@@ -14,6 +14,7 @@ final class PanelController {
     private var panel: OverlayPanel?
     private var currentScreen: NSScreen?
     private var animationGeneration = 0
+    private var animationTimer: Timer?
     private var pendingPeekHide: DispatchWorkItem?
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
@@ -61,6 +62,8 @@ final class PanelController {
     func stop() {
         cancelPeekHide()
         removeOutsideClickMonitors()
+        animationTimer?.invalidate()
+        animationTimer = nil
         animationGeneration += 1
         panel?.orderOut(nil)
         panel = nil
@@ -98,25 +101,61 @@ final class PanelController {
     private func transition(to newState: PanelState, panel: OverlayPanel, frame: NSRect) {
         guard state != newState || panel.frame != frame else { return }
 
+        animationTimer?.invalidate()
+        animationTimer = nil
         animationGeneration += 1
         let generation = animationGeneration
+        let startFrame = panel.frame
+        let isOpening = frame.width > startFrame.width
+        let shouldOrderOut = newState == .hidden
         state = newState
         updateOutsideClickMonitors(for: newState)
         onStateChange?(newState)
 
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.28
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            context.allowsImplicitAnimation = true
-            panel.animator().setFrame(frame, display: true)
-        } completionHandler: { [weak self, weak panel] in
-            DispatchQueue.main.async {
-                guard let self, self.animationGeneration == generation, self.state == newState else { return }
-                if newState == .hidden {
-                    panel?.orderOut(nil)
+        let duration: TimeInterval = isOpening ? 0.32 : 0.28
+        let startTime = ProcessInfo.processInfo.systemUptime
+        let timer = Timer(timeInterval: 1.0 / 120.0, repeats: true) { [weak self, weak panel] timer in
+            guard let self, let panel,
+                  self.animationGeneration == generation else {
+                timer.invalidate()
+                return
+            }
+
+            let elapsed = ProcessInfo.processInfo.systemUptime - startTime
+            let progress = min(max(elapsed / duration, 0), 1)
+            let easedProgress = Self.exponentialProgress(progress)
+            panel.setFrame(Self.interpolate(from: startFrame, to: frame, progress: easedProgress), display: true)
+
+            if progress >= 1 {
+                timer.invalidate()
+                self.animationTimer = nil
+                panel.setFrame(frame, display: true)
+                if shouldOrderOut {
+                    panel.orderOut(nil)
                 }
             }
         }
+        animationTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
+    }
+
+    private static func exponentialProgress(_ progress: Double) -> Double {
+        let minimum = pow(2.0, -10.0)
+        let range = 1.0 - minimum
+        return (1.0 - pow(2.0, -10.0 * progress)) / range
+    }
+
+    private static func interpolate(from start: NSRect, to end: NSRect, progress: Double) -> NSRect {
+        func value(_ start: CGFloat, _ end: CGFloat) -> CGFloat {
+            start + (end - start) * CGFloat(progress)
+        }
+
+        return NSRect(
+            x: value(start.origin.x, end.origin.x),
+            y: value(start.origin.y, end.origin.y),
+            width: value(start.size.width, end.size.width),
+            height: value(start.size.height, end.size.height)
+        )
     }
 
     private func updateOutsideClickMonitors(for state: PanelState) {
