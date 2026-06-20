@@ -1,10 +1,10 @@
 import AppKit
 
 struct PanelGeometry {
-    static let cornerRadius: CGFloat = 28
-    static let edgeMergeDepth: CGFloat = 30
+    static let cornerRadius: CGFloat = 20
+    static let edgeMergeDepth: CGFloat = 20
     static let peekWidth: CGFloat = 8
-    static let edgeTriggerWidth: CGFloat = 2
+    static let edgeTriggerWidth: CGFloat = 5
 
     let screen: NSScreen
     let visibleWidth: CGFloat
@@ -42,15 +42,14 @@ struct PanelGeometry {
     }
 
     private func frame(visibleWidth: CGFloat) -> NSRect {
-        let mergeRadius = min(Self.edgeMergeDepth, visibleWidth / 2)
         return NSRect(
             origin: NSPoint(
                 x: screen.frame.maxX - visibleWidth,
-                y: verticalOrigin - mergeRadius
+                y: verticalOrigin - Self.edgeMergeDepth
             ),
             size: NSSize(
                 width: visibleWidth,
-                height: height + mergeRadius * 2
+                height: height + Self.edgeMergeDepth * 2
             )
         )
     }

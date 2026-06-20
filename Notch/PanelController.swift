@@ -1,10 +1,20 @@
 import AppKit
+import QuartzCore
 import SwiftUI
 
 enum PanelState: Equatable {
     case hidden
     case peek
     case visible
+}
+
+private struct FrameAnimation {
+    let generation: Int
+    let startFrame: NSRect
+    let endFrame: NSRect
+    let startTime: TimeInterval
+    let duration: TimeInterval
+    let shouldOrderOut: Bool
 }
 
 final class PanelController {
@@ -14,7 +24,8 @@ final class PanelController {
     private var panel: OverlayPanel?
     private var currentScreen: NSScreen?
     private var animationGeneration = 0
-    private var animationTimer: Timer?
+    private var animationDisplayLink: CADisplayLink?
+    private var activeAnimation: FrameAnimation?
     private var pendingPeekHide: DispatchWorkItem?
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
@@ -62,8 +73,7 @@ final class PanelController {
     func stop() {
         cancelPeekHide()
         removeOutsideClickMonitors()
-        animationTimer?.invalidate()
-        animationTimer = nil
+        cancelFrameAnimation()
         animationGeneration += 1
         panel?.orderOut(nil)
         panel = nil
@@ -77,6 +87,7 @@ final class PanelController {
         if currentScreen !== screen {
             currentScreen = screen
             panel.setFrame(geometry.hiddenFrame, display: false)
+            (panel.contentView as? PanelHostingView)?.rootView = PanelView(fullWidth: geometry.visibleWidth)
         }
 
         panel.orderFrontRegardless()
@@ -86,7 +97,7 @@ final class PanelController {
     private func makePanel(on screen: NSScreen) -> OverlayPanel {
         let geometry = PanelGeometry(screen: screen)
         let panel = OverlayPanel(contentRect: geometry.hiddenFrame)
-        let contentView = PanelHostingView(rootView: PanelView())
+        let contentView = PanelHostingView(rootView: PanelView(fullWidth: geometry.visibleWidth))
         contentView.onMouseEntered = { [weak self] in self?.cancelPeekHide() }
         contentView.onMouseExited = { [weak self] in self?.schedulePeekHide() }
         contentView.onMouseDown = { [weak self] in
@@ -101,42 +112,60 @@ final class PanelController {
     private func transition(to newState: PanelState, panel: OverlayPanel, frame: NSRect) {
         guard state != newState || panel.frame != frame else { return }
 
-        animationTimer?.invalidate()
-        animationTimer = nil
+        cancelFrameAnimation()
         animationGeneration += 1
         let generation = animationGeneration
         let startFrame = panel.frame
         let isOpening = frame.width > startFrame.width
-        let shouldOrderOut = newState == .hidden
         state = newState
         updateOutsideClickMonitors(for: newState)
         onStateChange?(newState)
 
         let duration: TimeInterval = isOpening ? 0.32 : 0.28
-        let startTime = ProcessInfo.processInfo.systemUptime
-        let timer = Timer(timeInterval: 1.0 / 120.0, repeats: true) { [weak self, weak panel] timer in
-            guard let self, let panel,
-                  self.animationGeneration == generation else {
-                timer.invalidate()
-                return
-            }
+        activeAnimation = FrameAnimation(
+            generation: generation,
+            startFrame: startFrame,
+            endFrame: frame,
+            startTime: ProcessInfo.processInfo.systemUptime,
+            duration: duration,
+            shouldOrderOut: newState == .hidden
+        )
 
-            let elapsed = ProcessInfo.processInfo.systemUptime - startTime
-            let progress = min(max(elapsed / duration, 0), 1)
-            let easedProgress = Self.exponentialProgress(progress)
-            panel.setFrame(Self.interpolate(from: startFrame, to: frame, progress: easedProgress), display: true)
+        let animationScreen = currentScreen ?? panel.screen ?? NSScreen.main ?? NSScreen.screens[0]
+        let displayLink = animationScreen.displayLink(target: self, selector: #selector(updatePanelAnimation(_:)))
+        animationDisplayLink = displayLink
+        displayLink.add(to: .main, forMode: .common)
+    }
 
-            if progress >= 1 {
-                timer.invalidate()
-                self.animationTimer = nil
-                panel.setFrame(frame, display: true)
-                if shouldOrderOut {
-                    panel.orderOut(nil)
-                }
-            }
+    @objc private func updatePanelAnimation(_ displayLink: CADisplayLink) {
+        guard let animation = activeAnimation,
+              animation.generation == animationGeneration,
+              let panel else {
+            cancelFrameAnimation()
+            return
         }
-        animationTimer = timer
-        RunLoop.main.add(timer, forMode: .common)
+
+        let elapsed = displayLink.timestamp - animation.startTime
+        let progress = min(max(elapsed / animation.duration, 0), 1)
+        let easedProgress = Self.exponentialProgress(progress)
+        panel.setFrame(
+            Self.interpolate(from: animation.startFrame, to: animation.endFrame, progress: easedProgress),
+            display: true
+        )
+
+        guard progress >= 1 else { return }
+
+        panel.setFrame(animation.endFrame, display: true)
+        if animation.shouldOrderOut {
+            panel.orderOut(nil)
+        }
+        cancelFrameAnimation()
+    }
+
+    private func cancelFrameAnimation() {
+        animationDisplayLink?.invalidate()
+        animationDisplayLink = nil
+        activeAnimation = nil
     }
 
     private static func exponentialProgress(_ progress: Double) -> Double {
