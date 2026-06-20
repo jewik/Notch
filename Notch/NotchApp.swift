@@ -1,0 +1,19 @@
+//
+//  NotchApp.swift
+//  Notch
+//
+//
+//
+
+import SwiftUI
+
+@main
+struct NotchApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
+    var body: some Scene {
+        Settings {
+            EmptyView()
+        }
+    }
+}
