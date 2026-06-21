@@ -92,11 +92,16 @@ private struct EdgeMergingPanelShape: Shape {
 }
 
 private struct ContinuousCornerProfile {
+    /// Экспериментальная сила скругления: 1.0 — текущий профиль,
+    /// меньше — ближе к обычному радиусу, больше — более выраженный continuous corner.
+    private static let roundingForce: CGFloat = 0.3
+
     let radius: CGFloat
     let exponent: CGFloat
 
     init(width: CGFloat) {
         radius = min(max(width * 0.075, 8), 32)
-        exponent = min(max(4.2 + width / 420, 4.2), 5.5)
+        let widthDependentExponent = min(max(4.2 + width / 420, 4.2), 15)
+        exponent = 2 + (widthDependentExponent - 2) * Self.roundingForce
     }
 }

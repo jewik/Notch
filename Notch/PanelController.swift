@@ -207,13 +207,43 @@ final class PanelController {
         }
 
         let width = value(start.width, end.width)
-        let height = value(start.height, end.height)
+        let height = interpolatedHeight(
+            from: start,
+            to: end,
+            width: width,
+            progress: progress
+        )
         return NSRect(
             x: end.maxX - width,
             y: end.midY - height / 2,
             width: width,
             height: height
         )
+    }
+
+    private static func interpolatedHeight(
+        from start: NSRect,
+        to end: NSRect,
+        width: CGFloat,
+        progress: Double
+    ) -> CGFloat {
+        let compactFrame = start.width <= end.width ? start : end
+        let expandedFrame = start.width <= end.width ? end : start
+        let roundingCompletionWidth = PanelGeometry.peekWidth * 2
+
+        guard compactFrame.width <= PanelGeometry.peekWidth,
+              compactFrame.height != expandedFrame.height,
+              expandedFrame.width > roundingCompletionWidth else {
+            return start.height + (end.height - start.height) * CGFloat(progress)
+        }
+
+        let heightProgress = min(max(
+            (width - roundingCompletionWidth) /
+                (expandedFrame.width - roundingCompletionWidth),
+            0
+        ), 1)
+        return compactFrame.height +
+            (expandedFrame.height - compactFrame.height) * heightProgress
     }
 
     private func updateOutsideClickMonitors(for state: PanelState) {
