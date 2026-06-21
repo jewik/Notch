@@ -14,9 +14,9 @@ private struct EdgeMergingPanelShape: Shape {
     func path(in rect: CGRect) -> Path {
         guard rect.width > 0, rect.height > 0 else { return Path() }
 
-        let profile = ContinuousCornerProfile(size: rect.size)
-        let mergeDepth = min(profile.radius, rect.height / 4, rect.width / 2)
-        let cornerDepth = min(profile.radius, rect.height / 4, max(0, rect.width - mergeDepth))
+        let profile = ContinuousCornerProfile(width: rect.width)
+        let mergeDepth = min(profile.radius, rect.width / 2)
+        let cornerDepth = min(profile.radius, max(0, rect.width - mergeDepth))
         let edgeX = rect.maxX
         let shoulderX = edgeX - mergeDepth
         let bodyTop = rect.minY + mergeDepth
@@ -95,9 +95,8 @@ private struct ContinuousCornerProfile {
     let radius: CGFloat
     let exponent: CGFloat
 
-    init(size: CGSize) {
-        let shortSide = min(size.width, size.height)
-        radius = min(max(shortSide * 0.075, 8), 32)
-        exponent = min(max(4.2 + shortSide / 420, 4.2), 5.5)
+    init(width: CGFloat) {
+        radius = min(max(width * 0.075, 8), 32)
+        exponent = min(max(4.2 + width / 420, 4.2), 5.5)
     }
 }

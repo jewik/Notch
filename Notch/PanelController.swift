@@ -35,13 +35,13 @@ final class PanelController {
         cancelPeekHide()
         let targetScreen = screen ?? screenUnderPointer()
         let panel = preparePanel(on: targetScreen)
-        transition(to: .visible, panel: panel, frame: geometry(for: targetScreen).visibleFrame)
+        resize(panel: panel, to: .visible, frame: geometry(for: targetScreen).visibleFrame)
     }
 
     func hide() {
         cancelPeekHide()
         guard let panel, let currentScreen, state != .hidden else { return }
-        transition(to: .hidden, panel: panel, frame: geometry(for: currentScreen).hiddenFrame)
+        resize(panel: panel, to: .hidden, frame: geometry(for: currentScreen).hiddenFrame)
     }
 
     func toggle() {
@@ -56,7 +56,7 @@ final class PanelController {
         guard state != .visible else { return }
         cancelPeekHide()
         let panel = preparePanel(on: screen)
-        transition(to: .peek, panel: panel, frame: geometry(for: screen).peekFrame)
+        resize(panel: panel, to: .peek, frame: geometry(for: screen).peekFrame)
     }
 
     /// Плавно меняет панель до точного размера, сохраняя её центр по вертикали.
@@ -69,9 +69,9 @@ final class PanelController {
         let geometry = geometry(for: currentScreen)
         switch state {
         case .visible:
-            transition(to: .visible, panel: panel, frame: geometry.visibleFrame)
+            resize(panel: panel, to: .visible, frame: geometry.visibleFrame)
         case .peek:
-            transition(to: .peek, panel: panel, frame: geometry.peekFrame)
+            resize(panel: panel, to: .peek, frame: geometry.peekFrame)
         case .hidden:
             panel.setFrame(geometry.hiddenFrame, display: false)
         }
@@ -131,7 +131,7 @@ final class PanelController {
         PanelGeometry(screen: screen, size: preferredSize)
     }
 
-    private func transition(to newState: PanelState, panel: OverlayPanel, frame: NSRect) {
+    private func resize(panel: OverlayPanel, to newState: PanelState, frame: NSRect) {
         guard state != newState || panel.frame != frame else { return }
 
         cancelFrameAnimation()

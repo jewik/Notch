@@ -8,10 +8,14 @@ struct PanelGeometry {
     let visibleWidth: CGFloat
     let height: CGFloat
 
+    private var compactHeight: CGFloat {
+        screen.frame.height / 5
+    }
+
     init(screen: NSScreen, size: NSSize? = nil) {
         self.screen = screen
         let defaultSize = NSSize(
-            width: min(max(screen.frame.width / 3, 320), 560),
+            width: min(max(screen.frame.width / 4, 320), 560),
             height: screen.visibleFrame.height * 2 / 3
         )
         visibleWidth = size?.width ?? defaultSize.width
@@ -19,35 +23,35 @@ struct PanelGeometry {
     }
 
     var visibleFrame: NSRect {
-        frame(visibleWidth: visibleWidth)
+        frame(visibleWidth: visibleWidth, height: height)
     }
 
     var peekFrame: NSRect {
-        frame(visibleWidth: Self.peekWidth)
+        frame(visibleWidth: Self.peekWidth, height: compactHeight)
     }
 
     var hiddenFrame: NSRect {
-        frame(visibleWidth: 0)
+        frame(visibleWidth: 0, height: compactHeight)
     }
 
     var edgeTriggerFrame: NSRect {
         NSRect(
             x: screen.frame.maxX - Self.edgeTriggerWidth,
-            y: verticalOrigin,
+            y: verticalOrigin(for: compactHeight),
             width: Self.edgeTriggerWidth,
-            height: height
+            height: compactHeight
         )
     }
 
-    private var verticalOrigin: CGFloat {
-        screen.visibleFrame.midY - height / 2
+    private func verticalOrigin(for height: CGFloat) -> CGFloat {
+        screen.frame.midY - height / 2
     }
 
-    private func frame(visibleWidth: CGFloat) -> NSRect {
+    private func frame(visibleWidth: CGFloat, height: CGFloat) -> NSRect {
         return NSRect(
             origin: NSPoint(
                 x: screen.frame.maxX - visibleWidth,
-                y: verticalOrigin
+                y: verticalOrigin(for: height)
             ),
             size: NSSize(
                 width: visibleWidth,
