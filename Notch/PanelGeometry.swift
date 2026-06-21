@@ -1,8 +1,6 @@
 import AppKit
 
 struct PanelGeometry {
-    static let cornerRadius: CGFloat = 20
-    static let edgeMergeDepth: CGFloat = 20
     static let peekWidth: CGFloat = 8
     static let edgeTriggerWidth: CGFloat = 5
 
@@ -10,10 +8,14 @@ struct PanelGeometry {
     let visibleWidth: CGFloat
     let height: CGFloat
 
-    init(screen: NSScreen) {
+    init(screen: NSScreen, size: NSSize? = nil) {
         self.screen = screen
-        visibleWidth = min(max(screen.frame.width / 3, 320), 560)
-        height = min(max(screen.frame.height * 2 / 3, 420), screen.visibleFrame.height)
+        let defaultSize = NSSize(
+            width: min(max(screen.frame.width / 3, 320), 560),
+            height: screen.visibleFrame.height * 2 / 3
+        )
+        visibleWidth = size?.width ?? defaultSize.width
+        height = size?.height ?? defaultSize.height
     }
 
     var visibleFrame: NSRect {
@@ -31,9 +33,9 @@ struct PanelGeometry {
     var edgeTriggerFrame: NSRect {
         NSRect(
             x: screen.frame.maxX - Self.edgeTriggerWidth,
-            y: verticalOrigin - Self.edgeMergeDepth,
+            y: verticalOrigin,
             width: Self.edgeTriggerWidth,
-            height: height + Self.edgeMergeDepth * 2
+            height: height
         )
     }
 
@@ -45,11 +47,11 @@ struct PanelGeometry {
         return NSRect(
             origin: NSPoint(
                 x: screen.frame.maxX - visibleWidth,
-                y: verticalOrigin - Self.edgeMergeDepth
+                y: verticalOrigin
             ),
             size: NSSize(
                 width: visibleWidth,
-                height: height + Self.edgeMergeDepth * 2
+                height: height
             )
         )
     }

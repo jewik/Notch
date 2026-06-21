@@ -29,18 +29,19 @@ final class PanelController {
     private var pendingPeekHide: DispatchWorkItem?
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
+    private var preferredSize: NSSize?
 
     func show(on screen: NSScreen? = nil) {
         cancelPeekHide()
         let targetScreen = screen ?? screenUnderPointer()
         let panel = preparePanel(on: targetScreen)
-        transition(to: .visible, panel: panel, frame: PanelGeometry(screen: targetScreen).visibleFrame)
+        transition(to: .visible, panel: panel, frame: geometry(for: targetScreen).visibleFrame)
     }
 
     func hide() {
         cancelPeekHide()
         guard let panel, let currentScreen, state != .hidden else { return }
-        transition(to: .hidden, panel: panel, frame: PanelGeometry(screen: currentScreen).hiddenFrame)
+        transition(to: .hidden, panel: panel, frame: geometry(for: currentScreen).hiddenFrame)
     }
 
     func toggle() {
@@ -55,7 +56,25 @@ final class PanelController {
         guard state != .visible else { return }
         cancelPeekHide()
         let panel = preparePanel(on: screen)
-        transition(to: .peek, panel: panel, frame: PanelGeometry(screen: screen).peekFrame)
+        transition(to: .peek, panel: panel, frame: geometry(for: screen).peekFrame)
+    }
+
+    /// Плавно меняет панель до точного размера, сохраняя её центр по вертикали.
+    func resize(width: CGFloat, height: CGFloat) {
+        guard width.isFinite, height.isFinite, width > 0, height > 0 else { return }
+
+        preferredSize = NSSize(width: width, height: height)
+        guard let panel, let currentScreen else { return }
+
+        let geometry = geometry(for: currentScreen)
+        switch state {
+        case .visible:
+            transition(to: .visible, panel: panel, frame: geometry.visibleFrame)
+        case .peek:
+            transition(to: .peek, panel: panel, frame: geometry.peekFrame)
+        case .hidden:
+            panel.setFrame(geometry.hiddenFrame, display: false)
+        }
     }
 
     func schedulePeekHide() {
@@ -82,12 +101,11 @@ final class PanelController {
 
     private func preparePanel(on screen: NSScreen) -> OverlayPanel {
         let panel = panel ?? makePanel(on: screen)
-        let geometry = PanelGeometry(screen: screen)
+        let geometry = geometry(for: screen)
 
         if currentScreen !== screen {
             currentScreen = screen
             panel.setFrame(geometry.hiddenFrame, display: false)
-            (panel.contentView as? PanelHostingView)?.rootView = PanelView(fullWidth: geometry.visibleWidth)
         }
 
         panel.orderFrontRegardless()
@@ -95,9 +113,9 @@ final class PanelController {
     }
 
     private func makePanel(on screen: NSScreen) -> OverlayPanel {
-        let geometry = PanelGeometry(screen: screen)
+        let geometry = geometry(for: screen)
         let panel = OverlayPanel(contentRect: geometry.hiddenFrame)
-        let contentView = PanelHostingView(rootView: PanelView(fullWidth: geometry.visibleWidth))
+        let contentView = PanelHostingView(rootView: PanelView())
         contentView.onMouseEntered = { [weak self] in self?.cancelPeekHide() }
         contentView.onMouseExited = { [weak self] in self?.schedulePeekHide() }
         contentView.onMouseDown = { [weak self] in
@@ -107,6 +125,10 @@ final class PanelController {
         panel.contentView = contentView
         self.panel = panel
         return panel
+    }
+
+    private func geometry(for screen: NSScreen) -> PanelGeometry {
+        PanelGeometry(screen: screen, size: preferredSize)
     }
 
     private func transition(to newState: PanelState, panel: OverlayPanel, frame: NSRect) {
@@ -148,10 +170,11 @@ final class PanelController {
         let elapsed = displayLink.timestamp - animation.startTime
         let progress = min(max(elapsed / animation.duration, 0), 1)
         let easedProgress = Self.exponentialProgress(progress)
-        panel.setFrame(
-            Self.interpolate(from: animation.startFrame, to: animation.endFrame, progress: easedProgress),
-            display: true
-        )
+        panel.setFrame(Self.interpolateAnchoredFrame(
+            from: animation.startFrame,
+            to: animation.endFrame,
+            progress: easedProgress
+        ), display: true)
 
         guard progress >= 1 else { return }
 
@@ -174,16 +197,22 @@ final class PanelController {
         return (1.0 - pow(2.0, -10.0 * progress)) / range
     }
 
-    private static func interpolate(from start: NSRect, to end: NSRect, progress: Double) -> NSRect {
+    private static func interpolateAnchoredFrame(
+        from start: NSRect,
+        to end: NSRect,
+        progress: Double
+    ) -> NSRect {
         func value(_ start: CGFloat, _ end: CGFloat) -> CGFloat {
             start + (end - start) * CGFloat(progress)
         }
 
+        let width = value(start.width, end.width)
+        let height = value(start.height, end.height)
         return NSRect(
-            x: value(start.origin.x, end.origin.x),
-            y: value(start.origin.y, end.origin.y),
-            width: value(start.size.width, end.size.width),
-            height: value(start.size.height, end.size.height)
+            x: end.maxX - width,
+            y: end.midY - height / 2,
+            width: width,
+            height: height
         )
     }
 
