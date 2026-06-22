@@ -29,12 +29,6 @@ final class PanelController {
     private var pendingPeekHide: DispatchWorkItem?
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
-    private var sizePreset: PanelSizePreset
-
-    init(sizePreset: PanelSizePreset = .standard) {
-        self.sizePreset = sizePreset
-    }
-
     func show(on screen: NSScreen? = nil) {
         cancelPeekHide()
         let targetScreen = screen ?? screenUnderPointer()
@@ -61,35 +55,6 @@ final class PanelController {
         cancelPeekHide()
         let panel = preparePanel(on: screen)
         resize(panel: panel, to: .peek, frame: geometry(for: screen).peekFrame)
-    }
-
-    /// Плавно меняет панель до выбранного именованного размера.
-    func resize(to preset: PanelSizePreset) {
-        let size = currentSize(for: preset)
-        guard size.width.isFinite, size.height.isFinite,
-              size.width > 0, size.height > 0 else { return }
-
-        sizePreset = preset
-        applyCurrentSize()
-    }
-
-    /// Оставляет возможность задать разовый произвольный размер.
-    func resize(width: CGFloat, height: CGFloat) {
-        resize(to: PanelSizePreset(name: "custom", width: width, height: height))
-    }
-
-    private func applyCurrentSize() {
-        guard let panel, let currentScreen else { return }
-
-        let geometry = geometry(for: currentScreen)
-        switch state {
-        case .visible:
-            resize(panel: panel, to: .visible, frame: geometry.visibleFrame)
-        case .peek:
-            resize(panel: panel, to: .peek, frame: geometry.peekFrame)
-        case .hidden:
-            panel.setFrame(geometry.hiddenFrame, display: false)
-        }
     }
 
     func schedulePeekHide() {
@@ -143,12 +108,7 @@ final class PanelController {
     }
 
     private func geometry(for screen: NSScreen) -> PanelGeometry {
-        PanelGeometry(screen: screen, size: sizePreset.size(for: screen))
-    }
-
-    private func currentSize(for preset: PanelSizePreset) -> NSSize {
-        let screen = currentScreen ?? NSScreen.main ?? NSScreen.screens[0]
-        return preset.size(for: screen)
+        PanelGeometry(screen: screen)
     }
 
     private func resize(panel: OverlayPanel, to newState: PanelState, frame: NSRect) {
@@ -226,44 +186,14 @@ final class PanelController {
             start + (end - start) * CGFloat(progress)
         }
 
+        let width = value(start.width, end.width)
         let height = value(start.height, end.height)
-        let width = interpolatedWidth(
-            from: start,
-            to: end,
-            height: height,
-            progress: progress
-        )
         return NSRect(
             x: end.midX - width / 2,
             y: end.maxY - height,
             width: width,
             height: height
         )
-    }
-
-    private static func interpolatedWidth(
-        from start: NSRect,
-        to end: NSRect,
-        height: CGFloat,
-        progress: Double
-    ) -> CGFloat {
-        let compactFrame = start.height <= end.height ? start : end
-        let expandedFrame = start.height <= end.height ? end : start
-        let roundingCompletionHeight = PanelGeometry.peekHeight * 2
-
-        guard compactFrame.height <= PanelGeometry.peekHeight,
-              compactFrame.width != expandedFrame.width,
-              expandedFrame.height > roundingCompletionHeight else {
-            return start.width + (end.width - start.width) * CGFloat(progress)
-        }
-
-        let widthProgress = min(max(
-            (height - roundingCompletionHeight) /
-                (expandedFrame.height - roundingCompletionHeight),
-            0
-        ), 1)
-        return compactFrame.width +
-            (expandedFrame.width - compactFrame.width) * widthProgress
     }
 
     private func updateOutsideClickMonitors(for state: PanelState) {

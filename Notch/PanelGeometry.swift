@@ -1,47 +1,40 @@
 import AppKit
 
 struct PanelGeometry {
-    static let peekHeight: CGFloat = 8
-    static let edgeTriggerHeight: CGFloat = 5
+    static let edgeTriggerHeight: CGFloat = 25
 
     let screen: NSScreen
-    let visibleWidth: CGFloat
-    let height: CGFloat
-    
-    let scale: CGFloat
 
-    private var compactWidth: CGFloat {
-        screen.frame.width / 9
-    }
-
-    init(screen: NSScreen, size: NSSize? = nil) {
+    init(screen: NSScreen) {
         self.screen = screen
-        let defaultSize = PanelSizePreset.standard.size(for: screen)
-        visibleWidth = size?.width ?? defaultSize.width
-        height = size?.height ?? defaultSize.height
-        
-        scale = screen.backingScaleFactor
     }
 
     var visibleFrame: NSRect {
-        frame(width: visibleWidth, visibleHeight: height)
+        frame(for: .visible)
     }
 
     var peekFrame: NSRect {
-//        frame(width: compactWidth, visibleHeight: Self.peekHeight)
-        frame(width: CGFloat(400 / scale), visibleHeight: CGFloat(80 / scale))
+        frame(for: .peek)
     }
 
     var hiddenFrame: NSRect {
-        frame(width: CGFloat(360 / scale), visibleHeight: CGFloat(74 / scale))
+        frame(for: .hidden)
     }
 
     var edgeTriggerFrame: NSRect {
-        NSRect(
-            x: horizontalOrigin(for: compactWidth),
+        let width = PanelSizePreset.hidden.width(for: screen)
+        return NSRect(
+            x: horizontalOrigin(for: width),
             y: screen.frame.maxY - Self.edgeTriggerHeight,
-            width: compactWidth,
+            width: width,
             height: Self.edgeTriggerHeight
+        )
+    }
+
+    private func frame(for preset: PanelSizePreset) -> NSRect {
+        frame(
+            width: preset.width(for: screen),
+            visibleHeight: preset.height(for: screen)
         )
     }
 

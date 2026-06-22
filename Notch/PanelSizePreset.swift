@@ -2,41 +2,60 @@ import AppKit
 
 /// Именованный конечный размер панели.
 ///
-/// Чтобы добавить вариант, объявите новый `static let` и включите его в `all`.
+/// Новый вариант добавляется как `static let` и включается в `all`.
 struct PanelSizePreset {
+    typealias DimensionResolver = (NSScreen) -> CGFloat
+
     let name: String
 
-    private let resolveSize: (NSScreen) -> NSSize
+    private let resolveWidth: DimensionResolver
+    private let resolveHeight: DimensionResolver
 
     init(name: String, width: CGFloat, height: CGFloat) {
         self.name = name
-        resolveSize = { _ in NSSize(width: width, height: height) }
+        resolveWidth = { _ in width }
+        resolveHeight = { _ in height }
     }
 
-    private init(name: String, resolveSize: @escaping (NSScreen) -> NSSize) {
+    init(
+        name: String,
+        width: @escaping DimensionResolver,
+        height: @escaping DimensionResolver
+    ) {
         self.name = name
-        self.resolveSize = resolveSize
+        resolveWidth = width
+        resolveHeight = height
     }
 
-    func size(for screen: NSScreen) -> NSSize {
-        resolveSize(screen)
+    func width(for screen: NSScreen) -> CGFloat {
+        resolveWidth(screen)
     }
 
-    static let compact = PanelSizePreset(name: "compact", width: 420, height: 280)
-
-    /// Сохраняет текущий адаптивный размер панели.
-    static let standard = PanelSizePreset(name: "standard") { screen in
-        NSSize(
-            width: min(max(screen.frame.width / 3, 320), 560),
-            height: screen.visibleFrame.height / 3
-        )
+    func height(for screen: NSScreen) -> CGFloat {
+        resolveHeight(screen)
     }
 
-    static let large = PanelSizePreset(name: "large", width: 720, height: 480)
+    static let hidden = PanelSizePreset(
+        name: "hidden",
+        width: { 360 / $0.backingScaleFactor },
+        height: { 60 / $0.backingScaleFactor }
+    )
+
+    static let peek = PanelSizePreset(
+        name: "peek",
+        width: { 400 / $0.backingScaleFactor },
+        height: { 80 / $0.backingScaleFactor }
+    )
+
+    static let visible = PanelSizePreset(
+        name: "visible",
+        width: { min(max($0.frame.width / 3, 320), 560) },
+        height: { $0.visibleFrame.height / 3 }
+    )
 
     static let all: [PanelSizePreset] = [
-        .compact,
-        .standard,
-        .large,
+        .hidden,
+        .peek,
+        .visible,
     ]
 }
