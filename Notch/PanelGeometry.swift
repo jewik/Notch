@@ -14,10 +14,7 @@ struct PanelGeometry {
 
     init(screen: NSScreen, size: NSSize? = nil) {
         self.screen = screen
-        let defaultSize = NSSize(
-            width: min(max(screen.frame.width / 3, 320), 560),
-            height: screen.visibleFrame.height / 3
-        )
+        let defaultSize = PanelSizePreset.standard.size(for: screen)
         visibleWidth = size?.width ?? defaultSize.width
         height = size?.height ?? defaultSize.height
     }

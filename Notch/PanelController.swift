@@ -29,7 +29,11 @@ final class PanelController {
     private var pendingPeekHide: DispatchWorkItem?
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
-    private var preferredSize: NSSize?
+    private var sizePreset: PanelSizePreset
+
+    init(sizePreset: PanelSizePreset = .standard) {
+        self.sizePreset = sizePreset
+    }
 
     func show(on screen: NSScreen? = nil) {
         cancelPeekHide()
@@ -59,11 +63,22 @@ final class PanelController {
         resize(panel: panel, to: .peek, frame: geometry(for: screen).peekFrame)
     }
 
-    /// Плавно меняет панель до точного размера, сохраняя верхний центральный якорь.
-    func resize(width: CGFloat, height: CGFloat) {
-        guard width.isFinite, height.isFinite, width > 0, height > 0 else { return }
+    /// Плавно меняет панель до выбранного именованного размера.
+    func resize(to preset: PanelSizePreset) {
+        let size = currentSize(for: preset)
+        guard size.width.isFinite, size.height.isFinite,
+              size.width > 0, size.height > 0 else { return }
 
-        preferredSize = NSSize(width: width, height: height)
+        sizePreset = preset
+        applyCurrentSize()
+    }
+
+    /// Оставляет возможность задать разовый произвольный размер.
+    func resize(width: CGFloat, height: CGFloat) {
+        resize(to: PanelSizePreset(name: "custom", width: width, height: height))
+    }
+
+    private func applyCurrentSize() {
         guard let panel, let currentScreen else { return }
 
         let geometry = geometry(for: currentScreen)
@@ -128,7 +143,12 @@ final class PanelController {
     }
 
     private func geometry(for screen: NSScreen) -> PanelGeometry {
-        PanelGeometry(screen: screen, size: preferredSize)
+        PanelGeometry(screen: screen, size: sizePreset.size(for: screen))
+    }
+
+    private func currentSize(for preset: PanelSizePreset) -> NSSize {
+        let screen = currentScreen ?? NSScreen.main ?? NSScreen.screens[0]
+        return preset.size(for: screen)
     }
 
     private func resize(panel: OverlayPanel, to newState: PanelState, frame: NSRect) {

@@ -8,57 +8,36 @@ struct PanelView: View {
     }
 }
 
-/// Superellipse-профиль даёт непрерывный G2-переход к прямым граням. Верхние
-/// переходы мягко вливаются в край экрана, нижние образуют выпуклые G2-углы.
+/// Superellipse-профиль даёт непрерывный G2-переход нижних углов к прямым граням.
+/// Верхняя грань остаётся прямой и вплотную примыкает к краю экрана.
 private struct EdgeMergingPanelShape: Shape {
     func path(in rect: CGRect) -> Path {
         guard rect.width > 0, rect.height > 0 else { return Path() }
 
         let profile = ContinuousCornerProfile(expansion: rect.height)
-        let mergeDepth = min(profile.radius, rect.height / 2)
-        let cornerDepth = min(profile.radius, max(0, rect.height - mergeDepth))
-        let bodyLeft = rect.minX + mergeDepth
-        let bodyRight = rect.maxX - mergeDepth
-        let shoulderY = rect.minY + mergeDepth
+        let cornerDepth = min(profile.radius, rect.width / 2, rect.height)
 
         var path = Path()
         path.move(to: CGPoint(x: rect.minX, y: rect.minY))
-
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY - cornerDepth))
         addContinuousCorner(
             to: &path,
-            from: CGPoint(x: rect.minX, y: rect.minY),
-            horizontal: mergeDepth,
-            vertical: mergeDepth,
-            exponent: profile.exponent,
-            beginsVertically: false
-        )
-        path.addLine(to: CGPoint(x: bodyLeft, y: rect.maxY - cornerDepth))
-        addContinuousCorner(
-            to: &path,
-            from: CGPoint(x: bodyLeft, y: rect.maxY - cornerDepth),
+            from: CGPoint(x: rect.minX, y: rect.maxY - cornerDepth),
             horizontal: cornerDepth,
             vertical: cornerDepth,
             exponent: profile.exponent,
             beginsVertically: true
         )
-        path.addLine(to: CGPoint(x: bodyRight - cornerDepth, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX - cornerDepth, y: rect.maxY))
         addContinuousCorner(
             to: &path,
-            from: CGPoint(x: bodyRight - cornerDepth, y: rect.maxY),
+            from: CGPoint(x: rect.maxX - cornerDepth, y: rect.maxY),
             horizontal: cornerDepth,
             vertical: -cornerDepth,
             exponent: profile.exponent,
             beginsVertically: false
         )
-        path.addLine(to: CGPoint(x: bodyRight, y: shoulderY))
-        addContinuousCorner(
-            to: &path,
-            from: CGPoint(x: bodyRight, y: shoulderY),
-            horizontal: mergeDepth,
-            vertical: -mergeDepth,
-            exponent: profile.exponent,
-            beginsVertically: true
-        )
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
         path.closeSubpath()
         return path
     }
