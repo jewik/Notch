@@ -7,9 +7,11 @@ struct PanelGeometry {
     let screen: NSScreen
     let visibleWidth: CGFloat
     let height: CGFloat
+    
+    let scale: CGFloat
 
     private var compactWidth: CGFloat {
-        screen.frame.width / 8
+        screen.frame.width / 9
     }
 
     init(screen: NSScreen, size: NSSize? = nil) {
@@ -17,6 +19,8 @@ struct PanelGeometry {
         let defaultSize = PanelSizePreset.standard.size(for: screen)
         visibleWidth = size?.width ?? defaultSize.width
         height = size?.height ?? defaultSize.height
+        
+        scale = screen.backingScaleFactor
     }
 
     var visibleFrame: NSRect {
@@ -24,11 +28,12 @@ struct PanelGeometry {
     }
 
     var peekFrame: NSRect {
-        frame(width: compactWidth, visibleHeight: Self.peekHeight)
+//        frame(width: compactWidth, visibleHeight: Self.peekHeight)
+        frame(width: CGFloat(400 / scale), visibleHeight: CGFloat(80 / scale))
     }
 
     var hiddenFrame: NSRect {
-        frame(width: compactWidth, visibleHeight: 0)
+        frame(width: CGFloat(360 / scale), visibleHeight: CGFloat(74 / scale))
     }
 
     var edgeTriggerFrame: NSRect {
