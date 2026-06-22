@@ -8,57 +8,56 @@ struct PanelView: View {
     }
 }
 
-/// Superellipse-профиль даёт непрерывный G2-переход к прямым граням. Одна
-/// геометрия используется для выпуклых углов и вогнутых переходов у экрана.
+/// Superellipse-профиль даёт непрерывный G2-переход к прямым граням. Верхние
+/// переходы мягко вливаются в край экрана, нижние образуют выпуклые G2-углы.
 private struct EdgeMergingPanelShape: Shape {
     func path(in rect: CGRect) -> Path {
         guard rect.width > 0, rect.height > 0 else { return Path() }
 
-        let profile = ContinuousCornerProfile(width: rect.width)
-        let mergeDepth = min(profile.radius, rect.width / 2)
-        let cornerDepth = min(profile.radius, max(0, rect.width - mergeDepth))
-        let edgeX = rect.maxX
-        let shoulderX = edgeX - mergeDepth
-        let bodyTop = rect.minY + mergeDepth
-        let bodyBottom = rect.maxY - mergeDepth
+        let profile = ContinuousCornerProfile(expansion: rect.height)
+        let mergeDepth = min(profile.radius, rect.height / 2)
+        let cornerDepth = min(profile.radius, max(0, rect.height - mergeDepth))
+        let bodyLeft = rect.minX + mergeDepth
+        let bodyRight = rect.maxX - mergeDepth
+        let shoulderY = rect.minY + mergeDepth
 
         var path = Path()
-        path.move(to: CGPoint(x: edgeX, y: rect.minY))
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
 
         addContinuousCorner(
             to: &path,
-            from: CGPoint(x: edgeX, y: rect.minY),
-            horizontal: -mergeDepth,
+            from: CGPoint(x: rect.minX, y: rect.minY),
+            horizontal: mergeDepth,
             vertical: mergeDepth,
-            exponent: profile.exponent,
-            beginsVertically: true
-        )
-        path.addLine(to: CGPoint(x: rect.minX + cornerDepth, y: bodyTop))
-        addContinuousCorner(
-            to: &path,
-            from: CGPoint(x: rect.minX + cornerDepth, y: bodyTop),
-            horizontal: -cornerDepth,
-            vertical: cornerDepth,
             exponent: profile.exponent,
             beginsVertically: false
         )
-        path.addLine(to: CGPoint(x: rect.minX, y: bodyBottom - cornerDepth))
+        path.addLine(to: CGPoint(x: bodyLeft, y: rect.maxY - cornerDepth))
         addContinuousCorner(
             to: &path,
-            from: CGPoint(x: rect.minX, y: bodyBottom - cornerDepth),
+            from: CGPoint(x: bodyLeft, y: rect.maxY - cornerDepth),
             horizontal: cornerDepth,
             vertical: cornerDepth,
             exponent: profile.exponent,
             beginsVertically: true
         )
-        path.addLine(to: CGPoint(x: shoulderX, y: bodyBottom))
+        path.addLine(to: CGPoint(x: bodyRight - cornerDepth, y: rect.maxY))
         addContinuousCorner(
             to: &path,
-            from: CGPoint(x: shoulderX, y: bodyBottom),
-            horizontal: mergeDepth,
-            vertical: mergeDepth,
+            from: CGPoint(x: bodyRight - cornerDepth, y: rect.maxY),
+            horizontal: cornerDepth,
+            vertical: -cornerDepth,
             exponent: profile.exponent,
             beginsVertically: false
+        )
+        path.addLine(to: CGPoint(x: bodyRight, y: shoulderY))
+        addContinuousCorner(
+            to: &path,
+            from: CGPoint(x: bodyRight, y: shoulderY),
+            horizontal: mergeDepth,
+            vertical: -mergeDepth,
+            exponent: profile.exponent,
+            beginsVertically: true
         )
         path.closeSubpath()
         return path
@@ -99,9 +98,9 @@ private struct ContinuousCornerProfile {
     let radius: CGFloat
     let exponent: CGFloat
 
-    init(width: CGFloat) {
-        radius = min(max(width * 0.075, 8), 32)
-        let widthDependentExponent = min(max(4.2 + width / 420, 4.2), 15)
+    init(expansion: CGFloat) {
+        radius = min(max(expansion * 0.075, 8), 32)
+        let widthDependentExponent = min(max(4.2 + expansion / 420, 4.2), 15)
         exponent = 2 + (widthDependentExponent - 2) * Self.roundingForce
     }
 }

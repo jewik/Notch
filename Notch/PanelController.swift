@@ -59,7 +59,7 @@ final class PanelController {
         resize(panel: panel, to: .peek, frame: geometry(for: screen).peekFrame)
     }
 
-    /// Плавно меняет панель до точного размера, сохраняя её центр по вертикали.
+    /// Плавно меняет панель до точного размера, сохраняя верхний центральный якорь.
     func resize(width: CGFloat, height: CGFloat) {
         guard width.isFinite, height.isFinite, width > 0, height > 0 else { return }
 
@@ -138,7 +138,7 @@ final class PanelController {
         animationGeneration += 1
         let generation = animationGeneration
         let startFrame = panel.frame
-        let isOpening = frame.width > startFrame.width
+        let isOpening = frame.height > startFrame.height
         state = newState
         updateOutsideClickMonitors(for: newState)
         onStateChange?(newState)
@@ -206,44 +206,44 @@ final class PanelController {
             start + (end - start) * CGFloat(progress)
         }
 
-        let width = value(start.width, end.width)
-        let height = interpolatedHeight(
+        let height = value(start.height, end.height)
+        let width = interpolatedWidth(
             from: start,
             to: end,
-            width: width,
+            height: height,
             progress: progress
         )
         return NSRect(
-            x: end.maxX - width,
-            y: end.midY - height / 2,
+            x: end.midX - width / 2,
+            y: end.maxY - height,
             width: width,
             height: height
         )
     }
 
-    private static func interpolatedHeight(
+    private static func interpolatedWidth(
         from start: NSRect,
         to end: NSRect,
-        width: CGFloat,
+        height: CGFloat,
         progress: Double
     ) -> CGFloat {
-        let compactFrame = start.width <= end.width ? start : end
-        let expandedFrame = start.width <= end.width ? end : start
-        let roundingCompletionWidth = PanelGeometry.peekWidth * 2
+        let compactFrame = start.height <= end.height ? start : end
+        let expandedFrame = start.height <= end.height ? end : start
+        let roundingCompletionHeight = PanelGeometry.peekHeight * 2
 
-        guard compactFrame.width <= PanelGeometry.peekWidth,
-              compactFrame.height != expandedFrame.height,
-              expandedFrame.width > roundingCompletionWidth else {
-            return start.height + (end.height - start.height) * CGFloat(progress)
+        guard compactFrame.height <= PanelGeometry.peekHeight,
+              compactFrame.width != expandedFrame.width,
+              expandedFrame.height > roundingCompletionHeight else {
+            return start.width + (end.width - start.width) * CGFloat(progress)
         }
 
-        let heightProgress = min(max(
-            (width - roundingCompletionWidth) /
-                (expandedFrame.width - roundingCompletionWidth),
+        let widthProgress = min(max(
+            (height - roundingCompletionHeight) /
+                (expandedFrame.height - roundingCompletionHeight),
             0
         ), 1)
-        return compactFrame.height +
-            (expandedFrame.height - compactFrame.height) * heightProgress
+        return compactFrame.width +
+            (expandedFrame.width - compactFrame.width) * widthProgress
     }
 
     private func updateOutsideClickMonitors(for state: PanelState) {

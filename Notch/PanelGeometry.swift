@@ -1,61 +1,61 @@
 import AppKit
 
 struct PanelGeometry {
-    static let peekWidth: CGFloat = 8
-    static let edgeTriggerWidth: CGFloat = 5
+    static let peekHeight: CGFloat = 8
+    static let edgeTriggerHeight: CGFloat = 5
 
     let screen: NSScreen
     let visibleWidth: CGFloat
     let height: CGFloat
 
-    private var compactHeight: CGFloat {
-        screen.frame.height / 5
+    private var compactWidth: CGFloat {
+        screen.frame.width / 8
     }
 
     init(screen: NSScreen, size: NSSize? = nil) {
         self.screen = screen
         let defaultSize = NSSize(
-            width: min(max(screen.frame.width / 4, 320), 560),
-            height: screen.visibleFrame.height * 2 / 3
+            width: min(max(screen.frame.width / 3, 320), 560),
+            height: screen.visibleFrame.height / 3
         )
         visibleWidth = size?.width ?? defaultSize.width
         height = size?.height ?? defaultSize.height
     }
 
     var visibleFrame: NSRect {
-        frame(visibleWidth: visibleWidth, height: height)
+        frame(width: visibleWidth, visibleHeight: height)
     }
 
     var peekFrame: NSRect {
-        frame(visibleWidth: Self.peekWidth, height: compactHeight)
+        frame(width: compactWidth, visibleHeight: Self.peekHeight)
     }
 
     var hiddenFrame: NSRect {
-        frame(visibleWidth: 0, height: compactHeight)
+        frame(width: compactWidth, visibleHeight: 0)
     }
 
     var edgeTriggerFrame: NSRect {
         NSRect(
-            x: screen.frame.maxX - Self.edgeTriggerWidth,
-            y: verticalOrigin(for: compactHeight),
-            width: Self.edgeTriggerWidth,
-            height: compactHeight
+            x: horizontalOrigin(for: compactWidth),
+            y: screen.frame.maxY - Self.edgeTriggerHeight,
+            width: compactWidth,
+            height: Self.edgeTriggerHeight
         )
     }
 
-    private func verticalOrigin(for height: CGFloat) -> CGFloat {
-        screen.frame.midY - height / 2
+    private func horizontalOrigin(for width: CGFloat) -> CGFloat {
+        screen.frame.midX - width / 2
     }
 
-    private func frame(visibleWidth: CGFloat, height: CGFloat) -> NSRect {
+    private func frame(width: CGFloat, visibleHeight: CGFloat) -> NSRect {
         return NSRect(
             origin: NSPoint(
-                x: screen.frame.maxX - visibleWidth,
-                y: verticalOrigin(for: height)
+                x: horizontalOrigin(for: width),
+                y: screen.frame.maxY - visibleHeight
             ),
             size: NSSize(
-                width: visibleWidth,
-                height: height
+                width: width,
+                height: visibleHeight
             )
         )
     }
