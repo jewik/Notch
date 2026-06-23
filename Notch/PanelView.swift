@@ -8,6 +8,21 @@ struct PanelView: View {
     }
 }
 
+enum PanelEarSide {
+    case left
+    case right
+}
+
+struct PanelEarView: View {
+    let side: PanelEarSide
+
+    var body: some View {
+        PanelEarShape(side: side)
+            .fill(.black)
+            .ignoresSafeArea()
+    }
+}
+
 /// Superellipse-профиль даёт непрерывный G2-переход нижних углов к прямым граням.
 /// Верхняя грань остаётся прямой и вплотную примыкает к краю экрана.
 private struct EdgeMergingPanelShape: Shape {
@@ -20,7 +35,7 @@ private struct EdgeMergingPanelShape: Shape {
         var path = Path()
         path.move(to: CGPoint(x: rect.minX, y: rect.minY))
         path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY - cornerDepth))
-        addContinuousCorner(
+        ContinuousCornerPath.add(
             to: &path,
             from: CGPoint(x: rect.minX, y: rect.maxY - cornerDepth),
             horizontal: cornerDepth,
@@ -29,7 +44,7 @@ private struct EdgeMergingPanelShape: Shape {
             beginsVertically: true
         )
         path.addLine(to: CGPoint(x: rect.maxX - cornerDepth, y: rect.maxY))
-        addContinuousCorner(
+        ContinuousCornerPath.add(
             to: &path,
             from: CGPoint(x: rect.maxX - cornerDepth, y: rect.maxY),
             horizontal: cornerDepth,
@@ -41,10 +56,55 @@ private struct EdgeMergingPanelShape: Shape {
         path.closeSubpath()
         return path
     }
+}
+
+private struct PanelEarShape: Shape {
+    let side: PanelEarSide
 
     /// Дискретизирует аналитическую superellipse-кривую. У её концов нулевая
     /// кривизна, поэтому профиль мягко вливается в прямые участки без дугового шва.
-    private func addContinuousCorner(
+    func path(in rect: CGRect) -> Path {
+        guard rect.width > 0, rect.height > 0 else { return Path() }
+
+        let profile = ContinuousCornerProfile(expansion: rect.height)
+        var path = Path()
+
+        switch side {
+        case .left:
+            path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            ContinuousCornerPath.add(
+                to: &path,
+                from: CGPoint(x: rect.maxX, y: rect.maxY),
+                horizontal: -rect.width,
+                vertical: -rect.height,
+                exponent: profile.exponent,
+                beginsVertically: true
+            )
+        case .right:
+            path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+            ContinuousCornerPath.add(
+                to: &path,
+                from: CGPoint(x: rect.maxX, y: rect.minY),
+                horizontal: -rect.width,
+                vertical: rect.height,
+                exponent: profile.exponent,
+                beginsVertically: false
+            )
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.minY))
+        }
+
+        path.closeSubpath()
+        return path
+    }
+}
+
+private enum ContinuousCornerPath {
+    /// Дискретизирует аналитическую superellipse-кривую. У её концов нулевая
+    /// кривизна, поэтому профиль мягко вливается в прямые участки без дугового шва.
+    static func add(
         to path: inout Path,
         from origin: CGPoint,
         horizontal: CGFloat,
@@ -69,7 +129,7 @@ private struct EdgeMergingPanelShape: Shape {
     }
 }
 
-private struct ContinuousCornerProfile {
+struct ContinuousCornerProfile {
     /// Экспериментальная сила скругления: 1.0 — текущий профиль,
     /// меньше — ближе к обычному радиусу, больше — более выраженный continuous corner.
     private static let roundingForce: CGFloat = 0.1
@@ -78,7 +138,7 @@ private struct ContinuousCornerProfile {
     let exponent: CGFloat
 
     init(expansion: CGFloat) {
-        radius = min(max(expansion * 0.5, 8), 32)
+        radius = min(max(expansion * 0.3, 0), 32)
         let widthDependentExponent = min(max(4.2 + expansion / 420, 4.2), 15)
         exponent = 2 + (widthDependentExponent - 2) * Self.roundingForce
     }

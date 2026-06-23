@@ -22,6 +22,8 @@ final class PanelController {
 
     private(set) var state: PanelState = .hidden
     private var panel: OverlayPanel?
+    private var leftEarPanel: PanelEarPanel?
+    private var rightEarPanel: PanelEarPanel?
     private var currentScreen: NSScreen?
     private var animationGeneration = 0
     private var animationDisplayLink: CADisplayLink?
@@ -75,7 +77,10 @@ final class PanelController {
         cancelFrameAnimation()
         animationGeneration += 1
         panel?.orderOut(nil)
+        orderOutEarPanels()
         panel = nil
+        leftEarPanel = nil
+        rightEarPanel = nil
         currentScreen = nil
     }
 
@@ -88,7 +93,10 @@ final class PanelController {
             panel.setFrame(geometry.hiddenFrame, display: false)
         }
 
+        prepareEarPanels(for: panel)
+        updateEarPanels(for: panel.frame)
         panel.orderFrontRegardless()
+        orderFrontEarPanels()
         return panel
     }
 
@@ -150,19 +158,68 @@ final class PanelController {
         let elapsed = displayLink.timestamp - animation.startTime
         let progress = min(max(elapsed / animation.duration, 0), 1)
         let easedProgress = Self.exponentialProgress(progress)
-        panel.setFrame(Self.interpolateAnchoredFrame(
+        let interpolatedFrame = Self.interpolateAnchoredFrame(
             from: animation.startFrame,
             to: animation.endFrame,
             progress: easedProgress
-        ), display: true)
+        )
+        panel.setFrame(interpolatedFrame, display: true)
+        updateEarPanels(for: interpolatedFrame)
 
         guard progress >= 1 else { return }
 
         panel.setFrame(animation.endFrame, display: true)
+        updateEarPanels(for: animation.endFrame)
         if animation.shouldOrderOut {
             panel.orderOut(nil)
+            orderOutEarPanels()
         }
         cancelFrameAnimation()
+    }
+
+    private func prepareEarPanels(for panel: OverlayPanel) {
+        if leftEarPanel == nil {
+            let earPanel = PanelEarPanel(contentRect: .zero, side: .left)
+            panel.addChildWindow(earPanel, ordered: .above)
+            leftEarPanel = earPanel
+        }
+
+        if rightEarPanel == nil {
+            let earPanel = PanelEarPanel(contentRect: .zero, side: .right)
+            panel.addChildWindow(earPanel, ordered: .above)
+            rightEarPanel = earPanel
+        }
+    }
+
+    private func updateEarPanels(for panelFrame: NSRect) {
+        let backingScale = currentScreen?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 1
+        let minimumEarSize = 10 / backingScale
+        let earSize = max(ContinuousCornerProfile(expansion: panelFrame.height).radius, minimumEarSize)
+        let earY = panelFrame.maxY - earSize
+
+        leftEarPanel?.setFrame(NSRect(
+            x: panelFrame.minX - earSize,
+            y: earY,
+            width: earSize,
+            height: earSize
+        ), display: true)
+
+        rightEarPanel?.setFrame(NSRect(
+            x: panelFrame.maxX,
+            y: earY,
+            width: earSize,
+            height: earSize
+        ), display: true)
+    }
+
+    private func orderFrontEarPanels() {
+        leftEarPanel?.orderFrontRegardless()
+        rightEarPanel?.orderFrontRegardless()
+    }
+
+    private func orderOutEarPanels() {
+        leftEarPanel?.orderOut(nil)
+        rightEarPanel?.orderOut(nil)
     }
 
     private func cancelFrameAnimation() {
@@ -255,6 +312,31 @@ private final class OverlayPanel: NSPanel {
         isMovable = false
         isReleasedWhenClosed = false
         animationBehavior = .none
+    }
+
+    override var canBecomeKey: Bool { false }
+    override var canBecomeMain: Bool { false }
+}
+
+private final class PanelEarPanel: NSPanel {
+    init(contentRect: NSRect, side: PanelEarSide) {
+        super.init(
+            contentRect: contentRect,
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        isOpaque = false
+        backgroundColor = .clear
+        hasShadow = false
+        level = .statusBar
+        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
+        hidesOnDeactivate = false
+        ignoresMouseEvents = true
+        isMovable = false
+        isReleasedWhenClosed = false
+        animationBehavior = .none
+        contentView = NSHostingView(rootView: PanelEarView(side: side))
     }
 
     override var canBecomeKey: Bool { false }
