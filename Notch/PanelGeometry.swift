@@ -1,55 +1,56 @@
 import AppKit
 
 struct PanelGeometry {
-    static let cornerRadius: CGFloat = 20
-    static let edgeMergeDepth: CGFloat = 20
-    static let peekWidth: CGFloat = 8
-    static let edgeTriggerWidth: CGFloat = 5
+    static let edgeTriggerHeight: CGFloat = 25
 
     let screen: NSScreen
-    let visibleWidth: CGFloat
-    let height: CGFloat
 
     init(screen: NSScreen) {
         self.screen = screen
-        visibleWidth = min(max(screen.frame.width / 3, 320), 560)
-        height = min(max(screen.frame.height * 2 / 3, 420), screen.visibleFrame.height)
     }
 
     var visibleFrame: NSRect {
-        frame(visibleWidth: visibleWidth)
+        frame(for: .visible)
     }
 
     var peekFrame: NSRect {
-        frame(visibleWidth: Self.peekWidth)
+        frame(for: .peek)
     }
 
     var hiddenFrame: NSRect {
-        frame(visibleWidth: 0)
+        frame(for: .hidden)
     }
 
     var edgeTriggerFrame: NSRect {
-        NSRect(
-            x: screen.frame.maxX - Self.edgeTriggerWidth,
-            y: verticalOrigin - Self.edgeMergeDepth,
-            width: Self.edgeTriggerWidth,
-            height: height + Self.edgeMergeDepth * 2
+        let width = PanelSizePreset.hidden.width(for: screen)
+        return NSRect(
+            x: horizontalOrigin(for: width),
+            y: screen.frame.maxY - Self.edgeTriggerHeight,
+            width: width,
+            height: Self.edgeTriggerHeight
         )
     }
 
-    private var verticalOrigin: CGFloat {
-        screen.visibleFrame.midY - height / 2
+    private func frame(for preset: PanelSizePreset) -> NSRect {
+        frame(
+            width: preset.width(for: screen),
+            visibleHeight: preset.height(for: screen)
+        )
     }
 
-    private func frame(visibleWidth: CGFloat) -> NSRect {
+    private func horizontalOrigin(for width: CGFloat) -> CGFloat {
+        screen.frame.midX - width / 2
+    }
+
+    private func frame(width: CGFloat, visibleHeight: CGFloat) -> NSRect {
         return NSRect(
             origin: NSPoint(
-                x: screen.frame.maxX - visibleWidth,
-                y: verticalOrigin - Self.edgeMergeDepth
+                x: horizontalOrigin(for: width),
+                y: screen.frame.maxY - visibleHeight
             ),
             size: NSSize(
-                width: visibleWidth,
-                height: height + Self.edgeMergeDepth * 2
+                width: width,
+                height: visibleHeight
             )
         )
     }
