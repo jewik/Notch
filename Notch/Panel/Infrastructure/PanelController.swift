@@ -32,7 +32,7 @@ final class PanelController {
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
     private var screenChangeObserver: NSObjectProtocol?
-    private let contentVisibility = PanelContentVisibility()
+    private let presentation = PanelPresentationModel()
     private let contentMetrics = PanelContentMetrics()
 
     init() {
@@ -51,11 +51,16 @@ final class PanelController {
         }
     }
 
-    func show(on screen: NSScreen? = nil) {
+    func show(route: PanelRoute = .home, on screen: NSScreen? = nil) {
         cancelPeekHide()
+        presentation.route = route
         let targetScreen = screen ?? screenUnderPointer()
         let panel = preparePanel(on: targetScreen)
-        resize(panel: panel, to: .visible, frame: geometry(for: targetScreen).visibleFrame)
+        resize(
+            panel: panel,
+            to: .visible,
+            frame: geometry(for: targetScreen).visibleFrame(for: presentation.sizePreset)
+        )
     }
 
     func hide() {
@@ -96,7 +101,7 @@ final class PanelController {
         removeOutsideClickMonitors()
         cancelFrameAnimation()
         animationGeneration += 1
-        contentVisibility.showsHomeContent = false
+        presentation.isContentVisible = false
         panel?.orderOut(nil)
         orderOutEarPanels()
         panel = nil
@@ -126,7 +131,7 @@ final class PanelController {
         let geometry = geometry(for: screen)
         let panel = OverlayPanel(contentRect: geometry.hiddenFrame)
         let contentView = PanelHostingView(rootView: PanelView(
-            contentVisibility: contentVisibility,
+            presentation: presentation,
             contentMetrics: contentMetrics
         ))
         contentView.onMouseEntered = { [weak self] in self?.cancelPeekHide() }
@@ -151,7 +156,7 @@ final class PanelController {
         currentScreen = targetScreen
         contentMetrics.update(for: targetScreen)
         cancelFrameAnimation()
-        contentVisibility.showsHomeContent = false
+        presentation.isContentVisible = false
 
         let geometry = geometry(for: targetScreen)
         let targetFrame: NSRect
@@ -161,23 +166,23 @@ final class PanelController {
         case .peek:
             targetFrame = geometry.peekFrame
         case .visible:
-            targetFrame = geometry.visibleFrame
+            targetFrame = geometry.visibleFrame(for: presentation.sizePreset)
         }
 
         panel.setFrame(targetFrame, display: true)
         updateEarPanels(for: targetFrame)
-        contentVisibility.showsHomeContent = state == .visible
+        presentation.isContentVisible = state == .visible
     }
 
     private func resize(panel: OverlayPanel, to newState: PanelState, frame: NSRect) {
         guard state != newState || panel.frame != frame else {
-            contentVisibility.showsHomeContent = newState == .visible
+            presentation.isContentVisible = newState == .visible
             return
         }
 
         cancelFrameAnimation()
         animationGeneration += 1
-        contentVisibility.showsHomeContent = false
+        presentation.isContentVisible = false
         let generation = animationGeneration
         let startFrame = panel.frame
         let isOpening = frame.height > startFrame.height
@@ -228,7 +233,7 @@ final class PanelController {
             panel.orderOut(nil)
             orderOutEarPanels()
         }
-        contentVisibility.showsHomeContent = state == .visible
+        presentation.isContentVisible = state == .visible
         cancelFrameAnimation()
     }
 

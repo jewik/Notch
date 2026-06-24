@@ -9,8 +9,8 @@ struct PanelGeometry {
         self.screen = screen
     }
 
-    var visibleFrame: NSRect {
-        frame(for: .home)
+    func visibleFrame(for preset: PanelSizePreset) -> NSRect {
+        frame(for: preset)
     }
 
     var peekFrame: NSRect {
