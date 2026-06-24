@@ -5,9 +5,6 @@ struct ClipboardPageView: View {
 
     var body: some View {
         Color.clear
-            .frame(
-                width: PanelSizePreset.clipboard.width * pointMultiplier,
-                height: PanelSizePreset.clipboard.height * pointMultiplier
-            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

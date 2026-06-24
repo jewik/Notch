@@ -101,6 +101,7 @@ final class PanelController {
         removeOutsideClickMonitors()
         cancelFrameAnimation()
         animationGeneration += 1
+        presentation.isChromeVisible = false
         presentation.isContentVisible = false
         panel?.orderOut(nil)
         orderOutEarPanels()
@@ -174,17 +175,21 @@ final class PanelController {
 
         panel.setFrame(targetFrame, display: true)
         updateEarPanels(for: targetFrame)
+        presentation.isChromeVisible = state == .visible
         presentation.isContentVisible = state == .visible
     }
 
     private func resize(panel: OverlayPanel, to newState: PanelState, frame: NSRect) {
         guard state != newState || panel.frame != frame else {
+            presentation.isChromeVisible = newState == .visible
             presentation.isContentVisible = newState == .visible
             return
         }
 
         cancelFrameAnimation()
         animationGeneration += 1
+        let shouldKeepChromeVisible = state == .visible && newState == .visible
+        presentation.isChromeVisible = shouldKeepChromeVisible
         presentation.isContentVisible = false
         let generation = animationGeneration
         let startFrame = panel.frame
@@ -236,6 +241,7 @@ final class PanelController {
             panel.orderOut(nil)
             orderOutEarPanels()
         }
+        presentation.isChromeVisible = state == .visible
         presentation.isContentVisible = state == .visible
         cancelFrameAnimation()
     }
