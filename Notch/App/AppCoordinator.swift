@@ -14,6 +14,7 @@ final class AppCoordinator: NSObject {
 
     func start() {
         configureMenuBar()
+        ClipboardFeature.shared.start()
 
         shortcutService.onToggle = { [weak self] in
             self?.panelController.toggle()
@@ -32,6 +33,7 @@ final class AppCoordinator: NSObject {
     }
 
     func stop() {
+        ClipboardFeature.shared.stop()
         edgeTriggerService.stop()
         shortcutService.stop()
         panelController.stop()
