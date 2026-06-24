@@ -31,7 +31,25 @@ final class PanelController {
     private var pendingPeekHide: DispatchWorkItem?
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
+    private var screenChangeObserver: NSObjectProtocol?
     private let contentVisibility = PanelContentVisibility()
+    private let contentMetrics = PanelContentMetrics()
+
+    init() {
+        screenChangeObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didChangeScreenParametersNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleScreenParametersChanged()
+        }
+    }
+
+    deinit {
+        if let screenChangeObserver {
+            NotificationCenter.default.removeObserver(screenChangeObserver)
+        }
+    }
 
     func show(on screen: NSScreen? = nil) {
         cancelPeekHide()
@@ -88,6 +106,7 @@ final class PanelController {
     }
 
     private func preparePanel(on screen: NSScreen) -> OverlayPanel {
+        contentMetrics.update(for: screen)
         let panel = panel ?? makePanel(on: screen)
         let geometry = geometry(for: screen)
 
@@ -106,7 +125,10 @@ final class PanelController {
     private func makePanel(on screen: NSScreen) -> OverlayPanel {
         let geometry = geometry(for: screen)
         let panel = OverlayPanel(contentRect: geometry.hiddenFrame)
-        let contentView = PanelHostingView(rootView: PanelView(contentVisibility: contentVisibility))
+        let contentView = PanelHostingView(rootView: PanelView(
+            contentVisibility: contentVisibility,
+            contentMetrics: contentMetrics
+        ))
         contentView.onMouseEntered = { [weak self] in self?.cancelPeekHide() }
         contentView.onMouseExited = { [weak self] in self?.schedulePeekHide() }
         contentView.onMouseDown = { [weak self] in
@@ -120,6 +142,31 @@ final class PanelController {
 
     private func geometry(for screen: NSScreen) -> PanelGeometry {
         PanelGeometry(screen: screen)
+    }
+
+    private func handleScreenParametersChanged() {
+        guard let panel else { return }
+
+        let targetScreen = panel.screen ?? currentScreen ?? screenUnderPointer()
+        currentScreen = targetScreen
+        contentMetrics.update(for: targetScreen)
+        cancelFrameAnimation()
+        contentVisibility.showsHomeContent = false
+
+        let geometry = geometry(for: targetScreen)
+        let targetFrame: NSRect
+        switch state {
+        case .hidden:
+            targetFrame = geometry.hiddenFrame
+        case .peek:
+            targetFrame = geometry.peekFrame
+        case .visible:
+            targetFrame = geometry.visibleFrame
+        }
+
+        panel.setFrame(targetFrame, display: true)
+        updateEarPanels(for: targetFrame)
+        contentVisibility.showsHomeContent = state == .visible
     }
 
     private func resize(panel: OverlayPanel, to newState: PanelState, frame: NSRect) {
@@ -181,28 +228,29 @@ final class PanelController {
             panel.orderOut(nil)
             orderOutEarPanels()
         }
-        contentVisibility.showsHomeContent = state == .visible && panel.frame == animation.endFrame
+        contentVisibility.showsHomeContent = state == .visible
         cancelFrameAnimation()
     }
 
     private func prepareEarPanels(for panel: OverlayPanel) {
         if leftEarPanel == nil {
-            let earPanel = PanelEarPanel(contentRect: .zero, side: .left)
+            let earPanel = PanelEarPanel(contentRect: .zero, side: .left, contentMetrics: contentMetrics)
             panel.addChildWindow(earPanel, ordered: .above)
             leftEarPanel = earPanel
         }
 
         if rightEarPanel == nil {
-            let earPanel = PanelEarPanel(contentRect: .zero, side: .right)
+            let earPanel = PanelEarPanel(contentRect: .zero, side: .right, contentMetrics: contentMetrics)
             panel.addChildWindow(earPanel, ordered: .above)
             rightEarPanel = earPanel
         }
     }
 
     private func updateEarPanels(for panelFrame: NSRect) {
-        let backingScale = currentScreen?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 1
-        let minimumEarSize = 10 / backingScale
-        let earSize = max(ContinuousCornerProfile(expansion: panelFrame.height).radius, minimumEarSize)
+        let earSize = ContinuousCornerProfile(
+            expansion: panelFrame.height,
+            pointMultiplier: contentMetrics.pointMultiplier
+        ).radius
         let earY = panelFrame.maxY - earSize
 
         leftEarPanel?.setFrame(NSRect(
@@ -327,7 +375,7 @@ private final class OverlayPanel: NSPanel {
 }
 
 private final class PanelEarPanel: NSPanel {
-    init(contentRect: NSRect, side: PanelEarSide) {
+    init(contentRect: NSRect, side: PanelEarSide, contentMetrics: PanelContentMetrics) {
         super.init(
             contentRect: contentRect,
             styleMask: [.borderless, .nonactivatingPanel],
@@ -344,7 +392,10 @@ private final class PanelEarPanel: NSPanel {
         isMovable = false
         isReleasedWhenClosed = false
         animationBehavior = .none
-        contentView = NSHostingView(rootView: PanelEarView(side: side))
+        contentView = NSHostingView(rootView: PanelEarView(
+            side: side,
+            contentMetrics: contentMetrics
+        ))
     }
 
     override var canBecomeKey: Bool { false }

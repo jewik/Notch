@@ -6,20 +6,20 @@ final class PanelContentVisibility: ObservableObject {
 }
 
 struct PanelView: View {
-    @Environment(\.displayScale) private var displayScale
     @ObservedObject var contentVisibility: PanelContentVisibility
+    @ObservedObject var contentMetrics: PanelContentMetrics
     @StateObject private var systemLoad = SystemLoadMonitor()
 
     var body: some View {
         ZStack(alignment: .top) {
-            EdgeMergingPanelShape()
+            EdgeMergingPanelShape(pointMultiplier: contentMetrics.pointMultiplier)
                 .fill(.black)
                 .ignoresSafeArea()
 
             if contentVisibility.showsHomeContent {
                 HomePageView(
                     snapshot: systemLoad.snapshot,
-                    scale: displayScale
+                    pointMultiplier: contentMetrics.pointMultiplier
                 )
             }
         }
@@ -28,22 +28,22 @@ struct PanelView: View {
 
 private struct HomePageView: View {
     let snapshot: SystemLoadSnapshot
-    let scale: CGFloat
+    let pointMultiplier: CGFloat
 
-    private var resolvedScale: CGFloat {
-        max(scale, 1)
+    private func points(_ value: CGFloat) -> CGFloat {
+        value * pointMultiplier
     }
 
     private var rowWidth: CGFloat {
-        1000 / resolvedScale
+        points(PanelSizePreset.home.width)
     }
 
     private var serviceRowHeight: CGFloat {
-        70 / resolvedScale
+        points(35)
     }
 
     private var systemRowHeight: CGFloat {
-        130 / resolvedScale
+        points(65)
     }
 
     var body: some View {
@@ -51,7 +51,7 @@ private struct HomePageView: View {
             ServiceButtonRow()
                 .frame(width: rowWidth, height: serviceRowHeight, alignment: .leading)
 
-            SystemLoadRow(snapshot: snapshot, scale: resolvedScale)
+            SystemLoadRow(snapshot: snapshot, pointMultiplier: pointMultiplier)
                 .frame(width: rowWidth, height: systemRowHeight, alignment: .leading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -68,14 +68,18 @@ private struct ServiceButtonRow: View {
 
 private struct SystemLoadRow: View {
     let snapshot: SystemLoadSnapshot
-    let scale: CGFloat
+    let pointMultiplier: CGFloat
+
+    private func points(_ value: CGFloat) -> CGFloat {
+        value * pointMultiplier
+    }
 
     private var horizontalPadding: CGFloat {
-        22 / scale
+        points(10)
     }
 
     private var gaugeSpacing: CGFloat {
-        18 / scale
+        points(18)
     }
 
     var body: some View {
@@ -83,13 +87,15 @@ private struct SystemLoadRow: View {
             SystemLoadGauge(
                 title: "RAM",
                 value: snapshot.memoryLoad,
-                tint: .blue
+                tint: .blue,
+                pointMultiplier: pointMultiplier
             )
 
             SystemLoadGauge(
                 title: "CPU",
                 value: snapshot.cpuLoad,
-                tint: .green
+                tint: .green,
+                pointMultiplier: pointMultiplier
             )
         }
         .padding(.leading, horizontalPadding)
@@ -101,6 +107,11 @@ private struct SystemLoadGauge: View {
     let title: String
     let value: Double
     let tint: Color
+    let pointMultiplier: CGFloat
+
+    private func points(_ value: CGFloat) -> CGFloat {
+        value * pointMultiplier
+    }
 
     private var percentageText: String {
         value.formatted(.percent.precision(.fractionLength(0)))
@@ -111,12 +122,12 @@ private struct SystemLoadGauge: View {
             Text(title)
         } currentValueLabel: {
             Text(percentageText)
-                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                .font(.system(size: points(10), weight: .semibold, design: .rounded))
                 .monospacedDigit()
         }
         .gaugeStyle(.accessoryCircularCapacity)
         .tint(tint)
-        .frame(width: 52, height: 52)
+        .frame(width: points(52), height: points(52))
         .accessibilityLabel(title)
         .accessibilityValue(percentageText)
     }
@@ -129,9 +140,13 @@ enum PanelEarSide {
 
 struct PanelEarView: View {
     let side: PanelEarSide
+    @ObservedObject var contentMetrics: PanelContentMetrics
 
     var body: some View {
-        PanelEarShape(side: side)
+        PanelEarShape(
+            side: side,
+            pointMultiplier: contentMetrics.pointMultiplier
+        )
             .fill(.black)
             .ignoresSafeArea()
     }
@@ -140,10 +155,15 @@ struct PanelEarView: View {
 /// Superellipse-профиль даёт непрерывный G2-переход нижних углов к прямым граням.
 /// Верхняя грань остаётся прямой и вплотную примыкает к краю экрана.
 private struct EdgeMergingPanelShape: Shape {
+    let pointMultiplier: CGFloat
+
     func path(in rect: CGRect) -> Path {
         guard rect.width > 0, rect.height > 0 else { return Path() }
 
-        let profile = ContinuousCornerProfile(expansion: rect.height)
+        let profile = ContinuousCornerProfile(
+            expansion: rect.height,
+            pointMultiplier: pointMultiplier
+        )
         let cornerDepth = min(profile.radius, rect.width / 2, rect.height)
 
         var path = Path()
@@ -174,13 +194,17 @@ private struct EdgeMergingPanelShape: Shape {
 
 private struct PanelEarShape: Shape {
     let side: PanelEarSide
+    let pointMultiplier: CGFloat
 
     /// Дискретизирует аналитическую superellipse-кривую. У её концов нулевая
     /// кривизна, поэтому профиль мягко вливается в прямые участки без дугового шва.
     func path(in rect: CGRect) -> Path {
         guard rect.width > 0, rect.height > 0 else { return Path() }
 
-        let profile = ContinuousCornerProfile(expansion: rect.height)
+        let profile = ContinuousCornerProfile(
+            expansion: rect.height,
+            pointMultiplier: pointMultiplier
+        )
         var path = Path()
 
         switch side {
@@ -244,16 +268,41 @@ private enum ContinuousCornerPath {
 }
 
 struct ContinuousCornerProfile {
-    /// Экспериментальная сила скругления: 1.0 — текущий профиль,
-    /// меньше — ближе к обычному радиусу, больше — более выраженный continuous corner.
-    private static let roundingForce: CGFloat = 0.1
+    static let minimumRoundingRadius: CGFloat = 10
+    static let maximumRoundingRadius: CGFloat = 24
+
+    private static let minimumRoundingHeight: CGFloat = PanelSizePreset.hidden.height
+    private static let maximumRoundingHeight: CGFloat = PanelSizePreset.home.height
+    private static let minimumExponent: CGFloat = 2.2
+    private static let maximumExponent: CGFloat = 3.3
 
     let radius: CGFloat
     let exponent: CGFloat
 
-    init(expansion: CGFloat) {
-        radius = min(max(expansion * 0.3, 0), 32)
-        let widthDependentExponent = min(max(4.2 + expansion / 420, 4.2), 15)
-        exponent = 2 + (widthDependentExponent - 2) * Self.roundingForce
+    init(expansion: CGFloat, pointMultiplier: CGFloat = 1) {
+        let progress = Self.progress(for: expansion, pointMultiplier: pointMultiplier)
+        radius = Self.lerp(
+            from: Self.minimumRoundingRadius * pointMultiplier,
+            to: Self.maximumRoundingRadius * pointMultiplier,
+            progress: progress
+        )
+        exponent = Self.lerp(
+            from: Self.minimumExponent,
+            to: Self.maximumExponent,
+            progress: progress
+        )
+    }
+
+    private static func progress(for expansion: CGFloat, pointMultiplier: CGFloat) -> CGFloat {
+        let minimumHeight = minimumRoundingHeight * pointMultiplier
+        let maximumHeight = maximumRoundingHeight * pointMultiplier
+        let range = maximumHeight - minimumHeight
+        guard range > 0 else { return 1 }
+
+        return min(max((expansion - minimumHeight) / range, 0), 1)
+    }
+
+    private static func lerp(from start: CGFloat, to end: CGFloat, progress: CGFloat) -> CGFloat {
+        start + (end - start) * progress
     }
 }

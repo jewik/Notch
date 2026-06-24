@@ -23,11 +23,12 @@ struct PanelGeometry {
 
     var edgeTriggerFrame: NSRect {
         let width = PanelSizePreset.hidden.width(for: screen)
+        let height = PanelDisplayScale.points(Self.edgeTriggerHeight, for: screen)
         return NSRect(
             x: horizontalOrigin(for: width),
-            y: screen.frame.maxY - Self.edgeTriggerHeight,
+            y: screen.frame.maxY - height,
             width: width,
-            height: Self.edgeTriggerHeight
+            height: height
         )
     }
 
