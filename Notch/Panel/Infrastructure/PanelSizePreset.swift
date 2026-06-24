@@ -43,7 +43,7 @@ struct PanelSizePreset {
 
     static let sysMonitor = PanelSizePreset(
         name: "sysmonitor",
-        width: 500,
+        width: 400,
         height: 100
     )
 

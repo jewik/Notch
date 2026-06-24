@@ -13,31 +13,28 @@ struct PanelView: View {
         points(35)
     }
 
-    private var panelWidth: CGFloat {
-        points(presentation.sizePreset.width)
-    }
-
-    private var contentHeight: CGFloat {
-        max(points(presentation.sizePreset.height) - serviceRowHeight, 0)
-    }
-
     var body: some View {
         PanelSurfaceView(pointMultiplier: contentMetrics.pointMultiplier) {
-            if presentation.isChromeVisible {
-                VStack(spacing: 0) {
-                    PanelServiceRow(
-                        pointMultiplier: contentMetrics.pointMultiplier,
-                        activeRoute: presentation.route,
-                        openRoute: openRoute
-                    )
-                    .frame(width: panelWidth, height: serviceRowHeight, alignment: .leading)
+            GeometryReader { proxy in
+                if presentation.isChromeVisible {
+                    let panelWidth = proxy.size.width
+                    let contentHeight = max(proxy.size.height - serviceRowHeight, 0)
 
-                    if presentation.isContentVisible {
-                        contentView
-                            .frame(width: panelWidth, height: contentHeight, alignment: .top)
+                    VStack(spacing: 0) {
+                        PanelServiceRow(
+                            pointMultiplier: contentMetrics.pointMultiplier,
+                            activeRoute: presentation.route,
+                            openRoute: openRoute
+                        )
+                        .frame(width: panelWidth, height: serviceRowHeight, alignment: .leading)
+
+                        if presentation.isContentVisible {
+                            contentView
+                                .frame(width: panelWidth, height: contentHeight, alignment: .top)
+                        }
                     }
+                    .frame(width: panelWidth, height: proxy.size.height, alignment: .top)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
         }
     }

@@ -198,7 +198,7 @@ final class PanelController {
         updateOutsideClickMonitors(for: newState)
         onStateChange?(newState)
 
-        let duration: TimeInterval = isOpening ? 0.32 : 0.28
+        let duration: TimeInterval = isOpening ? 0.5 : 0.5
         activeAnimation = FrameAnimation(
             generation: generation,
             startFrame: startFrame,
