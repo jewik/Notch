@@ -44,7 +44,8 @@ final class ClipboardViewModel: ObservableObject {
             guard matchesKind else { return false }
 
             guard !query.isEmpty else { return true }
-            return capture.displayTitle.lowercased().contains(query) ||
+            return capture.preferredDisplayTitle.lowercased().contains(query) ||
+                capture.displayTitle.lowercased().contains(query) ||
                 capture.searchableText.lowercased().contains(query) ||
                 capture.sourceApplicationName?.lowercased().contains(query) == true
         }
@@ -74,6 +75,29 @@ final class ClipboardViewModel: ObservableObject {
         selectedCaptureID = capture.id
     }
 
+    func selectPrevious() {
+        moveSelection(by: -1)
+    }
+
+    func selectNext() {
+        moveSelection(by: 1)
+    }
+
+    func ensureSelection() {
+        let captures = filteredCaptures
+        guard !captures.isEmpty else {
+            selectedCaptureID = nil
+            return
+        }
+
+        if let selectedCaptureID,
+           captures.contains(where: { $0.id == selectedCaptureID }) {
+            return
+        }
+
+        selectedCaptureID = captures[0].id
+    }
+
     func rememberPasteTarget() {
         pasteboardService.rememberPasteTarget()
     }
@@ -96,7 +120,7 @@ final class ClipboardViewModel: ObservableObject {
     func paste(_ capture: ClipboardCapture) {
         if let updatedCapture = captures.first(where: { $0.id == capture.id }) {
             let didPaste = pasteboardService.paste(updatedCapture)
-            lastStatusMessage = didPaste ? "Inserted" : "Direct insert supports text fields only. Enable Accessibility if prompted."
+            lastStatusMessage = didPaste ? "Pasted" : "Copied. Enable Accessibility to paste automatically."
         } else {
             lastStatusMessage = "Item unavailable"
         }
@@ -119,6 +143,12 @@ final class ClipboardViewModel: ObservableObject {
     func clearUnpinned() {
         captures.removeAll { !$0.isPinned }
         selectedCaptureID = filteredCaptures.first?.id
+        persist()
+    }
+
+    func clearHistory() {
+        captures.removeAll()
+        selectedCaptureID = nil
         persist()
     }
 
@@ -146,6 +176,23 @@ final class ClipboardViewModel: ObservableObject {
         captures[index].lastCopiedAt = Date()
         captures[index].copyCount += 1
         sortAndPersist()
+    }
+
+    private func moveSelection(by offset: Int) {
+        let captures = filteredCaptures
+        guard !captures.isEmpty else {
+            selectedCaptureID = nil
+            return
+        }
+
+        guard let selectedCaptureID,
+              let currentIndex = captures.firstIndex(where: { $0.id == selectedCaptureID }) else {
+            selectedCaptureID = offset < 0 ? captures.last?.id : captures.first?.id
+            return
+        }
+
+        let nextIndex = min(max(currentIndex + offset, 0), captures.count - 1)
+        self.selectedCaptureID = captures[nextIndex].id
     }
 
     private func sortAndPersist() {

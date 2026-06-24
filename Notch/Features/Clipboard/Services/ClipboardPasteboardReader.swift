@@ -133,14 +133,14 @@ struct ClipboardPasteboardReader {
         if representations.contains(where: { $0.isImage }) {
             return .image
         }
-        if representations.contains(where: { representation in
-            guard representation.isPlainText, let text = representation.decodedText else { return false }
-            return URL(string: text.trimmingCharacters(in: .whitespacesAndNewlines))?.scheme != nil
-        }) {
-            return .link
-        }
         if representations.contains(where: { $0.isRichText }) {
             return .richText
+        }
+        if ClipboardTitleFormatter.hasNonURLDisplayText(in: representations) {
+            return .text
+        }
+        if ClipboardTitleFormatter.hasLink(in: representations) {
+            return .link
         }
         if representations.contains(where: { $0.isPlainText }) {
             return .text
@@ -152,30 +152,7 @@ struct ClipboardPasteboardReader {
         for representations: [ClipboardRepresentation],
         kind: ClipboardContentKind
     ) -> String {
-        if kind == .file {
-            let fileNames = representations
-                .compactMap(\.fileURL)
-                .map(\.lastPathComponent)
-                .filter { !$0.isEmpty }
-            if !fileNames.isEmpty {
-                return fileNames.joined(separator: ", ")
-            }
-        }
-
-        if let text = representations.compactMap(\.decodedText).first {
-            let normalized = text
-                .replacingOccurrences(of: "\n", with: " ")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            if !normalized.isEmpty {
-                return String(normalized.prefix(90))
-            }
-        }
-
-        if let firstType = representations.first?.typeIdentifier {
-            return firstType
-        }
-
-        return kind.title
+        ClipboardTitleFormatter.title(for: representations, kind: kind)
     }
 
     private static func subtitle(

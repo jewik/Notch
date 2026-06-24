@@ -16,8 +16,8 @@ final class AppCoordinator: NSObject {
         configureMenuBar()
         ClipboardFeature.shared.start()
 
-        shortcutService.onToggle = { [weak self] in
-            self?.panelController.toggle()
+        shortcutService.onOpenClipboard = { [weak self] in
+            self?.panelController.show(route: .clipboard)
         }
         shortcutService.onDismiss = { [weak self] in
             self?.panelController.hide()
@@ -52,10 +52,14 @@ final class AppCoordinator: NSObject {
         }
 
         let menu = NSMenu()
-        let toggleItem = NSMenuItem(title: "Показать", action: #selector(togglePanel), keyEquivalent: "v")
-        toggleItem.keyEquivalentModifierMask = [.command, .shift]
+        let toggleItem = NSMenuItem(title: "Показать", action: #selector(togglePanel), keyEquivalent: "")
         toggleItem.target = self
         menu.addItem(toggleItem)
+
+        let clipboardItem = NSMenuItem(title: "Буфер обмена", action: #selector(openClipboardPanel), keyEquivalent: "v")
+        clipboardItem.keyEquivalentModifierMask = [.command, .shift]
+        clipboardItem.target = self
+        menu.addItem(clipboardItem)
         menu.addItem(.separator())
 
         let quitItem = NSMenuItem(title: "Завершить Notch", action: #selector(quit), keyEquivalent: "q")
@@ -69,6 +73,10 @@ final class AppCoordinator: NSObject {
 
     @objc private func togglePanel() {
         panelController.toggle()
+    }
+
+    @objc private func openClipboardPanel() {
+        panelController.show(route: .clipboard)
     }
 
     @objc private func quit() {

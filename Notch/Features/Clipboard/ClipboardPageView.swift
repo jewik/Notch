@@ -22,7 +22,7 @@ struct ClipboardPageView: View {
 
     var body: some View {
         VStack(spacing: points(8)) {
-            searchField
+            searchRow
 
             if viewModel.captures.isEmpty {
                 ClipboardEmptyStateView(
@@ -37,20 +37,7 @@ struct ClipboardPageView: View {
                     pointMultiplier: pointMultiplier
                 )
             } else {
-                ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(spacing: points(6)) {
-                        ForEach(viewModel.filteredCaptures) { capture in
-                            ClipboardHistoryRow(
-                                capture: capture,
-                                isSelected: viewModel.selectedCapture?.id == capture.id,
-                                pointMultiplier: pointMultiplier,
-                                select: { viewModel.select(capture) },
-                                paste: { viewModel.paste(capture) }
-                            )
-                        }
-                    }
-                    .padding(.vertical, points(1))
-                }
+                historyList
             }
         }
         .padding(.horizontal, points(14))
@@ -63,9 +50,27 @@ struct ClipboardPageView: View {
                 isSearchFocused = true
             }
         }
+        .onChange(of: viewModel.searchText) { _, _ in
+            viewModel.ensureSelection()
+        }
         .onKeyPress(.return) {
             pasteSelected()
             return .handled
+        }
+        .onKeyPress(.upArrow) {
+            viewModel.selectPrevious()
+            return .handled
+        }
+        .onKeyPress(.downArrow) {
+            viewModel.selectNext()
+            return .handled
+        }
+    }
+
+    private var searchRow: some View {
+        HStack(spacing: points(7)) {
+            searchField
+            clearHistoryButton
         }
     }
 
@@ -93,6 +98,52 @@ struct ClipboardPageView: View {
         )
     }
 
+    private var clearHistoryButton: some View {
+        Button {
+            viewModel.clearHistory()
+        } label: {
+            Image(systemName: "trash")
+                .font(.system(size: points(12), weight: .semibold))
+                .frame(width: points(32), height: points(32))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.white.opacity(viewModel.captures.isEmpty ? 0.28 : 0.72))
+        .background(
+            RoundedRectangle(cornerRadius: points(8), style: .continuous)
+                .fill(.white.opacity(viewModel.captures.isEmpty ? 0.04 : 0.09))
+        )
+        .disabled(viewModel.captures.isEmpty)
+        .accessibilityLabel("Clear history")
+        .help("Clear history")
+    }
+
+    private var historyList: some View {
+        ScrollViewReader { proxy in
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVStack(spacing: points(6)) {
+                    ForEach(viewModel.filteredCaptures) { capture in
+                        ClipboardHistoryRow(
+                            capture: capture,
+                            isSelected: viewModel.selectedCapture?.id == capture.id,
+                            pointMultiplier: pointMultiplier,
+                            select: { viewModel.select(capture) },
+                            paste: { viewModel.paste(capture) }
+                        )
+                        .id(capture.id)
+                    }
+                }
+                .padding(.vertical, points(1))
+            }
+            .onChange(of: viewModel.selectedCaptureID) { _, selectedCaptureID in
+                guard let selectedCaptureID else { return }
+                withAnimation(.easeInOut(duration: 0.16)) {
+                    proxy.scrollTo(selectedCaptureID, anchor: .center)
+                }
+            }
+        }
+    }
+
     private func pasteSelected() {
         guard let capture = viewModel.selectedCapture else { return }
         viewModel.paste(capture)
@@ -116,7 +167,7 @@ private struct ClipboardHistoryRow: View {
                 .frame(width: points(44), height: points(44))
 
             VStack(alignment: .leading, spacing: points(4)) {
-                Text(capture.displayTitle)
+                Text(capture.preferredDisplayTitle)
                     .font(.system(size: points(12), weight: .semibold))
                     .lineLimit(1)
                     .foregroundStyle(.white.opacity(0.92))
@@ -175,9 +226,9 @@ private struct ClipboardItemPreviewIcon: View {
                 imagePreview
             case .file:
                 filePreview
-            case .text, .link, .richText:
-                textPreview
             case .pdf, .other:
+                fallbackPreview
+            case .text, .link, .richText:
                 fallbackPreview
             }
         }
@@ -212,16 +263,6 @@ private struct ClipboardItemPreviewIcon: View {
         .padding(points(4))
     }
 
-    private var textPreview: some View {
-        Text(previewText)
-            .font(.system(size: points(7), weight: .semibold, design: .monospaced))
-            .lineLimit(4)
-            .multilineTextAlignment(.leading)
-            .foregroundStyle(.white.opacity(0.78))
-            .padding(points(5))
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-
     private var fallbackPreview: some View {
         Image(systemName: capture.primaryKind.systemImageName)
             .font(.system(size: points(16), weight: .semibold))
@@ -232,12 +273,6 @@ private struct ClipboardItemPreviewIcon: View {
         capture.primaryFileURLs.first
     }
 
-    private var previewText: String {
-        let text = capture.searchableText.isEmpty
-            ? capture.items.flatMap(\.representations).compactMap(\.decodedText).first ?? capture.primaryKind.title
-            : capture.searchableText
-        return String(text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(42))
-    }
 }
 
 private struct ClipboardEmptyStateView: View {

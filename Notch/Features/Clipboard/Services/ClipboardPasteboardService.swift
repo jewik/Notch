@@ -39,9 +39,7 @@ final class ClipboardPasteboardService {
     }
 
     func paste(_ capture: ClipboardCapture) -> Bool {
-        guard let text = directPasteText(for: capture), !text.isEmpty else {
-            return false
-        }
+        restore(capture)
 
         guard canPasteAutomatically else {
             requestAccessibilityPermission()
@@ -49,7 +47,7 @@ final class ClipboardPasteboardService {
         }
 
         NotificationCenter.default.post(name: .clipboardWillPaste, object: nil)
-        directInsert(text)
+        postPasteShortcutWhenReady()
         return true
     }
 
@@ -98,62 +96,31 @@ final class ClipboardPasteboardService {
         ignoredExactHash = capture.exactHash
     }
 
-    private func directPasteText(for capture: ClipboardCapture) -> String? {
-        if let text = capture.primaryTextRepresentation?.decodedText {
-            return text
-        }
-        return capture.items
-            .flatMap(\.representations)
-            .first(where: { $0.isPlainText })?
-            .decodedText
-    }
-
-    private func directInsert(_ text: String) {
-        let insert: () -> Void = { [weak self] in
-            guard let self else { return }
-            postUnicodeText(text)
-        }
-
+    private func postPasteShortcutWhenReady() {
         if let pasteTargetApplication, !pasteTargetApplication.isTerminated {
             NSApp.yieldActivation(to: pasteTargetApplication)
             pasteTargetApplication.activate(from: .current, options: [])
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.22, execute: insert)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) { [weak self] in
+                self?.postPasteShortcut()
+            }
         } else {
             NSApp.deactivate()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12, execute: insert)
-        }
-    }
-
-    private func postUnicodeText(_ text: String) {
-        var chunk = ""
-        var characterCount = 0
-
-        for character in text {
-            chunk.append(character)
-            characterCount += 1
-
-            if characterCount >= 16 {
-                postUnicodeChunk(chunk)
-                chunk.removeAll(keepingCapacity: true)
-                characterCount = 0
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self] in
+                self?.postPasteShortcut()
             }
         }
-
-        if !chunk.isEmpty {
-            postUnicodeChunk(chunk)
-        }
     }
 
-    private func postUnicodeChunk(_ text: String) {
+    private func postPasteShortcut() {
+        let vKeyCode: CGKeyCode = 9
         guard let source = CGEventSource(stateID: .hidSystemState),
-              let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: true),
-              let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: false) else {
+              let keyDown = CGEvent(keyboardEventSource: source, virtualKey: vKeyCode, keyDown: true),
+              let keyUp = CGEvent(keyboardEventSource: source, virtualKey: vKeyCode, keyDown: false) else {
             return
         }
 
-        var utf16 = Array(text.utf16)
-        keyDown.keyboardSetUnicodeString(stringLength: utf16.count, unicodeString: &utf16)
-        keyUp.keyboardSetUnicodeString(stringLength: utf16.count, unicodeString: &utf16)
+        keyDown.flags = .maskCommand
+        keyUp.flags = .maskCommand
         keyDown.post(tap: .cghidEventTap)
         keyUp.post(tap: .cghidEventTap)
     }

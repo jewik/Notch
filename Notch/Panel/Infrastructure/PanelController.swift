@@ -49,7 +49,7 @@ final class PanelController {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.hideImmediatelyForClipboardPaste()
+            self?.hideForClipboardPaste()
         }
     }
 
@@ -174,19 +174,15 @@ final class PanelController {
         return panel
     }
 
-    private func hideImmediatelyForClipboardPaste() {
+    private func hideForClipboardPaste() {
         cancelPeekHide()
-        removeOutsideClickMonitors()
-        cancelFrameAnimation()
-        animationGeneration += 1
-        state = .hidden
-        presentation.isChromeVisible = false
-        presentation.isContentVisible = false
-        panel?.allowsKeyWindow = false
-        panel?.resignKey()
-        panel?.orderOut(nil)
-        orderOutEarPanels()
-        onStateChange?(.hidden)
+        guard let panel else { return }
+
+        let targetScreen = currentScreen ?? panel.screen ?? screenUnderPointer()
+        currentScreen = targetScreen
+        panel.allowsKeyWindow = false
+        panel.resignKey()
+        resize(panel: panel, to: .hidden, frame: geometry(for: targetScreen).hiddenFrame)
     }
 
     private func geometry(for screen: NSScreen) -> PanelGeometry {
