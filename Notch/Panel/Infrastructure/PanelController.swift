@@ -132,7 +132,10 @@ final class PanelController {
         let panel = OverlayPanel(contentRect: geometry.hiddenFrame)
         let contentView = PanelHostingView(rootView: PanelView(
             presentation: presentation,
-            contentMetrics: contentMetrics
+            contentMetrics: contentMetrics,
+            openRoute: { [weak self] route in
+                self?.show(route: route, on: self?.currentScreen)
+            }
         ))
         contentView.onMouseEntered = { [weak self] in self?.cancelPeekHide() }
         contentView.onMouseExited = { [weak self] in self?.schedulePeekHide() }
