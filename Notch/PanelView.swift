@@ -1,10 +1,124 @@
+import Combine
 import SwiftUI
 
+final class PanelContentVisibility: ObservableObject {
+    @Published var showsHomeContent = false
+}
+
 struct PanelView: View {
+    @Environment(\.displayScale) private var displayScale
+    @ObservedObject var contentVisibility: PanelContentVisibility
+    @StateObject private var systemLoad = SystemLoadMonitor()
+
     var body: some View {
-        EdgeMergingPanelShape()
-            .fill(.black)
-            .ignoresSafeArea()
+        ZStack(alignment: .top) {
+            EdgeMergingPanelShape()
+                .fill(.black)
+                .ignoresSafeArea()
+
+            if contentVisibility.showsHomeContent {
+                HomePageView(
+                    snapshot: systemLoad.snapshot,
+                    scale: displayScale
+                )
+            }
+        }
+    }
+}
+
+private struct HomePageView: View {
+    let snapshot: SystemLoadSnapshot
+    let scale: CGFloat
+
+    private var resolvedScale: CGFloat {
+        max(scale, 1)
+    }
+
+    private var rowWidth: CGFloat {
+        1000 / resolvedScale
+    }
+
+    private var serviceRowHeight: CGFloat {
+        70 / resolvedScale
+    }
+
+    private var systemRowHeight: CGFloat {
+        130 / resolvedScale
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ServiceButtonRow()
+                .frame(width: rowWidth, height: serviceRowHeight, alignment: .leading)
+
+            SystemLoadRow(snapshot: snapshot, scale: resolvedScale)
+                .frame(width: rowWidth, height: systemRowHeight, alignment: .leading)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+}
+
+private struct ServiceButtonRow: View {
+    var body: some View {
+        HStack(spacing: 0) {
+            Color.clear
+        }
+    }
+}
+
+private struct SystemLoadRow: View {
+    let snapshot: SystemLoadSnapshot
+    let scale: CGFloat
+
+    private var horizontalPadding: CGFloat {
+        22 / scale
+    }
+
+    private var gaugeSpacing: CGFloat {
+        18 / scale
+    }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: gaugeSpacing) {
+            SystemLoadGauge(
+                title: "RAM",
+                value: snapshot.memoryLoad,
+                tint: .blue
+            )
+
+            SystemLoadGauge(
+                title: "CPU",
+                value: snapshot.cpuLoad,
+                tint: .green
+            )
+        }
+        .padding(.leading, horizontalPadding)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+    }
+}
+
+private struct SystemLoadGauge: View {
+    let title: String
+    let value: Double
+    let tint: Color
+
+    private var percentageText: String {
+        value.formatted(.percent.precision(.fractionLength(0)))
+    }
+
+    var body: some View {
+        Gauge(value: value, in: 0...1) {
+            Text(title)
+        } currentValueLabel: {
+            Text(percentageText)
+                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                .monospacedDigit()
+        }
+        .gaugeStyle(.accessoryCircularCapacity)
+        .tint(tint)
+        .frame(width: 52, height: 52)
+        .accessibilityLabel(title)
+        .accessibilityValue(percentageText)
     }
 }
 

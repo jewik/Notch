@@ -31,6 +31,8 @@ final class PanelController {
     private var pendingPeekHide: DispatchWorkItem?
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
+    private let contentVisibility = PanelContentVisibility()
+
     func show(on screen: NSScreen? = nil) {
         cancelPeekHide()
         let targetScreen = screen ?? screenUnderPointer()
@@ -76,6 +78,7 @@ final class PanelController {
         removeOutsideClickMonitors()
         cancelFrameAnimation()
         animationGeneration += 1
+        contentVisibility.showsHomeContent = false
         panel?.orderOut(nil)
         orderOutEarPanels()
         panel = nil
@@ -103,7 +106,7 @@ final class PanelController {
     private func makePanel(on screen: NSScreen) -> OverlayPanel {
         let geometry = geometry(for: screen)
         let panel = OverlayPanel(contentRect: geometry.hiddenFrame)
-        let contentView = PanelHostingView(rootView: PanelView())
+        let contentView = PanelHostingView(rootView: PanelView(contentVisibility: contentVisibility))
         contentView.onMouseEntered = { [weak self] in self?.cancelPeekHide() }
         contentView.onMouseExited = { [weak self] in self?.schedulePeekHide() }
         contentView.onMouseDown = { [weak self] in
@@ -120,10 +123,14 @@ final class PanelController {
     }
 
     private func resize(panel: OverlayPanel, to newState: PanelState, frame: NSRect) {
-        guard state != newState || panel.frame != frame else { return }
+        guard state != newState || panel.frame != frame else {
+            contentVisibility.showsHomeContent = newState == .visible
+            return
+        }
 
         cancelFrameAnimation()
         animationGeneration += 1
+        contentVisibility.showsHomeContent = false
         let generation = animationGeneration
         let startFrame = panel.frame
         let isOpening = frame.height > startFrame.height
@@ -174,6 +181,7 @@ final class PanelController {
             panel.orderOut(nil)
             orderOutEarPanels()
         }
+        contentVisibility.showsHomeContent = state == .visible && panel.frame == animation.endFrame
         cancelFrameAnimation()
     }
 

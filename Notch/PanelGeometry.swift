@@ -10,7 +10,7 @@ struct PanelGeometry {
     }
 
     var visibleFrame: NSRect {
-        frame(for: .visible)
+        frame(for: .home)
     }
 
     var peekFrame: NSRect {

@@ -37,25 +37,29 @@ struct PanelSizePreset {
 
     static let hidden = PanelSizePreset(
         name: "hidden",
-        width: { 360 / $0.backingScaleFactor },
-        height: { 60 / $0.backingScaleFactor }
+//        width: { 360 / $0.backingScaleFactor },
+//        height: { 60 / $0.backingScaleFactor }
+        width: CGFloat(360 / 2),
+        height: CGFloat(60 / 2)
     )
 
     static let peek = PanelSizePreset(
         name: "peek",
-        width: { 400 / $0.backingScaleFactor },
-        height: { 80 / $0.backingScaleFactor }
+//        width: { 400 / $0.backingScaleFactor },
+//        height: { 80 / $0.backingScaleFactor }
+        width: CGFloat(400 / 2),
+        height: CGFloat(80 / 2)
     )
 
-    static let visible = PanelSizePreset(
-        name: "visible",
-        width: { min(max($0.frame.width / 3, 320), 560) },
-        height: { $0.visibleFrame.height / 3 }
+    static let home = PanelSizePreset(
+        name: "home",
+        width: { 1000 / $0.backingScaleFactor },
+        height: { 200 / $0.backingScaleFactor }
     )
 
     static let all: [PanelSizePreset] = [
         .hidden,
         .peek,
-        .visible,
+        .home,
     ]
 }
