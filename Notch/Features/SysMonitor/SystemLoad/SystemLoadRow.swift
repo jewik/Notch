@@ -9,15 +9,11 @@ struct SystemLoadRow: View {
     }
 
     private var horizontalPadding: CGFloat {
-        points(10)
-    }
-
-    private var gaugeSpacing: CGFloat {
-        points(18)
+        points(12)
     }
 
     var body: some View {
-        HStack(alignment: .center, spacing: gaugeSpacing) {
+        HStack(alignment: .center, spacing: 0) {
             SystemLoadGauge(
                 title: "RAM",
                 value: snapshot.memoryLoad,
@@ -25,14 +21,34 @@ struct SystemLoadRow: View {
                 pointMultiplier: pointMultiplier
             )
 
+            Spacer(minLength: points(8))
+
             SystemLoadGauge(
                 title: "CPU",
                 value: snapshot.cpuLoad,
                 tint: .green,
                 pointMultiplier: pointMultiplier
             )
+
+            Spacer(minLength: points(8))
+
+            SystemLoadGauge(
+                title: "Disk",
+                value: snapshot.diskLoad,
+                tint: .orange,
+                pointMultiplier: pointMultiplier
+            )
+
+            Spacer(minLength: points(8))
+
+            SystemLoadGauge(
+                title: "Batt",
+                value: snapshot.batteryCharge,
+                tint: .yellow,
+                pointMultiplier: pointMultiplier
+            )
         }
-        .padding(.leading, horizontalPadding)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(.horizontal, horizontalPadding)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     }
 }

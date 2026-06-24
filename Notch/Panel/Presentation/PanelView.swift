@@ -13,6 +13,10 @@ struct PanelView: View {
         points(35)
     }
 
+    private var elementAnimation: Animation {
+        .easeInOut(duration: 0.18)
+    }
+
     var body: some View {
         PanelSurfaceView(pointMultiplier: contentMetrics.pointMultiplier) {
             GeometryReader { proxy in
@@ -31,11 +35,17 @@ struct PanelView: View {
                         if presentation.isContentVisible {
                             contentView
                                 .frame(width: panelWidth, height: contentHeight, alignment: .top)
+                                .id(presentation.route)
+                                .transition(.panelElementBlur)
                         }
                     }
                     .frame(width: panelWidth, height: proxy.size.height, alignment: .top)
+                    .transition(.panelElementBlur)
                 }
             }
+            .animation(elementAnimation, value: presentation.isChromeVisible)
+            .animation(elementAnimation, value: presentation.isContentVisible)
+            .animation(elementAnimation, value: presentation.route)
         }
     }
 
@@ -49,6 +59,26 @@ struct PanelView: View {
         case .clipboard:
             ClipboardPageView(pointMultiplier: contentMetrics.pointMultiplier)
         }
+    }
+}
+
+private extension AnyTransition {
+    static var panelElementBlur: AnyTransition {
+        .modifier(
+            active: PanelElementBlurModifier(opacity: 0, blurRadius: 10),
+            identity: PanelElementBlurModifier(opacity: 1, blurRadius: 0)
+        )
+    }
+}
+
+private struct PanelElementBlurModifier: ViewModifier {
+    let opacity: Double
+    let blurRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(opacity)
+            .blur(radius: blurRadius)
     }
 }
 
@@ -72,6 +102,8 @@ private struct PanelServiceRow: View {
                 openRoute(.home)
             }
 
+            Spacer(minLength: 0)
+
             ServiceRouteButton(
                 systemName: "waveform.path.ecg",
                 accessibilityLabel: "System Monitor",
@@ -89,8 +121,6 @@ private struct PanelServiceRow: View {
             ) {
                 openRoute(.clipboard)
             }
-
-            Spacer(minLength: 0)
         }
     }
 }
