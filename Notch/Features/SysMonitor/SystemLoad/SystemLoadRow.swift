@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct SystemLoadRow: View {
+
+
     let snapshot: SystemLoadSnapshot
     let pointMultiplier: CGFloat
 
@@ -8,16 +10,12 @@ struct SystemLoadRow: View {
         value * pointMultiplier
     }
 
-    private var horizontalPadding: CGFloat {
-        points(12)
-    }
 
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
             SystemLoadGauge(
-                title: "RAM",
+                title: "MEM",
                 value: snapshot.memoryLoad,
-                tint: .blue,
                 pointMultiplier: pointMultiplier
             )
 
@@ -26,29 +24,27 @@ struct SystemLoadRow: View {
             SystemLoadGauge(
                 title: "CPU",
                 value: snapshot.cpuLoad,
-                tint: .green,
                 pointMultiplier: pointMultiplier
             )
 
             Spacer(minLength: points(8))
 
             SystemLoadGauge(
-                title: "Disk",
+                title: "DISK",
                 value: snapshot.diskLoad,
-                tint: .orange,
                 pointMultiplier: pointMultiplier
             )
 
             Spacer(minLength: points(8))
 
             SystemLoadGauge(
-                title: "Batt",
+                title: "BAT",
                 value: snapshot.batteryCharge,
-                tint: .yellow,
                 pointMultiplier: pointMultiplier
             )
         }
-        .padding(.horizontal, horizontalPadding)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .padding(.horizontal, points(24))
+        .padding(.bottom, points(24))
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
     }
 }

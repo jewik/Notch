@@ -44,7 +44,7 @@ struct PanelSizePreset {
     static let sysMonitor = PanelSizePreset(
         name: "sysmonitor",
         width: 340,
-        height: 100
+        height: 120
     )
 
     static let clipboard = PanelSizePreset(
