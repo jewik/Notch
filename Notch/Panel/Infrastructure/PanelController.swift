@@ -53,13 +53,20 @@ final class PanelController {
 
     func show(route: PanelRoute = .home, on screen: NSScreen? = nil) {
         cancelPeekHide()
-        presentation.route = route
         let targetScreen = screen ?? screenUnderPointer()
         let panel = preparePanel(on: targetScreen)
+        let isVisibleRouteSwitch = state == .visible && presentation.route != route
+
+        if isVisibleRouteSwitch {
+            presentation.isChromeVisible = true
+            presentation.isContentVisible = true
+        }
+
+        presentation.route = route
         resize(
             panel: panel,
             to: .visible,
-            frame: geometry(for: targetScreen).visibleFrame(for: presentation.sizePreset)
+            frame: geometry(for: targetScreen).visibleFrame(for: route.sizePreset)
         )
     }
 
@@ -188,9 +195,9 @@ final class PanelController {
 
         cancelFrameAnimation()
         animationGeneration += 1
-        let shouldKeepChromeVisible = state == .visible && newState == .visible
-        presentation.isChromeVisible = shouldKeepChromeVisible
-        presentation.isContentVisible = false
+        let shouldKeepElementsVisible = newState == .visible && (state == .visible || state == .peek)
+        presentation.isChromeVisible = shouldKeepElementsVisible
+        presentation.isContentVisible = shouldKeepElementsVisible
         let generation = animationGeneration
         let startFrame = panel.frame
         let isOpening = frame.height > startFrame.height
@@ -198,7 +205,7 @@ final class PanelController {
         updateOutsideClickMonitors(for: newState)
         onStateChange?(newState)
 
-        let duration: TimeInterval = isOpening ? 0.32 : 0.28
+        let duration: TimeInterval = isOpening ? 0.5 : 0.5
         activeAnimation = FrameAnimation(
             generation: generation,
             startFrame: startFrame,
@@ -262,8 +269,9 @@ final class PanelController {
 
     private func updateEarPanels(for panelFrame: NSRect) {
         let earSize = ContinuousCornerProfile(
-            expansion: panelFrame.height,
-            pointMultiplier: contentMetrics.pointMultiplier
+            panelHeight: panelFrame.height,
+            pointMultiplier: contentMetrics.pointMultiplier,
+            settings: .ears
         ).radius
         let earY = panelFrame.maxY - earSize
 

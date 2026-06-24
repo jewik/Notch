@@ -1,12 +1,20 @@
 import Combine
 import Darwin.Mach
 import Foundation
+import IOKit.ps
 
 struct SystemLoadSnapshot {
     let cpuLoad: Double
     let memoryLoad: Double
+    let diskLoad: Double
+    let batteryCharge: Double
 
-    static let empty = SystemLoadSnapshot(cpuLoad: 0, memoryLoad: 0)
+    static let empty = SystemLoadSnapshot(
+        cpuLoad: 0,
+        memoryLoad: 0,
+        diskLoad: 0,
+        batteryCharge: 0
+    )
 }
 
 @MainActor
@@ -50,7 +58,9 @@ private struct SystemLoadSampler {
     mutating func snapshot() -> SystemLoadSnapshot {
         SystemLoadSnapshot(
             cpuLoad: cpuLoad() ?? 0,
-            memoryLoad: Self.memoryLoad() ?? 0
+            memoryLoad: Self.memoryLoad() ?? 0,
+            diskLoad: Self.diskLoad() ?? 0,
+            batteryCharge: Self.batteryCharge() ?? 0
         )
     }
 
@@ -118,6 +128,40 @@ private struct SystemLoadSampler {
         guard totalBytes > 0 else { return nil }
 
         return clamped(Double(usedBytes) / Double(totalBytes))
+    }
+
+    private static func diskLoad() -> Double? {
+        guard let attributes = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory()),
+              let freeBytes = attributes[.systemFreeSize] as? NSNumber,
+              let totalBytes = attributes[.systemSize] as? NSNumber,
+              totalBytes.doubleValue > 0 else {
+            return nil
+        }
+
+        let freeRatio = freeBytes.doubleValue / totalBytes.doubleValue
+        return clamped(1 - freeRatio)
+    }
+
+    private static func batteryCharge() -> Double? {
+        guard let powerSourcesInfo = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
+              let powerSources = IOPSCopyPowerSourcesList(powerSourcesInfo)?.takeRetainedValue() as? [CFTypeRef] else {
+            return nil
+        }
+
+        for powerSource in powerSources {
+            guard let description = IOPSGetPowerSourceDescription(powerSourcesInfo, powerSource)?.takeUnretainedValue() as? [String: Any],
+                  let type = description[kIOPSTypeKey] as? String,
+                  type == kIOPSInternalBatteryType,
+                  let currentCapacity = description[kIOPSCurrentCapacityKey] as? NSNumber,
+                  let maximumCapacity = description[kIOPSMaxCapacityKey] as? NSNumber,
+                  maximumCapacity.doubleValue > 0 else {
+                continue
+            }
+
+            return clamped(currentCapacity.doubleValue / maximumCapacity.doubleValue)
+        }
+
+        return nil
     }
 
     private static func clamped(_ value: Double) -> Double {

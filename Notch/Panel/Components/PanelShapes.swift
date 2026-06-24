@@ -9,8 +9,9 @@ struct EdgeMergingPanelShape: Shape {
         guard rect.width > 0, rect.height > 0 else { return Path() }
 
         let profile = ContinuousCornerProfile(
-            expansion: rect.height,
-            pointMultiplier: pointMultiplier
+            panelHeight: rect.height,
+            pointMultiplier: pointMultiplier,
+            settings: .bottomAngles
         )
         let cornerDepth = min(profile.radius, rect.width / 2, rect.height)
 
@@ -50,8 +51,9 @@ struct PanelEarShape: Shape {
         guard rect.width > 0, rect.height > 0 else { return Path() }
 
         let profile = ContinuousCornerProfile(
-            expansion: rect.height,
-            pointMultiplier: pointMultiplier
+            panelHeight: rect.height,
+            pointMultiplier: pointMultiplier,
+            settings: .ears
         )
         var path = Path()
 
@@ -116,22 +118,40 @@ private enum ContinuousCornerPath {
 }
 
 struct ContinuousCornerProfile {
-    static let minimumRoundingRadius: CGFloat = 10
-    static let maximumRoundingRadius: CGFloat = 24
+    struct RoundingSettings {
+        let maximumRoundingRadius: CGFloat
+        let pointsAmountForMaximumRounding: CGFloat
 
-    private static let minimumRoundingHeight: CGFloat = PanelSizePreset.hidden.height
-    private static let maximumRoundingHeight: CGFloat = PanelSizePreset.home.height
+        static let ears = RoundingSettings(
+            maximumRoundingRadius: 20,
+            pointsAmountForMaximumRounding: PanelSizePreset.home.height
+        )
+
+        static let bottomAngles = RoundingSettings(
+            maximumRoundingRadius: 50,
+            pointsAmountForMaximumRounding: PanelSizePreset.home.height
+        )
+    }
+
+    static let minimumRoundingRadius: CGFloat = 10
+
     private static let minimumExponent: CGFloat = 2.2
     private static let maximumExponent: CGFloat = 3.3
 
     let radius: CGFloat
     let exponent: CGFloat
 
-    init(expansion: CGFloat, pointMultiplier: CGFloat = 1) {
-        let progress = Self.progress(for: expansion, pointMultiplier: pointMultiplier)
+    init(panelHeight: CGFloat, pointMultiplier: CGFloat = 1, settings: RoundingSettings) {
+        let progress = Self.progress(
+            for: panelHeight,
+            pointsAmountForMaximumRounding: settings.pointsAmountForMaximumRounding,
+            pointMultiplier: pointMultiplier
+        )
+        let minimumRadius = Self.minimumRoundingRadius * pointMultiplier
+        let maximumRadius = max(minimumRadius, settings.maximumRoundingRadius * pointMultiplier)
         radius = Self.lerp(
-            from: Self.minimumRoundingRadius * pointMultiplier,
-            to: Self.maximumRoundingRadius * pointMultiplier,
+            from: minimumRadius,
+            to: maximumRadius,
             progress: progress
         )
         exponent = Self.lerp(
@@ -141,13 +161,15 @@ struct ContinuousCornerProfile {
         )
     }
 
-    private static func progress(for expansion: CGFloat, pointMultiplier: CGFloat) -> CGFloat {
-        let minimumHeight = minimumRoundingHeight * pointMultiplier
-        let maximumHeight = maximumRoundingHeight * pointMultiplier
-        let range = maximumHeight - minimumHeight
-        guard range > 0 else { return 1 }
+    private static func progress(
+        for panelHeight: CGFloat,
+        pointsAmountForMaximumRounding: CGFloat,
+        pointMultiplier: CGFloat
+    ) -> CGFloat {
+        let maximumHeight = pointsAmountForMaximumRounding * pointMultiplier
+        guard maximumHeight > 0 else { return 1 }
 
-        return min(max((expansion - minimumHeight) / range, 0), 1)
+        return min(max(panelHeight / maximumHeight, 0), 1)
     }
 
     private static func lerp(from start: CGFloat, to end: CGFloat, progress: CGFloat) -> CGFloat {

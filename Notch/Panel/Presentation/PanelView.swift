@@ -13,32 +13,39 @@ struct PanelView: View {
         points(35)
     }
 
-    private var panelWidth: CGFloat {
-        points(presentation.sizePreset.width)
-    }
-
-    private var contentHeight: CGFloat {
-        max(points(presentation.sizePreset.height) - serviceRowHeight, 0)
+    private var elementAnimation: Animation {
+        .easeInOut(duration: 0.18)
     }
 
     var body: some View {
         PanelSurfaceView(pointMultiplier: contentMetrics.pointMultiplier) {
-            if presentation.isChromeVisible {
-                VStack(spacing: 0) {
-                    PanelServiceRow(
-                        pointMultiplier: contentMetrics.pointMultiplier,
-                        activeRoute: presentation.route,
-                        openRoute: openRoute
-                    )
-                    .frame(width: panelWidth, height: serviceRowHeight, alignment: .leading)
+            GeometryReader { proxy in
+                if presentation.isChromeVisible {
+                    let panelWidth = proxy.size.width
+                    let contentHeight = max(proxy.size.height - serviceRowHeight, 0)
 
-                    if presentation.isContentVisible {
-                        contentView
-                            .frame(width: panelWidth, height: contentHeight, alignment: .top)
+                    VStack(spacing: 0) {
+                        PanelServiceRow(
+                            pointMultiplier: contentMetrics.pointMultiplier,
+                            activeRoute: presentation.route,
+                            openRoute: openRoute
+                        )
+                        .frame(width: panelWidth, height: serviceRowHeight, alignment: .leading)
+
+                        if presentation.isContentVisible {
+                            contentView
+                                .frame(width: panelWidth, height: contentHeight, alignment: .top)
+                                .id(presentation.route)
+                                .transition(.panelElementBlur)
+                        }
                     }
+                    .frame(width: panelWidth, height: proxy.size.height, alignment: .top)
+                    .transition(.panelElementBlur)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
+            .animation(elementAnimation, value: presentation.isChromeVisible)
+            .animation(elementAnimation, value: presentation.isContentVisible)
+            .animation(elementAnimation, value: presentation.route)
         }
     }
 
@@ -52,6 +59,26 @@ struct PanelView: View {
         case .clipboard:
             ClipboardPageView(pointMultiplier: contentMetrics.pointMultiplier)
         }
+    }
+}
+
+private extension AnyTransition {
+    static var panelElementBlur: AnyTransition {
+        .modifier(
+            active: PanelElementBlurModifier(opacity: 0, blurRadius: 10),
+            identity: PanelElementBlurModifier(opacity: 1, blurRadius: 0)
+        )
+    }
+}
+
+private struct PanelElementBlurModifier: ViewModifier {
+    let opacity: Double
+    let blurRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(opacity)
+            .blur(radius: blurRadius)
     }
 }
 
@@ -75,6 +102,8 @@ private struct PanelServiceRow: View {
                 openRoute(.home)
             }
 
+            Spacer(minLength: 0)
+
             ServiceRouteButton(
                 systemName: "waveform.path.ecg",
                 accessibilityLabel: "System Monitor",
@@ -92,8 +121,6 @@ private struct PanelServiceRow: View {
             ) {
                 openRoute(.clipboard)
             }
-
-            Spacer(minLength: 0)
         }
     }
 }
