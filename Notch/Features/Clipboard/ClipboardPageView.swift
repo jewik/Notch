@@ -93,7 +93,7 @@ struct ClipboardPageView: View {
         .frame(maxWidth: .infinity)
         .frame(height: points(32))
         .background(
-            RoundedRectangle(cornerRadius: points(8), style: .continuous)
+            RoundedRectangle(cornerRadius: points(12), style: .continuous)
                 .fill(.white.opacity(0.09))
         )
     }
@@ -110,7 +110,7 @@ struct ClipboardPageView: View {
         .buttonStyle(.plain)
         .foregroundStyle(.white.opacity(viewModel.captures.isEmpty ? 0.28 : 0.72))
         .background(
-            RoundedRectangle(cornerRadius: points(8), style: .continuous)
+            RoundedRectangle(cornerRadius: points(12), style: .continuous)
                 .fill(.white.opacity(viewModel.captures.isEmpty ? 0.04 : 0.09))
         )
         .disabled(viewModel.captures.isEmpty)
@@ -184,11 +184,11 @@ private struct ClipboardHistoryRow: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
         .background(
-            RoundedRectangle(cornerRadius: points(8), style: .continuous)
+            RoundedRectangle(cornerRadius: points(12), style: .continuous)
                 .fill(isSelected ? .white.opacity(0.13) : .white.opacity(0.055))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: points(8), style: .continuous)
+            RoundedRectangle(cornerRadius: points(12), style: .continuous)
                 .stroke(.white.opacity(isSelected ? 0.18 : 0.07), lineWidth: 1)
         )
         .simultaneousGesture(TapGesture(count: 1).onEnded {
@@ -218,7 +218,7 @@ private struct ClipboardItemPreviewIcon: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: points(7), style: .continuous)
+            RoundedRectangle(cornerRadius: points(12), style: .continuous)
                 .fill(.white.opacity(0.1))
 
             switch capture.primaryKind {
@@ -232,9 +232,9 @@ private struct ClipboardItemPreviewIcon: View {
                 fallbackPreview
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: points(7), style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: points(12), style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: points(7), style: .continuous)
+            RoundedRectangle(cornerRadius: points(12), style: .continuous)
                 .stroke(.white.opacity(0.08), lineWidth: 1)
         )
     }

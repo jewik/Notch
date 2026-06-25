@@ -25,8 +25,8 @@ struct PanelSizePreset {
     // exact notch size on macbook pro 14 inch
     static let hidden = PanelSizePreset(
         name: "hidden",
-        width: 160,
-        height: 28
+        width: 180,
+        height: 30
     )
 
     static let peek = PanelSizePreset(
@@ -37,8 +37,8 @@ struct PanelSizePreset {
 
     static let home = PanelSizePreset(
         name: "home",
-        width: 500,
-        height: 100
+        width: 400,
+        height: 120
     )
 
     static let sysMonitor = PanelSizePreset(

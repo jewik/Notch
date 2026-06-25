@@ -133,7 +133,7 @@ struct ContinuousCornerProfile {
         )
     }
 
-    static let minimumRoundingRadius: CGFloat = 10
+    static let minimumRoundingRadius: CGFloat = 8
 
     private static let minimumExponent: CGFloat = 2.2
     private static let maximumExponent: CGFloat = 3.3
