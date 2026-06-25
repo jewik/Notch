@@ -52,16 +52,16 @@ struct SystemLoadGauge: View {
             ZStack {
                 VStack(spacing: points(1)) {
                     Image(systemName: iconName)
-                        .font(.system(size: points(11), weight: .semibold))
+                        .font(.system(size: points(14), weight: .semibold))
 
                     Text(title)
-                        .font(.system(size: points(10), weight: .semibold, design: .rounded))
+                        .font(.system(size: points(8), weight: .semibold, design: .rounded))
                 }
                     .opacity(isHovering ? 0 : 1)
                     .blur(radius: isHovering ? points(4) : 0)
 
                 Text(percentageText)
-                    .font(.system(size: points(13), weight: .semibold, design: .rounded))
+                    .font(.system(size: points(12), weight: .semibold, design: .rounded))
                     .opacity(isHovering ? 1 : 0)
                     .blur(radius: isHovering ? 0 : points(4))
                     .monospacedDigit()

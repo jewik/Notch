@@ -2,7 +2,7 @@ import AppKit
 import Carbon.HIToolbox
 
 final class ShortcutService {
-    var onToggle: (() -> Void)?
+    var onOpenClipboard: (() -> Void)?
     var onDismiss: (() -> Void)?
 
     private static let signature: OSType = 0x4E_54_43_48 // NTCH
@@ -94,7 +94,7 @@ final class ShortcutService {
         DispatchQueue.main.async {
             switch hotKeyID.id {
             case ShortcutService.toggleID:
-                service.onToggle?()
+                service.onOpenClipboard?()
             case ShortcutService.dismissID:
                 service.onDismiss?()
             default:

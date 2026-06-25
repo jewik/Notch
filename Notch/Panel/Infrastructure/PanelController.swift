@@ -32,6 +32,7 @@ final class PanelController {
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
     private var screenChangeObserver: NSObjectProtocol?
+    private var clipboardWillPasteObserver: NSObjectProtocol?
     private let presentation = PanelPresentationModel()
     private let contentMetrics = PanelContentMetrics()
 
@@ -43,11 +44,21 @@ final class PanelController {
         ) { [weak self] _ in
             self?.handleScreenParametersChanged()
         }
+        clipboardWillPasteObserver = NotificationCenter.default.addObserver(
+            forName: .clipboardWillPaste,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.hideForClipboardPaste()
+        }
     }
 
     deinit {
         if let screenChangeObserver {
             NotificationCenter.default.removeObserver(screenChangeObserver)
+        }
+        if let clipboardWillPasteObserver {
+            NotificationCenter.default.removeObserver(clipboardWillPasteObserver)
         }
     }
 
@@ -56,6 +67,10 @@ final class PanelController {
         let targetScreen = screen ?? screenUnderPointer()
         let panel = preparePanel(on: targetScreen)
         let isVisibleRouteSwitch = state == .visible && presentation.route != route
+        if route == .clipboard {
+            ClipboardFeature.shared.rememberPasteTarget()
+        }
+        panel.allowsKeyWindow = route == .clipboard
 
         if isVisibleRouteSwitch {
             presentation.isChromeVisible = true
@@ -63,6 +78,9 @@ final class PanelController {
         }
 
         presentation.route = route
+        if route == .clipboard {
+            panel.makeKey()
+        }
         resize(
             panel: panel,
             to: .visible,
@@ -154,6 +172,17 @@ final class PanelController {
         panel.contentView = contentView
         self.panel = panel
         return panel
+    }
+
+    private func hideForClipboardPaste() {
+        cancelPeekHide()
+        guard let panel else { return }
+
+        let targetScreen = currentScreen ?? panel.screen ?? screenUnderPointer()
+        currentScreen = targetScreen
+        panel.allowsKeyWindow = false
+        panel.resignKey()
+        resize(panel: panel, to: .hidden, frame: geometry(for: targetScreen).hiddenFrame)
     }
 
     private func geometry(for screen: NSScreen) -> PanelGeometry {
@@ -374,6 +403,8 @@ final class PanelController {
 }
 
 private final class OverlayPanel: NSPanel {
+    var allowsKeyWindow = false
+
     init(contentRect: NSRect) {
         super.init(
             contentRect: contentRect,
@@ -392,7 +423,7 @@ private final class OverlayPanel: NSPanel {
         animationBehavior = .none
     }
 
-    override var canBecomeKey: Bool { false }
+    override var canBecomeKey: Bool { allowsKeyWindow }
     override var canBecomeMain: Bool { false }
 }
 

@@ -101,6 +101,15 @@ private struct PanelServiceRow: View {
             ) {
                 openRoute(.home)
             }
+            
+            ServiceRouteButton(
+                systemName: "doc.on.clipboard",
+                accessibilityLabel: "Clipboard",
+                isActive: activeRoute == .clipboard,
+                pointMultiplier: pointMultiplier
+            ) {
+                openRoute(.clipboard)
+            }
 
             Spacer(minLength: 0)
 
@@ -113,14 +122,7 @@ private struct PanelServiceRow: View {
                 openRoute(.sysMonitor)
             }
 
-            ServiceRouteButton(
-                systemName: "doc.on.clipboard",
-                accessibilityLabel: "Clipboard",
-                isActive: activeRoute == .clipboard,
-                pointMultiplier: pointMultiplier
-            ) {
-                openRoute(.clipboard)
-            }
+
         }
     }
 }
