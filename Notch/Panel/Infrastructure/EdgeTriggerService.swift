@@ -4,6 +4,7 @@ final class EdgeTriggerService {
     private let onEnter: (NSScreen) -> Void
     private let onExit: () -> Void
     private let onClick: (NSScreen) -> Void
+    private let onFileDragEnter: (NSScreen) -> Void
 
     private var sensorPanels: [EdgeSensorPanel] = []
     private var screenChangeObserver: NSObjectProtocol?
@@ -11,11 +12,13 @@ final class EdgeTriggerService {
     init(
         onEnter: @escaping (NSScreen) -> Void,
         onExit: @escaping () -> Void,
-        onClick: @escaping (NSScreen) -> Void
+        onClick: @escaping (NSScreen) -> Void,
+        onFileDragEnter: @escaping (NSScreen) -> Void
     ) {
         self.onEnter = onEnter
         self.onExit = onExit
         self.onClick = onClick
+        self.onFileDragEnter = onFileDragEnter
     }
 
     func start() {
@@ -51,6 +54,10 @@ final class EdgeTriggerService {
                 guard let screen else { return }
                 self?.onClick(screen)
             }
+            panel.sensorView.onFileDragEnter = { [weak self, weak screen] in
+                guard let screen else { return }
+                self?.onFileDragEnter(screen)
+            }
             panel.orderFrontRegardless()
             return panel
         }
@@ -85,8 +92,19 @@ private final class EdgeSensorView: NSView {
     var onEnter: (() -> Void)?
     var onExit: (() -> Void)?
     var onClick: (() -> Void)?
+    var onFileDragEnter: (() -> Void)?
 
     private var trackingAreaReference: NSTrackingArea?
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        registerForDraggedTypes([.fileURL])
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        registerForDraggedTypes([.fileURL])
+    }
 
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
@@ -114,5 +132,22 @@ private final class EdgeSensorView: NSView {
 
     override func mouseDown(with event: NSEvent) {
         onClick?()
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        guard acceptsFileDrag(sender) else { return [] }
+        onFileDragEnter?()
+        return .copy
+    }
+
+    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        acceptsFileDrag(sender) ? .copy : []
+    }
+
+    private func acceptsFileDrag(_ sender: NSDraggingInfo) -> Bool {
+        sender.draggingPasteboard.canReadObject(
+            forClasses: [NSURL.self],
+            options: [.urlReadingFileURLsOnly: true]
+        )
     }
 }

@@ -6,7 +6,8 @@ final class AppCoordinator: NSObject {
     private lazy var edgeTriggerService = EdgeTriggerService(
         onEnter: { [weak self] screen in self?.panelController.peek(on: screen) },
         onExit: { [weak self] in self?.panelController.schedulePeekHide() },
-        onClick: { [weak self] screen in self?.panelController.show(on: screen) }
+        onClick: { [weak self] screen in self?.panelController.show(on: screen) },
+        onFileDragEnter: { [weak self] screen in self?.panelController.show(route: .home, on: screen) }
     )
 
     private var statusItem: NSStatusItem?
