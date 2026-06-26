@@ -66,25 +66,19 @@ final class PanelController {
         cancelPeekHide()
         let targetScreen = screen ?? screenUnderPointer()
         let panel = preparePanel(on: targetScreen)
-        let isVisibleRouteSwitch = state == .visible && presentation.route != route
         if route == .clipboard {
             ClipboardFeature.shared.rememberPasteTarget()
         }
         panel.allowsKeyWindow = route == .clipboard
 
-        if isVisibleRouteSwitch {
-            presentation.isChromeVisible = true
-            presentation.isContentVisible = true
-        }
-
-        presentation.route = route
         if route == .clipboard {
             panel.makeKey()
         }
         resize(
             panel: panel,
             to: .visible,
-            frame: geometry(for: targetScreen).visibleFrame(for: route.sizePreset)
+            frame: geometry(for: targetScreen).visibleFrame(for: route.sizePreset),
+            route: route
         )
     }
 
@@ -215,8 +209,15 @@ final class PanelController {
         presentation.isContentVisible = state == .visible
     }
 
-    private func resize(panel: OverlayPanel, to newState: PanelState, frame: NSRect) {
-        guard state != newState || panel.frame != frame else {
+    private func resize(
+        panel: OverlayPanel,
+        to newState: PanelState,
+        frame: NSRect,
+        route: PanelRoute? = nil
+    ) {
+        let isRouteChange = route.map { presentation.route != $0 } ?? false
+
+        guard state != newState || panel.frame != frame || isRouteChange else {
             presentation.isChromeVisible = newState == .visible
             presentation.isContentVisible = newState == .visible
             return
@@ -224,9 +225,7 @@ final class PanelController {
 
         cancelFrameAnimation()
         animationGeneration += 1
-        let shouldKeepElementsVisible = newState == .visible && (state == .visible || state == .peek)
-        presentation.isChromeVisible = shouldKeepElementsVisible
-        presentation.isContentVisible = shouldKeepElementsVisible
+        let shouldShowElementsAtAnimationStart = newState == .visible
         let generation = animationGeneration
         let startFrame = panel.frame
         let isOpening = frame.height > startFrame.height
@@ -243,6 +242,12 @@ final class PanelController {
             duration: duration,
             shouldOrderOut: newState == .hidden
         )
+
+        if let route {
+            presentation.route = route
+        }
+        presentation.isChromeVisible = shouldShowElementsAtAnimationStart
+        presentation.isContentVisible = shouldShowElementsAtAnimationStart
 
         let animationScreen = currentScreen ?? panel.screen ?? NSScreen.main ?? NSScreen.screens[0]
         let displayLink = animationScreen.displayLink(target: self, selector: #selector(updatePanelAnimation(_:)))
