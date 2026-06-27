@@ -117,9 +117,9 @@ final class ClipboardViewModel: ObservableObject {
         lastStatusMessage = "Copied"
     }
 
-    func paste(_ capture: ClipboardCapture) {
+    func paste(_ capture: ClipboardCapture, style: ClipboardPasteStyle = .plainText) {
         if let updatedCapture = captures.first(where: { $0.id == capture.id }) {
-            let didPaste = pasteboardService.paste(updatedCapture)
+            let didPaste = pasteboardService.paste(updatedCapture, style: style)
             lastStatusMessage = didPaste ? "Pasted" : "Copied. Enable Accessibility to paste automatically."
         } else {
             lastStatusMessage = "Item unavailable"

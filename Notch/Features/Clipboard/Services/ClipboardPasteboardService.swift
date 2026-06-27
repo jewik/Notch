@@ -6,6 +6,11 @@ extension Notification.Name {
     static let clipboardWillPaste = Notification.Name("NotchClipboardWillPaste")
 }
 
+enum ClipboardPasteStyle {
+    case plainText
+    case raw
+}
+
 final class ClipboardPasteboardService {
     var onCapture: ((ClipboardCapture) -> Void)?
 
@@ -38,8 +43,8 @@ final class ClipboardPasteboardService {
         restore(capture)
     }
 
-    func paste(_ capture: ClipboardCapture) -> Bool {
-        restore(capture)
+    func paste(_ capture: ClipboardCapture, style: ClipboardPasteStyle = .plainText) -> Bool {
+        restore(capture, style: style)
 
         guard canPasteAutomatically else {
             requestAccessibilityPermission()
@@ -79,21 +84,33 @@ final class ClipboardPasteboardService {
         onCapture?(capture)
     }
 
-    private func restore(_ capture: ClipboardCapture) {
+    private func restore(_ capture: ClipboardCapture, style: ClipboardPasteStyle = .raw) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
 
         let pasteboardItems = capture.items.map { clipboardItem in
-            let pasteboardItem = NSPasteboardItem()
-            for representation in clipboardItem.representations {
-                pasteboardItem.setData(representation.data, forType: representation.pasteboardType)
-            }
-            return pasteboardItem
+            pasteboardItem(for: clipboardItem, style: style)
         }
 
         pasteboard.writeObjects(pasteboardItems)
         lastChangeCount = pasteboard.changeCount
         ignoredExactHash = capture.exactHash
+    }
+
+    private func pasteboardItem(for clipboardItem: ClipboardItem, style: ClipboardPasteStyle) -> NSPasteboardItem {
+        let pasteboardItem = NSPasteboardItem()
+
+        if style == .plainText,
+           clipboardItem.kind.isTextLike,
+           let plainText = clipboardItem.plainTextForPaste {
+            pasteboardItem.setString(plainText, forType: .string)
+            return pasteboardItem
+        }
+
+        for representation in clipboardItem.representations {
+            pasteboardItem.setData(representation.data, forType: representation.pasteboardType)
+        }
+        return pasteboardItem
     }
 
     private func postPasteShortcutWhenReady() {

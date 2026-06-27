@@ -86,7 +86,7 @@ struct ClipboardPasteboardReader {
         let exactHash = Self.exactHash(for: clipboardItems)
         let searchableText = Self.searchableText(for: clipboardItems)
         let semanticHash = Self.semanticHash(for: clipboardItems, fallback: exactHash)
-        let primaryKind = clipboardItems.first?.kind ?? .other
+        let primaryKind = Self.primaryKind(for: clipboardItems)
         let now = Date()
 
         return ClipboardCapture(
@@ -127,23 +127,26 @@ struct ClipboardPasteboardReader {
         if representations.contains(where: { $0.isFileURL }) {
             return .file
         }
-        if representations.contains(where: { $0.isPDF }) {
-            return .pdf
+        if ClipboardTitleFormatter.hasNonURLDisplayText(in: representations) {
+            return .text
+        }
+        if representations.contains(where: { $0.isRichText && $0.hasRenderedTextContent }) {
+            return .richText
         }
         if representations.contains(where: { $0.isImage }) {
             return .image
         }
-        if representations.contains(where: { $0.isRichText }) {
-            return .richText
-        }
-        if ClipboardTitleFormatter.hasNonURLDisplayText(in: representations) {
-            return .text
+        if representations.contains(where: { $0.isPDF }) {
+            return .pdf
         }
         if ClipboardTitleFormatter.hasLink(in: representations) {
             return .link
         }
         if representations.contains(where: { $0.isPlainText }) {
             return .text
+        }
+        if representations.contains(where: { $0.isRichText }) {
+            return .richText
         }
         return .other
     }
@@ -171,13 +174,24 @@ struct ClipboardPasteboardReader {
         for items: [ClipboardItem],
         searchableText: String
     ) -> String {
-        if let firstTitle = items.first?.title, !firstTitle.isEmpty {
-            return firstTitle
+        if let title = primaryTitle(for: items), !title.isEmpty {
+            return title
         }
         if !searchableText.isEmpty {
             return String(searchableText.prefix(90))
         }
         return "\(items.count) item\(items.count == 1 ? "" : "s")"
+    }
+
+    private static func primaryKind(for items: [ClipboardItem]) -> ClipboardContentKind {
+        items.first(where: { $0.kind.isTextLike })?.kind ??
+            items.first?.kind ??
+            .other
+    }
+
+    private static func primaryTitle(for items: [ClipboardItem]) -> String? {
+        items.first(where: { $0.kind.isTextLike && !$0.title.isEmpty })?.title ??
+            items.first(where: { !$0.title.isEmpty })?.title
     }
 
     private static func searchableText(for items: [ClipboardItem]) -> String {

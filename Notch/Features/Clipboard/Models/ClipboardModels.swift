@@ -50,6 +50,15 @@ enum ClipboardContentKind: String, Codable, CaseIterable, Identifiable {
             "shippingbox"
         }
     }
+
+    nonisolated var isTextLike: Bool {
+        switch self {
+        case .text, .link, .richText:
+            true
+        case .image, .file, .pdf, .other:
+            false
+        }
+    }
 }
 
 struct ClipboardCapture: Codable, Identifiable, Equatable {
@@ -109,6 +118,9 @@ struct ClipboardRepresentation: Codable, Identifiable, Equatable {
 
 extension ClipboardCapture {
     var preferredDisplayTitle: String {
+        if let title = items.first(where: { $0.kind.isTextLike })?.preferredDisplayTitle, !title.isEmpty {
+            return title
+        }
         if let title = items.first?.preferredDisplayTitle, !title.isEmpty {
             return title
         }
@@ -148,15 +160,43 @@ extension ClipboardCapture {
     var matchesPinnedFilter: Bool {
         isPinned
     }
+
+    var hasRawTextFormatting: Bool {
+        items.contains { item in
+            item.kind.isTextLike &&
+                item.representations.contains(where: { $0.isFormattedText })
+        }
+    }
 }
 
 extension ClipboardItem {
     var preferredDisplayTitle: String {
         ClipboardTitleFormatter.title(for: representations, kind: kind)
     }
+
+    nonisolated var plainTextForPaste: String? {
+        let directText = representations
+            .filter { $0.isPastePlainText || $0.isURL }
+            .compactMap(\.decodedText)
+            .first
+
+        if let directText {
+            return directText
+        }
+
+        return representations
+            .filter(\.isFormattedText)
+            .compactMap(\.renderedPlainText)
+            .first
+    }
 }
 
 extension ClipboardRepresentation {
+    nonisolated var isPastePlainText: Bool {
+        typeIdentifier == NSPasteboard.PasteboardType.string.rawValue ||
+            (uniformType?.conforms(to: .plainText) == true && !isMarkupText && !isFileURL)
+    }
+
     nonisolated var isPlainText: Bool {
         typeIdentifier == NSPasteboard.PasteboardType.string.rawValue ||
             uniformType?.conforms(to: .plainText) == true ||
@@ -173,6 +213,20 @@ extension ClipboardRepresentation {
             typeIdentifier == NSPasteboard.PasteboardType.rtfd.rawValue ||
             uniformType?.conforms(to: .rtf) == true ||
             uniformType?.conforms(to: .html) == true
+    }
+
+    nonisolated var isFormattedText: Bool {
+        isRichText
+    }
+
+    nonisolated var hasRenderedTextContent: Bool {
+        guard let text = renderedPlainText else {
+            return false
+        }
+
+        return text.contains { character in
+            !character.isWhitespace && character != "\u{fffc}"
+        }
     }
 
     nonisolated var isMarkupText: Bool {
@@ -220,6 +274,43 @@ extension ClipboardRepresentation {
             return value
         }
         return nil
+    }
+
+    nonisolated var renderedPlainText: String? {
+        if isPastePlainText || isURL {
+            return decodedText
+        }
+
+        let documentType: NSAttributedString.DocumentType?
+        if typeIdentifier == NSPasteboard.PasteboardType.rtf.rawValue ||
+            uniformType?.conforms(to: .rtf) == true {
+            documentType = .rtf
+        } else if typeIdentifier == NSPasteboard.PasteboardType.rtfd.rawValue {
+            documentType = .rtfd
+        } else if uniformType?.conforms(to: .html) == true ||
+                    typeIdentifier.lowercased().contains("html") {
+            documentType = .html
+        } else {
+            documentType = nil
+        }
+
+        if let documentType,
+           let attributedString = try? NSAttributedString(
+               data: data,
+               options: [
+                   .documentType: documentType,
+                   .characterEncoding: String.Encoding.utf8.rawValue,
+               ],
+               documentAttributes: nil
+           ) {
+            return attributedString.string
+        }
+
+        guard isMarkupText, let text = decodedText else {
+            return nil
+        }
+
+        return ClipboardTitleFormatter.markupText(text)
     }
 
     nonisolated var fileURL: URL? {
@@ -314,7 +405,7 @@ enum ClipboardTitleFormatter {
             .first { !$0.isEmpty }
     }
 
-    nonisolated private static func markupText(_ text: String) -> String {
+    nonisolated static func markupText(_ text: String) -> String {
         let withoutTags = text.replacingOccurrences(
             of: "<[^>]+>",
             with: " ",

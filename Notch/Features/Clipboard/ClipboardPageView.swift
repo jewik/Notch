@@ -128,7 +128,8 @@ struct ClipboardPageView: View {
                             isSelected: viewModel.selectedCapture?.id == capture.id,
                             pointMultiplier: pointMultiplier,
                             select: { viewModel.select(capture) },
-                            paste: { viewModel.paste(capture) }
+                            paste: { viewModel.paste(capture) },
+                            pasteRaw: { viewModel.paste(capture, style: .raw) }
                         )
                         .id(capture.id)
                     }
@@ -156,6 +157,7 @@ private struct ClipboardHistoryRow: View {
     let pointMultiplier: CGFloat
     let select: () -> Void
     let paste: () -> Void
+    let pasteRaw: () -> Void
 
     private func points(_ value: CGFloat) -> CGFloat {
         value * pointMultiplier
@@ -179,6 +181,10 @@ private struct ClipboardHistoryRow: View {
             }
 
             Spacer(minLength: 0)
+
+            if capture.hasRawTextFormatting {
+                rawPasteButton
+            }
         }
         .padding(points(8))
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -198,6 +204,30 @@ private struct ClipboardHistoryRow: View {
             select()
             paste()
         })
+    }
+
+    private var rawPasteButton: some View {
+        Button {
+            select()
+            pasteRaw()
+        } label: {
+            Text("Raw")
+                .font(.system(size: points(9), weight: .bold))
+                .foregroundStyle(.white.opacity(0.82))
+                .frame(width: points(38), height: points(24))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .background(
+            RoundedRectangle(cornerRadius: points(8), style: .continuous)
+                .fill(.white.opacity(0.1))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: points(8), style: .continuous)
+                .stroke(.white.opacity(0.11), lineWidth: 1)
+        )
+        .accessibilityLabel("Paste with formatting")
+        .help("Paste with formatting")
     }
 
     private var metadata: String {
