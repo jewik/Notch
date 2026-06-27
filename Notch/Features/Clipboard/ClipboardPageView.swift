@@ -91,9 +91,9 @@ struct ClipboardPageView: View {
         }
         .padding(.horizontal, points(10))
         .frame(maxWidth: .infinity)
-        .frame(height: points(32))
+        .frame(height: points(30))
         .background(
-            RoundedRectangle(cornerRadius: points(12), style: .continuous)
+            RoundedRectangle(cornerRadius: points(15), style: .continuous)
                 .fill(.white.opacity(0.09))
         )
     }
@@ -104,13 +104,13 @@ struct ClipboardPageView: View {
         } label: {
             Image(systemName: "trash")
                 .font(.system(size: points(12), weight: .semibold))
-                .frame(width: points(32), height: points(32))
+                .frame(width: points(30), height: points(30))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .foregroundStyle(.white.opacity(viewModel.captures.isEmpty ? 0.28 : 0.72))
         .background(
-            RoundedRectangle(cornerRadius: points(12), style: .continuous)
+            RoundedRectangle(cornerRadius: points(15), style: .continuous)
                 .fill(.white.opacity(viewModel.captures.isEmpty ? 0.04 : 0.09))
         )
         .disabled(viewModel.captures.isEmpty)
@@ -135,6 +135,7 @@ struct ClipboardPageView: View {
                     }
                 }
                 .padding(.vertical, points(1))
+                
             }
             .onChange(of: viewModel.selectedCaptureID) { _, selectedCaptureID in
                 guard let selectedCaptureID else { return }
@@ -166,7 +167,7 @@ private struct ClipboardHistoryRow: View {
     var body: some View {
         HStack(spacing: points(10)) {
             ClipboardItemPreviewIcon(capture: capture, pointMultiplier: pointMultiplier)
-                .frame(width: points(44), height: points(44))
+                .frame(width: points(50), height: points(50))
 
             VStack(alignment: .leading, spacing: points(4)) {
                 Text(capture.preferredDisplayTitle)
@@ -190,11 +191,11 @@ private struct ClipboardHistoryRow: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
         .background(
-            RoundedRectangle(cornerRadius: points(12), style: .continuous)
+            RoundedRectangle(cornerRadius: points(15), style: .continuous)
                 .fill(isSelected ? .white.opacity(0.13) : .white.opacity(0.055))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: points(12), style: .continuous)
+            RoundedRectangle(cornerRadius: points(15), style: .continuous)
                 .stroke(.white.opacity(isSelected ? 0.18 : 0.07), lineWidth: 1)
         )
         .simultaneousGesture(TapGesture(count: 1).onEnded {
@@ -248,7 +249,7 @@ private struct ClipboardItemPreviewIcon: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: points(12), style: .continuous)
+            RoundedRectangle(cornerRadius: points(10), style: .continuous)
                 .fill(.white.opacity(0.1))
 
             switch capture.primaryKind {
@@ -262,9 +263,9 @@ private struct ClipboardItemPreviewIcon: View {
                 fallbackPreview
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: points(12), style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: points(10), style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: points(12), style: .continuous)
+            RoundedRectangle(cornerRadius: points(10), style: .continuous)
                 .stroke(.white.opacity(0.08), lineWidth: 1)
         )
     }

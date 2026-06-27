@@ -67,7 +67,7 @@ private struct HomeRouteButtonsView: View {
     }
 
     var body: some View {
-        VStack(spacing: points(7)) {
+        VStack(alignment: .leading) {
             HomeRouteButton(
                 systemName: "doc.on.clipboard",
                 title: "Clip",
@@ -86,7 +86,7 @@ private struct HomeRouteButtonsView: View {
                 openRoute(.sysMonitor)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 
@@ -104,23 +104,22 @@ private struct HomeRouteButton: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: points(6)) {
+            HStack(spacing: points(2)) {
                 Image(systemName: systemName)
-                    .font(.system(size: points(15), weight: .semibold))
+                    .font(.system(size: points(14), weight: .semibold))
 
                 Text(title)
                     .font(.system(size: points(12), weight: .semibold, design: .rounded))
                     .lineLimit(1)
             }
-            .padding(.horizontal, points(8))
-            .frame(width: points(80), height: points(28))
+            .padding(points(4))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .foregroundStyle(.white.opacity(0.72))
         .background {
             if isHovered {
-                RoundedRectangle(cornerRadius: points(6), style: .continuous)
+                RoundedRectangle(cornerRadius: points(12), style: .continuous)
                     .fill(.white.opacity(0.14))
             }
         }
@@ -445,10 +444,6 @@ private struct HomePlayerButton: View {
         }
         .buttonStyle(.plain)
         .foregroundStyle(.white.opacity(0.78))
-        .background(
-            RoundedRectangle(cornerRadius: points(7), style: .continuous)
-                .fill(.white.opacity(0.09))
-        )
         .accessibilityLabel(accessibilityLabel)
         .help(accessibilityLabel)
     }

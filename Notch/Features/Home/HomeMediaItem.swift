@@ -10,8 +10,8 @@ struct HomeMediaItem: Equatable {
     var hasContent: Bool
 
     static let empty = HomeMediaItem(
-        title: "Nothing playing",
-        artist: "Start media in any app",
+        title: "------",
+        artist: "------",
         sourceName: nil,
         artwork: nil,
         isPlaying: false,

@@ -115,6 +115,8 @@ private struct PanelServiceRow: View {
                 pointMultiplier: pointMultiplier
             ) {}
         }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, points(6))
     }
 }
 
@@ -137,9 +139,9 @@ private struct ServiceRouteButton: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: points(6)) {
+            HStack(spacing: points(2)) {
                 Image(systemName: systemName)
-                    .font(.system(size: points(15), weight: .semibold))
+                    .font(.system(size: points(14), weight: .semibold))
 
                 if let title {
                     Text(title)
@@ -147,21 +149,17 @@ private struct ServiceRouteButton: View {
                         .lineLimit(1)
                 }
             }
-            .padding(.horizontal, title == nil ? 0 : points(10))
-            .frame(maxHeight: .infinity)
+            .padding(points(4))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .foregroundStyle(isActive ? .white : .white.opacity(0.72))
         .background {
             if isHighlighted {
-                RoundedRectangle(cornerRadius: points(6), style: .continuous)
-                    .fill(.white.opacity(0.14))
-                    .padding(points(4))
+                RoundedRectangle(cornerRadius: points(12), style: .continuous)
+                    .fill(.white.opacity(0.2))
             }
         }
-        .frame(width: title == nil ? points(35) : points(78))
-        .frame(maxHeight: .infinity)
         .onHover { isHovered = $0 }
         .accessibilityLabel(accessibilityLabel)
         .help(accessibilityLabel)
