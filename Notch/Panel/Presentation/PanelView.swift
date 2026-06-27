@@ -53,7 +53,10 @@ struct PanelView: View {
     private var contentView: some View {
         switch presentation.route {
         case .home:
-            HomePageView(pointMultiplier: contentMetrics.pointMultiplier)
+            HomePageView(
+                pointMultiplier: contentMetrics.pointMultiplier,
+                openRoute: openRoute
+            )
         case .sysMonitor:
             SysMonitorPageView(pointMultiplier: contentMetrics.pointMultiplier)
         case .clipboard:
@@ -95,67 +98,72 @@ private struct PanelServiceRow: View {
         HStack(spacing: 0) {
             ServiceRouteButton(
                 systemName: "house",
+                title: "Home",
                 accessibilityLabel: "Home",
                 isActive: activeRoute == .home,
                 pointMultiplier: pointMultiplier
             ) {
                 openRoute(.home)
             }
-            
-            ServiceRouteButton(
-                systemName: "doc.on.clipboard",
-                accessibilityLabel: "Clipboard",
-                isActive: activeRoute == .clipboard,
-                pointMultiplier: pointMultiplier
-            ) {
-                openRoute(.clipboard)
-            }
 
             Spacer(minLength: 0)
 
             ServiceRouteButton(
-                systemName: "waveform.path.ecg",
-                accessibilityLabel: "System Monitor",
-                isActive: activeRoute == .sysMonitor,
+                systemName: "gearshape",
+                accessibilityLabel: "Settings",
+                isActive: false,
                 pointMultiplier: pointMultiplier
-            ) {
-                openRoute(.sysMonitor)
-            }
-
-
+            ) {}
         }
     }
 }
 
 private struct ServiceRouteButton: View {
     let systemName: String
+    var title: String?
     let accessibilityLabel: String
     let isActive: Bool
     let pointMultiplier: CGFloat
     let action: () -> Void
+    @State private var isHovered = false
 
     private func points(_ value: CGFloat) -> CGFloat {
         value * pointMultiplier
     }
 
+    private var isHighlighted: Bool {
+        isActive || isHovered
+    }
+
     var body: some View {
         Button(action: action) {
-            Image(systemName: systemName)
-                .font(.system(size: points(15), weight: .semibold))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .contentShape(Rectangle())
+            HStack(spacing: points(6)) {
+                Image(systemName: systemName)
+                    .font(.system(size: points(15), weight: .semibold))
+
+                if let title {
+                    Text(title)
+                        .font(.system(size: points(12), weight: .semibold, design: .rounded))
+                        .lineLimit(1)
+                }
+            }
+            .padding(.horizontal, title == nil ? 0 : points(10))
+            .frame(maxHeight: .infinity)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .foregroundStyle(isActive ? .white : .white.opacity(0.72))
         .background {
-            if isActive {
+            if isHighlighted {
                 RoundedRectangle(cornerRadius: points(6), style: .continuous)
                     .fill(.white.opacity(0.14))
                     .padding(points(4))
             }
         }
-        .frame(width: points(35))
+        .frame(width: title == nil ? points(35) : points(78))
         .frame(maxHeight: .infinity)
+        .onHover { isHovered = $0 }
         .accessibilityLabel(accessibilityLabel)
+        .help(accessibilityLabel)
     }
 }

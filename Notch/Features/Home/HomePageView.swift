@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 struct HomePageView: View {
     let pointMultiplier: CGFloat
+    let openRoute: (PanelRoute) -> Void
     @StateObject private var mediaViewModel = HomeMediaViewModel()
 
     private func points(_ value: CGFloat) -> CGFloat {
@@ -18,8 +19,7 @@ struct HomePageView: View {
                 pointMultiplier: pointMultiplier,
                 previous: mediaViewModel.previous,
                 togglePlayPause: mediaViewModel.togglePlayPause,
-                next: mediaViewModel.next,
-                showOutputSource: mediaViewModel.showOutputSource
+                next: mediaViewModel.next
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -29,8 +29,12 @@ struct HomePageView: View {
                 .padding(.vertical, points(10))
                 .padding(.horizontal, points(5))
 
-            Spacer(minLength: 0)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            HomeRouteButtonsView(
+                pointMultiplier: pointMultiplier,
+                openRoute: openRoute
+            )
+            .frame(width: points(80))
+            .frame(maxHeight: .infinity)
 
             Rectangle()
                 .fill(.white.opacity(0.08))
@@ -51,6 +55,78 @@ struct HomePageView: View {
         .onDisappear {
             mediaViewModel.stop()
         }
+    }
+}
+
+private struct HomeRouteButtonsView: View {
+    let pointMultiplier: CGFloat
+    let openRoute: (PanelRoute) -> Void
+
+    private func points(_ value: CGFloat) -> CGFloat {
+        value * pointMultiplier
+    }
+
+    var body: some View {
+        VStack(spacing: points(7)) {
+            HomeRouteButton(
+                systemName: "doc.on.clipboard",
+                title: "Clip",
+                accessibilityLabel: "Clip",
+                pointMultiplier: pointMultiplier
+            ) {
+                openRoute(.clipboard)
+            }
+
+            HomeRouteButton(
+                systemName: "waveform.path.ecg",
+                title: "Monitor",
+                accessibilityLabel: "System Monitor",
+                pointMultiplier: pointMultiplier
+            ) {
+                openRoute(.sysMonitor)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct HomeRouteButton: View {
+    let systemName: String
+    let title: String
+    let accessibilityLabel: String
+    let pointMultiplier: CGFloat
+    let action: () -> Void
+    @State private var isHovered = false
+
+    private func points(_ value: CGFloat) -> CGFloat {
+        value * pointMultiplier
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: points(6)) {
+                Image(systemName: systemName)
+                    .font(.system(size: points(15), weight: .semibold))
+
+                Text(title)
+                    .font(.system(size: points(12), weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, points(8))
+            .frame(width: points(80), height: points(28))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.white.opacity(0.72))
+        .background {
+            if isHovered {
+                RoundedRectangle(cornerRadius: points(6), style: .continuous)
+                    .fill(.white.opacity(0.14))
+            }
+        }
+        .onHover { isHovered = $0 }
+        .accessibilityLabel(accessibilityLabel)
+        .help(accessibilityLabel)
     }
 }
 
@@ -263,7 +339,6 @@ private struct HomeMediaPlayerView: View {
     let previous: () -> Void
     let togglePlayPause: () -> Void
     let next: () -> Void
-    let showOutputSource: () -> Void
 
     private func points(_ value: CGFloat) -> CGFloat {
         value * pointMultiplier
@@ -307,13 +382,6 @@ private struct HomeMediaPlayerView: View {
                             accessibilityLabel: "Next",
                             pointMultiplier: pointMultiplier,
                             action: next
-                        )
-
-                        HomePlayerButton(
-                            systemName: "airplayaudio",
-                            accessibilityLabel: "Output source",
-                            pointMultiplier: pointMultiplier,
-                            action: showOutputSource
                         )
                     }
                     .disabled(!isAvailable)

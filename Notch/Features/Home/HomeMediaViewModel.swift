@@ -41,11 +41,6 @@ final class HomeMediaViewModel: ObservableObject {
         scheduleFollowUpRefresh()
     }
 
-    func showOutputSource() {
-        guard let url = URL(string: "x-apple.systempreferences:com.apple.Sound-Settings.extension") else { return }
-        NSWorkspace.shared.open(url)
-    }
-
     private func refresh() {
         mediaRemote.fetchNowPlaying { [weak self] item in
             self?.item = item
