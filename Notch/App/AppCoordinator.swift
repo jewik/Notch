@@ -29,6 +29,7 @@ final class AppCoordinator: NSObject {
             guard let self else { return }
             self.toggleMenuItem?.title = state == .visible ? "Скрыть" : "Показать"
             self.shortcutService.setDismissShortcutEnabled(state == .visible)
+            self.edgeTriggerService.setInteractionEnabled(state != .visible)
         }
         edgeTriggerService.start()
     }

@@ -50,7 +50,7 @@ struct PanelSizePreset {
     static let clipboard = PanelSizePreset(
         name: "clipboard",
         width: 500,
-        height: 400
+        height: 300
     )
 
     static let all: [PanelSizePreset] = [

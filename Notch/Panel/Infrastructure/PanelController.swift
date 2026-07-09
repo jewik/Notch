@@ -10,6 +10,7 @@ enum PanelState: Equatable {
 
 private struct FrameAnimation {
     let generation: Int
+    let endState: PanelState
     let startFrame: NSRect
     let endFrame: NSRect
     let startTime: TimeInterval
@@ -28,6 +29,7 @@ final class PanelController {
     private var animationGeneration = 0
     private var animationDisplayLink: CADisplayLink?
     private var activeAnimation: FrameAnimation?
+    private var animationFallback: DispatchWorkItem?
     private var pendingPeekHide: DispatchWorkItem?
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
@@ -73,6 +75,8 @@ final class PanelController {
 
         if route == .clipboard {
             panel.makeKey()
+        } else {
+            panel.resignKey()
         }
         resize(
             panel: panel,
@@ -84,12 +88,12 @@ final class PanelController {
 
     func hide() {
         cancelPeekHide()
-        guard let panel, let currentScreen, state != .hidden else { return }
+        guard let panel, let currentScreen, effectiveState != .hidden else { return }
         resize(panel: panel, to: .hidden, frame: geometry(for: currentScreen).hiddenFrame)
     }
 
     func toggle() {
-        if state == .visible {
+        if effectiveState == .visible {
             hide()
         } else {
             show()
@@ -97,18 +101,18 @@ final class PanelController {
     }
 
     func peek(on screen: NSScreen) {
-        guard state != .visible else { return }
+        guard effectiveState != .visible else { return }
         cancelPeekHide()
         let panel = preparePanel(on: screen)
         resize(panel: panel, to: .peek, frame: geometry(for: screen).peekFrame)
     }
 
     func schedulePeekHide() {
-        guard state == .peek else { return }
+        guard effectiveState == .peek else { return }
         cancelPeekHide()
 
         let workItem = DispatchWorkItem { [weak self] in
-            guard self?.state == .peek else { return }
+            guard self?.effectiveState == .peek else { return }
             self?.hide()
         }
         pendingPeekHide = workItem
@@ -120,6 +124,7 @@ final class PanelController {
         removeOutsideClickMonitors()
         cancelFrameAnimation()
         animationGeneration += 1
+        state = .hidden
         presentation.isChromeVisible = false
         presentation.isContentVisible = false
         panel?.orderOut(nil)
@@ -160,7 +165,7 @@ final class PanelController {
         contentView.onMouseEntered = { [weak self] in self?.cancelPeekHide() }
         contentView.onMouseExited = { [weak self] in self?.schedulePeekHide() }
         contentView.onMouseDown = { [weak self] in
-            guard let self, self.state == .peek else { return }
+            guard let self, self.effectiveState == .peek else { return }
             self.show(on: self.currentScreen)
         }
         panel.contentView = contentView
@@ -183,9 +188,14 @@ final class PanelController {
         PanelGeometry(screen: screen)
     }
 
+    private var effectiveState: PanelState {
+        activeAnimation?.endState ?? state
+    }
+
     private func handleScreenParametersChanged() {
         guard let panel else { return }
 
+        let targetState = effectiveState
         let targetScreen = panel.screen ?? currentScreen ?? screenUnderPointer()
         currentScreen = targetScreen
         contentMetrics.update(for: targetScreen)
@@ -194,7 +204,7 @@ final class PanelController {
 
         let geometry = geometry(for: targetScreen)
         let targetFrame: NSRect
-        switch state {
+        switch targetState {
         case .hidden:
             targetFrame = geometry.hiddenFrame
         case .peek:
@@ -205,8 +215,18 @@ final class PanelController {
 
         panel.setFrame(targetFrame, display: true)
         updateEarPanels(for: targetFrame)
-        presentation.isChromeVisible = state == .visible
-        presentation.isContentVisible = state == .visible
+        state = targetState
+        if targetState == .hidden {
+            panel.orderOut(nil)
+            orderOutEarPanels()
+        } else {
+            panel.orderFrontRegardless()
+            orderFrontEarPanels()
+        }
+        updateOutsideClickMonitors(for: targetState)
+        onStateChange?(targetState)
+        presentation.isChromeVisible = targetState == .visible
+        presentation.isContentVisible = targetState == .visible
     }
 
     private func resize(
@@ -216,8 +236,9 @@ final class PanelController {
         route: PanelRoute? = nil
     ) {
         let isRouteChange = route.map { presentation.route != $0 } ?? false
+        let targetFrame = activeAnimation?.endFrame ?? panel.frame
 
-        guard state != newState || panel.frame != frame || isRouteChange else {
+        guard effectiveState != newState || targetFrame != frame || isRouteChange else {
             presentation.isChromeVisible = newState == .visible
             presentation.isContentVisible = newState == .visible
             return
@@ -229,16 +250,16 @@ final class PanelController {
         let generation = animationGeneration
         let startFrame = panel.frame
         let isOpening = frame.height > startFrame.height
-        state = newState
         updateOutsideClickMonitors(for: newState)
         onStateChange?(newState)
 
         let duration: TimeInterval = isOpening ? 0.5 : 0.5
         activeAnimation = FrameAnimation(
             generation: generation,
+            endState: newState,
             startFrame: startFrame,
             endFrame: frame,
-            startTime: ProcessInfo.processInfo.systemUptime,
+            startTime: CACurrentMediaTime(),
             duration: duration,
             shouldOrderOut: newState == .hidden
         )
@@ -253,6 +274,7 @@ final class PanelController {
         let displayLink = animationScreen.displayLink(target: self, selector: #selector(updatePanelAnimation(_:)))
         animationDisplayLink = displayLink
         displayLink.add(to: .main, forMode: .common)
+        scheduleAnimationFallback(generation: generation, duration: duration)
     }
 
     @objc private func updatePanelAnimation(_ displayLink: CADisplayLink) {
@@ -276,14 +298,43 @@ final class PanelController {
 
         guard progress >= 1 else { return }
 
+        finishFrameAnimation(animation, panel: panel)
+    }
+
+    private func scheduleAnimationFallback(generation: Int, duration: TimeInterval) {
+        animationFallback?.cancel()
+
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self,
+                  let animation = self.activeAnimation,
+                  animation.generation == generation,
+                  let panel = self.panel else {
+                return
+            }
+            self.finishFrameAnimation(animation, panel: panel)
+        }
+        animationFallback = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.08, execute: workItem)
+    }
+
+    private func finishFrameAnimation(_ animation: FrameAnimation, panel: OverlayPanel) {
+        guard animation.generation == animationGeneration else { return }
+
         panel.setFrame(animation.endFrame, display: true)
         updateEarPanels(for: animation.endFrame)
+        state = animation.endState
+
         if animation.shouldOrderOut {
             panel.orderOut(nil)
             orderOutEarPanels()
+        } else {
+            panel.orderFrontRegardless()
+            orderFrontEarPanels()
         }
+
         presentation.isChromeVisible = state == .visible
         presentation.isContentVisible = state == .visible
+        updateOutsideClickMonitors(for: state)
         cancelFrameAnimation()
     }
 
@@ -338,6 +389,8 @@ final class PanelController {
         animationDisplayLink?.invalidate()
         animationDisplayLink = nil
         activeAnimation = nil
+        animationFallback?.cancel()
+        animationFallback = nil
     }
 
     private static func exponentialProgress(_ progress: Double) -> Double {
@@ -379,7 +432,7 @@ final class PanelController {
     }
 
     private func handlePossibleOutsideClick(at location: NSPoint) {
-        guard state == .visible, let panel, !panel.frame.contains(location) else { return }
+        guard effectiveState == .visible, let panel, !panel.frame.contains(location) else { return }
         hide()
     }
 

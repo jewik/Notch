@@ -116,7 +116,7 @@ private struct PanelServiceRow: View {
             ) {}
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, points(6))
+        .padding(.horizontal, points(10))
     }
 }
 

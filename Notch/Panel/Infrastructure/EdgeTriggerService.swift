@@ -8,6 +8,7 @@ final class EdgeTriggerService {
 
     private var sensorPanels: [EdgeSensorPanel] = []
     private var screenChangeObserver: NSObjectProtocol?
+    private var isInteractionEnabled = true
 
     init(
         onEnter: @escaping (NSScreen) -> Void,
@@ -41,21 +42,24 @@ final class EdgeTriggerService {
         sensorPanels.removeAll()
     }
 
+    func setInteractionEnabled(_ isEnabled: Bool) {
+        isInteractionEnabled = isEnabled
+        sensorPanels.forEach { $0.ignoresMouseEvents = !isEnabled }
+    }
+
     private func rebuildSensors() {
         sensorPanels.forEach { $0.orderOut(nil) }
         sensorPanels = NSScreen.screens.map { screen in
             let panel = EdgeSensorPanel(frame: PanelGeometry(screen: screen).edgeTriggerFrame)
-            panel.sensorView.onEnter = { [weak self, weak screen] in
-                guard let screen else { return }
+            panel.ignoresMouseEvents = !isInteractionEnabled
+            panel.sensorView.onEnter = { [weak self] in
                 self?.onEnter(screen)
             }
             panel.sensorView.onExit = { [weak self] in self?.onExit() }
-            panel.sensorView.onClick = { [weak self, weak screen] in
-                guard let screen else { return }
+            panel.sensorView.onClick = { [weak self] in
                 self?.onClick(screen)
             }
-            panel.sensorView.onFileDragEnter = { [weak self, weak screen] in
-                guard let screen else { return }
+            panel.sensorView.onFileDragEnter = { [weak self] in
                 self?.onFileDragEnter(screen)
             }
             panel.orderFrontRegardless()
