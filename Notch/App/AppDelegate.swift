@@ -8,6 +8,7 @@
 import AppKit
 import SwiftUI
 
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
         
     let container = AppContainer()
@@ -54,6 +55,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func makeHostingView() -> NSView {
+//        let root = PanelView()
         let root = PanelView().environment(container)
         let hostingView = NSHostingView(rootView: root)
         hostingView.autoresizingMask = [.width, .height]

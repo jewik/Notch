@@ -4,6 +4,7 @@ import Observation
 import SwiftUI
 
 enum ExpandedPanelPresets {
+    case greeting
     case home
     case tray
 }
@@ -17,9 +18,9 @@ enum CollapsedPanelPresets {
 @Observable
 final class PanelState {
     
-    var isExpanded: Bool = false
+    var isExpanded: Bool = true
     var collapsedPreset: CollapsedPanelPresets = .none
-    var expandedPreset: ExpandedPanelPresets = .home
+    var expandedPreset: ExpandedPanelPresets = .greeting
     
     func expand() {
         withAnimation {
@@ -27,6 +28,9 @@ final class PanelState {
         }
     }
     func collapse() {
+        if expandedPreset == .greeting {
+            return
+        }
         withAnimation {
             isExpanded = false
         }

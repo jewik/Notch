@@ -17,7 +17,7 @@ final class CollapsedContentController {
     }
 
     func setPreset(_ preset: CollapsedPanelPresets) {
-        withAnimation {
+        withAnimation (.smooth(duration: 0.5)) {
             self.panelState.collapsedPreset = preset
         }
     }

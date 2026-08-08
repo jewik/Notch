@@ -10,7 +10,7 @@ import Foundation
 import Combine
 
 
-final class NowPlayingViewModel: ObservableObject {
+final class NowPlayingViewModel{
 
     @Published private(set) var info: NowPlayingInfo?
 

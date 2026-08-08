@@ -28,10 +28,13 @@ struct ExpandedContentView: View {
         switch container.panelState.expandedPreset {
         case .home:
             HomeUI()
-                .transition(.changePresetTransition)
+                .transition(.collapseExpandTransition)
         case .tray:
             TrayUI()
-                .transition(.changePresetTransition)
+                .transition(.collapseExpandTransition)
+        case .greeting:
+            GreetingView()
+                .transition(.collapseExpandTransition)
         }
     }
 

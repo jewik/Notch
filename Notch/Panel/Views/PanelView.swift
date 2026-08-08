@@ -20,7 +20,7 @@ struct PanelView: View {
     let extraContentPadding: CGFloat = 0
     
     private var panelShadowRadius: CGFloat {
-        isPanelHovered ? ui(20) : 0
+        (isPanelHovered || container.panelState.isExpanded) ? ui(20) : 0
     }
 
     private func ui(_ value: CGFloat) -> CGFloat {
@@ -29,10 +29,14 @@ struct PanelView: View {
     
     private func selectAnimation(to newSize: CGSize){
         if newSize.width >= self.contentSize.width && newSize.height >= self.contentSize.height {
-            resizeAnimation = .bouncyExpandAnimation
+            resizeAnimation = .bouncy(duration: 0.5)
         } else {
-            resizeAnimation = .smoothCollapceAnimation
+            resizeAnimation = .smooth(duration: 0.5)
         }
+    }
+    
+    init() {
+        contentSize = CGSize(width: ui(184), height: ui(33))
     }
 
     var body: some View {
@@ -110,5 +114,6 @@ struct PanelView: View {
 #Preview {
     PanelView()
         .background(.gray.opacity(0.1))
+        .environment(AppContainer())
 }
 

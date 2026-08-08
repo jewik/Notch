@@ -18,7 +18,7 @@ struct TrayUI: View {
 
     
     var body: some View {
-        VStack(spacing: ui(2)){
+        VStack(alignment: .center, spacing: ui(2)){
             
             NavigationRowView()
 

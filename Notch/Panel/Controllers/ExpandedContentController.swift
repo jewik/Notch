@@ -19,7 +19,7 @@ final class ExpandedContentController {
     }
 
     func setPreset(_ preset: ExpandedPanelPresets) {
-        withAnimation {
+        withAnimation (.smooth(duration: 0.5)) {
             self.panelState.expandedPreset = preset
         }
     }
