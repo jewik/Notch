@@ -1,9 +1,13 @@
 
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 
 struct PanelView: View {
+    
+    @Environment(AppContainer.self)
+    private var container
     
     @Environment(\.uiScale)
     private var scale
@@ -11,6 +15,7 @@ struct PanelView: View {
     @State private var contentSize: CGSize = .zero
     @State private var resizeAnimation: Animation = .smoothCollapceAnimation
     @State private var isPanelHovered: Bool = false
+    @State private var isDragging: Bool = false
     
     let extraContentPadding: CGFloat = 0
     
@@ -51,7 +56,16 @@ struct PanelView: View {
 
 
 
-                ContentView()
+            
+            ZStack(alignment: .top) {
+                    if container.panelState.isExpanded {
+                        ExpandedContentView()
+                            .transition(.collapseExpandTransition)
+                    } else {
+                        CollapsedContentView()
+                            .transition(.collapseExpandTransition)
+                    }
+            }
                 .padding(
                     EdgeInsets(
                         top: 0,
@@ -69,10 +83,26 @@ struct PanelView: View {
                     contentSize = size
                 }
                 .onHover { isPanelHovered = $0}
+            
+            // hande airdrop
+                .onDrop(
+                    of: [UTType.fileURL],
+                    isTargeted: $isDragging
+                ) {
+                    providers in
+                    print("onDrop")
+                    return true
+                }
+                .onChange(of: isDragging) {oldValue, newValue in
+                    if newValue {
+                        container.panelState.expand()
+                        container.expandedContentController.setPreset(.tray)
+                    }
+                }
                 
 
         }
-        .frame(width: 1200, height: 300, alignment: .top)
+        .frame(width: ui(1200), height: ui(300), alignment: .top)
             
     }
 }

@@ -9,17 +9,11 @@ import AppKit
 import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    
-    @Environment(\.uiScale) var scale
-    
+        
     let container = AppContainer()
     
     private var overlayPanel: FloatingNotificationPanel?
     
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Hide the dock icon and regular menu-bar presence. The app still runs
         // and can display AppKit windows/panels.
@@ -60,7 +54,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func makeHostingView() -> NSView {
-        let root = PanelView().environment(container.panelController)
+        let root = PanelView().environment(container)
         let hostingView = NSHostingView(rootView: root)
         hostingView.autoresizingMask = [.width, .height]
         hostingView.wantsLayer = true

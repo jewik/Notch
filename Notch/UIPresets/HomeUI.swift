@@ -19,7 +19,7 @@ struct HomeUI: View {
         VStack(alignment: .center, spacing: 0) {
             
             NavigationRowView()
-            HStack(alignment: .top, spacing: 0) {
+            HStack(alignment: .center, spacing: 0) {
                 
                 PlayerView()
 //                    .background(.red.opacity(0.1))

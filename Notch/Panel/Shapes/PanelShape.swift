@@ -29,10 +29,10 @@ struct UnionPanelShape: Shape {
         let botRadius: CGFloat = min(height / 2, botMaxRadius)
         
         path.move(to: CGPoint(x: 0, y: 0))
-        path.addLine(to: CGPoint(x: 0, y: 1))
+        path.addLine(to: CGPoint(x: 0, y: ui(1)))
         ContinuousCornerPath.add(
             addTo: &path,
-            startPoint: CGPoint(x: -topRadius, y: topRadius + 1),
+            startPoint: CGPoint(x: -topRadius, y: topRadius + ui(1)),
             radius: topRadius,
             angleType: .bottomLeft,
             inversion: true
@@ -40,21 +40,21 @@ struct UnionPanelShape: Shape {
         
         ContinuousCornerPath.add(
             addTo: &path,
-            startPoint: CGPoint(x: topRadius, y: height - botRadius + 1),
+            startPoint: CGPoint(x: topRadius, y: height - botRadius + ui(1)),
             radius: botRadius,
             angleType: .bottomLeft
         )
         
         ContinuousCornerPath.add(
             addTo: &path,
-            startPoint: CGPoint(x: width - botRadius - topRadius, y: height + 1),
+            startPoint: CGPoint(x: width - botRadius - topRadius, y: height + ui(1)),
             radius: botRadius,
             angleType: .bottomRight
         )
         
         ContinuousCornerPath.add(
             addTo: &path,
-            startPoint: CGPoint(x: width, y: 1),
+            startPoint: CGPoint(x: width, y: ui(1)),
             radius: topRadius,
             angleType: .topLeft,
             inversion: true

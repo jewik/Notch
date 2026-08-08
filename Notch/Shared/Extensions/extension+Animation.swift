@@ -8,10 +8,10 @@
 import SwiftUI
 
 extension Animation {
-    static var smoothCollapceAnimation = Animation.smooth(duration: 0.35)
+    static var smoothCollapceAnimation = Animation.smooth(duration: 0.4)
 
     static var bouncyExpandAnimation = Animation.spring(
-        response: 0.35,
-        dampingFraction: 0.7
-    )    
+        response: 0.4,
+        dampingFraction: 0.6
+    )
 }

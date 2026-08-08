@@ -12,8 +12,6 @@ struct UITestsApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self)
     private var appDelegate
     
-    @State
-        private var panelController = PanelController()
 
     var body: some Scene {
         // A Settings scene keeps this as a valid SwiftUI app without creating

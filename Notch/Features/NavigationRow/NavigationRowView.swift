@@ -12,8 +12,8 @@ import SwiftUI
 
 struct NavigationRowView: View {
     
-    @Environment(PanelController.self)
-    private var panelController
+    @Environment(AppContainer.self)
+    private var container
     
     @Environment(\.uiScale)
     private var scale
@@ -33,7 +33,7 @@ struct NavigationRowView: View {
                 accessibilityLabel: "Home",
                 isActive: false,
                 action: {
-                    panelController.setPreset(.home)
+                    container.expandedContentController.setPreset(.home)
                 })
             .padding(.leading, ui(8))
             
@@ -44,7 +44,7 @@ struct NavigationRowView: View {
                 accessibilityLabel: "Tray",
                 isActive: false,
                 action: {
-                    panelController.setPreset(.tray)
+                    container.expandedContentController.setPreset(.tray)
                 })
             .padding(.leading, ui(4))
             

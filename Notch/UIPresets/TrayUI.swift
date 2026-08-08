@@ -22,7 +22,7 @@ struct TrayUI: View {
             
             NavigationRowView()
 
-            HStack(alignment: .top, spacing: 0) {
+            HStack(alignment: .center, spacing: 0) {
                 
                 AirDropZoneView()
                 

@@ -1,10 +1,10 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct ContentView: View {
+struct ExpandedContentView: View {
     
-    @Environment(PanelController.self)
-    private var panelController
+    @Environment(AppContainer.self)
+    private var container
     
     @State private var isDragging: Bool = false
     
@@ -12,29 +12,12 @@ struct ContentView: View {
         
         ZStack (alignment: .top){
             content
-            
-            TogglePresetButton(action: {
-                panelController.toggle()
-                print("Toggle button pressed")
-            })
         }
         .onContinuousHover{ phase in
             if phase == .ended {
                 print("hoverEnded")
-                panelController.collapse()
-            }
-        }
-        .onDrop(
-            of: [UTType.fileURL],
-            isTargeted: $isDragging
-        ) {
-            providers in
-            print("onDrop")
-            return true
-        }
-        .onChange(of: isDragging) {oldValue, newValue in
-            if newValue {
-                panelController.setPreset(.tray)
+                container.panelState.collapse()
+                container.collapsedContentController.setPreset(.none)
             }
         }
         
@@ -42,21 +25,13 @@ struct ContentView: View {
     
     @ViewBuilder
     private var content: some View {
-        switch panelController.getPreset() {
-        case .collapsed:
-            CollapsedStateView()
-//                .id("collapsed")
-                .transition(.topCollapseExpand)
-            
+        switch container.panelState.expandedPreset {
         case .home:
             HomeUI()
-//                .id("home")
-                .transition(.topCollapseExpand)
-            
+                .transition(.changePresetTransition)
         case .tray:
             TrayUI()
-//                .id("tray")
-                .transition(.topCollapseExpand)
+                .transition(.changePresetTransition)
         }
     }
 
@@ -72,6 +47,7 @@ struct TogglePresetButton: View {
     private func ui(_ value: CGFloat) -> CGFloat {
         value * scale
     }
+    
     var body: some View {
         Button(action: action) {
             

@@ -1,16 +1,18 @@
 //
-//  PeekZoneUI.swift
-//  UITests
+//  CollapsedPanelView.swift
+//  Notch
 //
-//  Created by Usanin Ivan on 31.07.2026.
+//  Created by Usanin Ivan on 08.08.2026.
 //
-
 
 
 import SwiftUI
 
 
-struct CollapsedStateView: View {
+struct CollapsedContentView: View {
+    
+    @Environment(AppContainer.self)
+    private var container
     
     @Environment(\.uiScale)
     private var scale: CGFloat
@@ -26,10 +28,16 @@ struct CollapsedStateView: View {
             
 //            CollapsedPlayerView()
             
-            ZStack(alignment: .top) {
+            ZStack {
+                PanelShape(uiScale: scale)
+                    .fill(.indigo)
             }
             .frame(width: ui(184), height: ui(33), alignment: .top)
-            //        .background(.red)
+            .onTapGesture {tap in
+                print("tapped")
+                container.panelState.expand()
+                container.expandedContentController.setPreset(.home)
+            }
         }
 
     }
@@ -37,7 +45,7 @@ struct CollapsedStateView: View {
 
 
 #Preview {
-    CollapsedStateView()
+    CollapsedContentView()
         .background(Color.red.opacity(0.1))
         .frame(width: 300, height: 140, alignment: .top)
 }
