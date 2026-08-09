@@ -24,11 +24,11 @@ struct TrayUI: View {
 
             HStack(alignment: .center, spacing: 0) {
                 
-                AirDropZoneView()
+                AirDropView()
                 
             }
         }
-        .frame(width: ui(500), height: ui(150 + 34))
+        .frame(width: ui(500), height: ui(150 + 32))
 
     }
 }
@@ -42,8 +42,9 @@ struct TrayUI: View {
             .fill(.black)
         TrayUI()
             .background(Color.cyan.opacity(0.1))
+            .environment(AppContainer())
     }
-.frame(width: 500, height: 150 + 34, alignment: .top)
+.frame(width: 500, height: 150 + 32, alignment: .top)
 
 
 }

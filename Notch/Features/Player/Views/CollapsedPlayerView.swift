@@ -36,7 +36,7 @@ struct CollapsedPlayerView: View {
                 
                 ZStack {
                 }
-                .frame(width: ui(184), height: ui(33))
+                .frame(width: ui(184), height: ui(32))
                 .padding(.horizontal, ui(4))
                 //            .background(.red.opacity(0.2))
                 
@@ -57,7 +57,7 @@ struct CollapsedPlayerView: View {
                         .font(.system(size: ui(14), weight: .semibold, design: .rounded))
                         .lineLimit(1)
                 }
-                .frame(width: ui(184), height: ui(33))
+                .frame(width: ui(184), height: ui(32))
                 .transition(.collapseExpandTransition)
             }
         }
@@ -76,6 +76,6 @@ struct CollapsedPlayerView: View {
             .background(Color.blue.opacity(0.2))
 
     }
-    .frame(width: 244, height: 66)
+    .frame(width: 244, height: 64)
     .frame(width: 400, height: 200, alignment: .top)
 }

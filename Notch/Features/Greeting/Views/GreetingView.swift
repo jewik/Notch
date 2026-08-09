@@ -46,6 +46,8 @@ struct GreetingView: View {
             withAnimation {
                 showGreeting = true
             }
+            try? await Task.sleep(for: .seconds(0.5))
+            container.panelState.collapse(force: true)
         }
 
         

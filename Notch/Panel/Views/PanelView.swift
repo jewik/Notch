@@ -22,6 +22,9 @@ struct PanelView: View {
     private var panelShadowRadius: CGFloat {
         (isPanelHovered || container.panelState.isExpanded) ? ui(20) : 0
     }
+//    private var panelStrokeColor: Color {
+//        container.panelState.isExpanded ? .white.opacity(0.1) : .clear
+//    }
 
     private func ui(_ value: CGFloat) -> CGFloat {
         value * scale
@@ -36,7 +39,7 @@ struct PanelView: View {
     }
     
     init() {
-        contentSize = CGSize(width: ui(184), height: ui(33))
+        contentSize = CGSize(width: ui(184), height: ui(32))
     }
 
     var body: some View {
@@ -48,8 +51,10 @@ struct PanelView: View {
                         uiScale: 1
                     )
                     .fill(.black)
+//                    .stroke(panelStrokeColor, lineWidth: ui(1))
                     .shadow(color: .black, radius: panelShadowRadius)
                     .animation(resizeAnimation, value: panelShadowRadius)
+//                    .animation(.smooth, value: panelStrokeColor)
                     
                 }
                 .frame(

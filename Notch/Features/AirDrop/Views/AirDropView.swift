@@ -4,7 +4,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 // 6 points of width 300 UIs in total
-struct AirDropZoneView: View {
+struct AirDropView: View {
 
     @Environment(\.uiScale)
     private var scale
@@ -43,6 +43,6 @@ struct AirDropZoneView: View {
 }
 
 #Preview {
-    AirDropZoneView()
+    AirDropView()
         .background(Color.pink.opacity(0.1))
 }

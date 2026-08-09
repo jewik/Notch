@@ -35,6 +35,9 @@ struct ExpandedContentView: View {
         case .greeting:
             GreetingView()
                 .transition(.collapseExpandTransition)
+        case .valediction:
+            ValedictionView()
+                .transition(.collapseExpandTransition)
         }
     }
 

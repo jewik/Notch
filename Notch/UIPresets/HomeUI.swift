@@ -26,11 +26,11 @@ struct HomeUI: View {
                 Divider()
                     .padding(.vertical, ui(10))
                 
-                JLampView()
+                FastFolderView()
 //                    .background(.blue.opacity(0.1))
             }
         }
-        .frame(width: ui(600), height: ui(150 + 34), alignment: .top)
+        .frame(width: ui(600), height: ui(150 + 32), alignment: .top)
     }
     
 }
@@ -45,8 +45,9 @@ struct HomeUI: View {
             PanelShape(uiScale: 1)
                 .fill(.black)
             HomeUI()
+                .environment(AppContainer())
 //                .background(Color.cyan.opacity(0.1))
         }
-    .frame(width: 600, height: 150 + 34, alignment: .top)
+    .frame(width: 600, height: 150 + 32, alignment: .top)
 
 }

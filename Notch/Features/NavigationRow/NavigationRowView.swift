@@ -24,7 +24,9 @@ struct NavigationRowView: View {
     
     var body: some View {
         HStack (alignment: .center, spacing: 0) {
-            BackButton(action: {})
+            BackButton(
+                action: {container.expandedContentController.setPreset(.valediction)}
+            )
                 .padding(.leading, ui(10))
             
             ServiceRowButtonUI(
@@ -68,7 +70,7 @@ struct NavigationRowView: View {
             .padding(.trailing, ui(4))
         }
         .frame(maxWidth: .infinity)
-        .frame(height: ui(34))
+        .frame(height: ui(32))
     }
 }
 

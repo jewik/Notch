@@ -32,7 +32,7 @@ struct CollapsedContentView: View {
                 PanelShape(uiScale: scale)
                     .fill(.indigo)
             }
-            .frame(width: ui(184), height: ui(33), alignment: .top)
+            .frame(width: ui(184), height: ui(32), alignment: .top)
             .onTapGesture {tap in
                 print("tapped")
                 container.panelState.expand()

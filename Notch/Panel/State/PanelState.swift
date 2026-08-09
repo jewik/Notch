@@ -7,6 +7,7 @@ enum ExpandedPanelPresets {
     case greeting
     case home
     case tray
+    case valediction
 }
 
 enum CollapsedPanelPresets {
@@ -27,8 +28,8 @@ final class PanelState {
             isExpanded = true
         }
     }
-    func collapse() {
-        if expandedPreset == .greeting {
+    func collapse(force: Bool = false) {
+        if !force && (expandedPreset == .greeting || expandedPreset == .valediction) {
             return
         }
         withAnimation {
