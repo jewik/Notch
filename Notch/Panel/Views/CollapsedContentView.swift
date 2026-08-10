@@ -23,21 +23,24 @@ struct CollapsedContentView: View {
     
     
     var body: some View {
-        
-        ZStack(alignment: .top) {
+        VStack{
             
-//            CollapsedPlayerView()
+            ZStack(alignment: .top) {
+                
+//                            CollapsedPlayerView()
+                
+                ZStack {
+                    PanelShape(uiScale: scale)
+                        .fill(.indigo)
+                }
+                .frame(width: ui(184), height: ui(32), alignment: .top)
+                .onTapGesture {tap in
+                    print("tapped")
+                    container.panelController.showExpandedPreset(.home)
+                }
+            }
             
-            ZStack {
-                PanelShape(uiScale: scale)
-                    .fill(.indigo)
-            }
-            .frame(width: ui(184), height: ui(32), alignment: .top)
-            .onTapGesture {tap in
-                print("tapped")
-                container.panelState.expand()
-                container.expandedContentController.setPreset(.home)
-            }
+            NotificationView()
         }
     }
 }

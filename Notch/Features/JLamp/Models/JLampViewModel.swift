@@ -10,7 +10,7 @@ import Combine
 import SwiftUI
 
 @Observable
-final class JLampViewModel {
+final class JLampModel {
     
     var jBrightness: Int = 0
     var jSpeed: Int = 0

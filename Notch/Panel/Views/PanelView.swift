@@ -20,7 +20,7 @@ struct PanelView: View {
     let extraContentPadding: CGFloat = 0
     
     private var panelShadowRadius: CGFloat {
-        (isPanelHovered || container.panelState.isExpanded) ? ui(20) : 0
+        isPanelHovered || container.panelState.isNotificationTime ? ui(20) : 0
     }
 //    private var panelStrokeColor: Color {
 //        container.panelState.isExpanded ? .white.opacity(0.1) : .clear
@@ -67,13 +67,16 @@ struct PanelView: View {
 
             
             ZStack(alignment: .top) {
-                    if container.panelState.isExpanded {
-                        ExpandedContentView()
-                            .transition(.collapseExpandTransition)
-                    } else {
-                        CollapsedContentView()
-                            .transition(.collapseExpandTransition)
-                    }
+                
+                if container.panelState.panelMode == .collapsed {
+                    CollapsedContentView().transition(.collapseExpandTransition)
+                } else if container.panelState.panelMode == .expanded {
+                    ExpandedContentView().transition(.collapseExpandTransition)
+                } else {
+                    Text("pashalka")
+                }
+                    
+                
             }
                 .padding(
                     EdgeInsets(
@@ -104,14 +107,14 @@ struct PanelView: View {
                 }
                 .onChange(of: isDragging) {oldValue, newValue in
                     if newValue {
-                        container.panelState.expand()
-                        container.expandedContentController.setPreset(.tray)
+                        container.panelController.showExpandedPreset(.tray)
                     }
                 }
                 
 
         }
         .frame(width: ui(1200), height: ui(300), alignment: .top)
+//        .background(.red)
             
     }
 }

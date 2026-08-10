@@ -11,6 +11,10 @@ struct AirDropView: View {
         
     @State var isDragging: Bool = false
     
+    private var bgOpacity: Double {
+        isDragging ? 0.3 : 0.2
+    }
+    
     private func ui(_ value: CGFloat) -> CGFloat {
         value * scale
     }
@@ -19,8 +23,8 @@ struct AirDropView: View {
         
         ZStack(alignment: .center) {
             RoundedRectangle(cornerRadius: ui(30))
-                .fill(Color.blue.opacity(0.2))
-                .stroke(Color.blue.opacity(0.5), lineWidth: 1)
+                .fill(Color.indigo.opacity(bgOpacity))
+                .stroke(Color.indigo.opacity(bgOpacity), lineWidth: 1)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             HStack (spacing: ui(6)){
                 Image(systemName: "airplayaudio").font(.system(size: ui(20)))

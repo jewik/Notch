@@ -26,7 +26,7 @@ struct ValedictionView: View {
                         color: .indigo,
                         accessibilityLabel: "Cancel",
                         action: {
-                            container.expandedContentController.setPreset(.home)
+                            container.panelController.showExpandedPreset(.home)
                         }
                     )
                     
@@ -36,10 +36,8 @@ struct ValedictionView: View {
                         accessibilityLabel: "Terminate",
                         action: {
                             Task {
-
-                                container.panelState.collapse(force: true)
+                                container.notificationController.hideNotification()
                                 try? await Task.sleep(for: .seconds(1))
-                                
                                 NSApplication.shared.terminate(nil)
                             }
                         }
@@ -50,6 +48,9 @@ struct ValedictionView: View {
             
         }
         .frame(width: ui(220), height: ui(150), alignment: .bottom)
+        .onAppear {
+            print("valediction called")
+        }
     }
 }
 
@@ -75,7 +76,7 @@ struct ValedationButton : View{
             Button(action: action) {
                 ZStack {
                     RoundedRectangle(cornerRadius: ui(20))
-                        .fill(color.opacity(0.1))
+                        .fill(color.opacity(0.2))
                         .frame(width: ui(180), height: ui(40))
 
                         Text(title)

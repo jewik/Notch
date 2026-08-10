@@ -68,7 +68,7 @@ struct JLampSettingView : View {
     
     @Environment(\.uiScale) private var scale
     
-    var jLampViewModel = JLampViewModel()
+    var jLampModel = JLampModel()
     
     private func ui(_ value: CGFloat) -> CGFloat {
         value * scale
@@ -83,7 +83,7 @@ struct JLampSettingView : View {
                 .font(.system(size: ui(14), weight: .semibold))
             
 //            GlassSlider(
-//                value: $jLampViewModel.jBrightness
+//                value: $jLampModel.jBrightness
 //            )  { newValue in
 //                print("Brightness:", newValue)
 //            }

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct GreetingView: View {
+struct GreetingNotificationView: View {
     
     @Environment(AppContainer.self)
     private var container
@@ -19,38 +19,18 @@ struct GreetingView: View {
         value * scale
     }
     
-    @State private var showGreeting: Bool = false
-    
-    
-    
-    
     var body: some View {
         
         ZStack (alignment: .center) {
             
-            if showGreeting {
                 Text("Hola!")
                     .font(.system(size: 40, weight: .bold, design: .rounded))
                     .onTapGesture {tap in
-                        container.expandedContentController.setPreset(.home)
-                    }
-            }
+                        container.panelController.showExpandedPreset(.home)
+                }
         }
         .frame(width: ui(220), height: ui(140))
-        .animation(
-            .smooth(duration: 0.5),
-            value: showGreeting
-        )
-        .task {
-            try? await Task.sleep(for: .seconds(0.5))
-            withAnimation {
-                showGreeting = true
-            }
-            try? await Task.sleep(for: .seconds(0.5))
-            container.panelState.collapse(force: true)
-        }
 
-        
     }
     
     
@@ -62,7 +42,7 @@ struct GreetingView: View {
             .fill(.black)
 
         
-        GreetingView()
+        GreetingNotificationView()
             .background(Color.blue.opacity(0.2))
             .environment(AppContainer())
 

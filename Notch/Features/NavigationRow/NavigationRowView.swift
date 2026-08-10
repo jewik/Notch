@@ -25,7 +25,10 @@ struct NavigationRowView: View {
     var body: some View {
         HStack (alignment: .center, spacing: 0) {
             BackButton(
-                action: {container.expandedContentController.setPreset(.valediction)}
+                action: {
+                    container.panelController.showCollapsedPreset()
+                    container.notificationController.showNotification(notification: .valediction)
+                }
             )
                 .padding(.leading, ui(10))
             
@@ -33,9 +36,9 @@ struct NavigationRowView: View {
                 systemName: "house.fill",
                 title: "Home",
                 accessibilityLabel: "Home",
-                isActive: false,
+                isActive: container.panelState.expandedPreset == .home,
                 action: {
-                    container.expandedContentController.setPreset(.home)
+                    container.panelController.showExpandedPreset(.home)
                 })
             .padding(.leading, ui(8))
             
@@ -44,22 +47,13 @@ struct NavigationRowView: View {
                 systemName: "tray.fill",
                 title: "Tray",
                 accessibilityLabel: "Tray",
-                isActive: false,
+                isActive: container.panelState.expandedPreset == .tray,
                 action: {
-                    container.expandedContentController.setPreset(.tray)
+                    container.panelController.showExpandedPreset(.tray)
                 })
             .padding(.leading, ui(4))
             
             Spacer()
-            
-            ServiceRowButtonUI(
-                systemName: "paperclip",
-                title: "Clip",
-                accessibilityLabel: "Clipboard",
-                isActive: false,
-                action: {})
-            .padding(.leading, ui(4))
-            
             
             ServiceRowButtonUI(
                 systemName: "gearshape.fill",

@@ -3,37 +3,29 @@
 import Observation
 import SwiftUI
 
-enum ExpandedPanelPresets {
-    case greeting
+enum ExpandedPreset {
     case home
     case tray
+}
+
+enum PanelMode {
+    case collapsed
+    case expanded
+}
+
+enum NotificationPreset {
+    case greeting
     case valediction
 }
 
-enum CollapsedPanelPresets {
-    case none
-    case player
-    case tray
-}
 
 @Observable
 final class PanelState {
     
-    var isExpanded: Bool = true
-    var collapsedPreset: CollapsedPanelPresets = .none
-    var expandedPreset: ExpandedPanelPresets = .greeting
+    var panelMode: PanelMode = .collapsed
+    var expandedPreset: ExpandedPreset = .home
+    var notification: NotificationPreset = .greeting
     
-    func expand() {
-        withAnimation {
-            isExpanded = true
-        }
-    }
-    func collapse(force: Bool = false) {
-        if !force && (expandedPreset == .greeting || expandedPreset == .valediction) {
-            return
-        }
-        withAnimation {
-            isExpanded = false
-        }
-    }
+    var isNotificationTime: Bool = false
+
 }

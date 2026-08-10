@@ -9,6 +9,9 @@ import SwiftUI
 
 struct FastFolderView: View {
     
+    @Environment(AppContainer.self)
+    private var container: AppContainer
+    
     @Environment(\.uiScale)
     private var scale: CGFloat
 
@@ -16,24 +19,82 @@ struct FastFolderView: View {
         value * scale
     }
     
-    private let projectsUrl = URL(fileURLWithPath: "/Users/ivan/Projects")
-    private let downloadsUrl = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent("Downloads")
     
     var body: some View {
         VStack {
-            
-            Text("Open Downloads")
-                .onTapGesture {tap in
-                    NSWorkspace.shared.open(downloadsUrl)
+            HStack(spacing: ui(20)) {
+                ForEach(container.fastFolderStore.folders) { folder in
+                    FastFolderButtonView(
+                        folderName: folder.name,
+                        action: {
+                            container.fastFolderStore.open(folder)
+                        }
+                    )
+//                    .background(.red)
                 }
-            Text("Open Projects")
-                .onTapGesture {tap in
-                    NSWorkspace.shared.open(projectsUrl)
+            }
+            HStack {
+                Button {
+                    selectFolder()
+                } label: {
+                    Label("Add Folder", systemImage: "plus")
                 }
+                
+                Button("kill folders") {
+                    container.fastFolderStore.clearFolders()
+                }
+            }
             
         }
         .frame(width: ui(300), height: ui(150))
+    }
+    
+    private func selectFolder() {
+        let panel = NSOpenPanel()
+        
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        
+        guard panel.runModal() == .OK,
+              let url = panel.url
+        else {
+            return
+        }
+        
+        container.fastFolderStore.addFolder(url: url)
+    }
+}
+
+
+struct FastFolderButtonView: View {
+    
+    let folderName: String
+    let action: () -> Void
+    
+    @Environment(\.uiScale)
+    private var scale: CGFloat
+
+    private func ui(_ value: CGFloat) -> CGFloat {
+        value * scale
+    }
+    
+    var body: some View {
+
+        Button(action: action){
+            VStack(alignment: .center, spacing: 0) {
+                Image(nsImage: NSWorkspace.shared.icon(forFile: NSHomeDirectory()))
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: ui(60), height: ui(60))
+                
+                Text(folderName)
+                    .font(.system(size: ui(12), weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+            }
+            .frame(width: ui(70), height: ui(80))
+        }
+        .buttonStyle(.plain)
     }
 }
 

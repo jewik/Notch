@@ -16,8 +16,8 @@ struct ExpandedContentView: View {
         .onContinuousHover{ phase in
             if phase == .ended {
                 print("hoverEnded")
-                container.panelState.collapse()
-                container.collapsedContentController.setPreset(.none)
+                
+                container.panelController.showCollapsedPreset()
             }
         }
         
@@ -25,18 +25,12 @@ struct ExpandedContentView: View {
     
     @ViewBuilder
     private var content: some View {
-        switch container.panelState.expandedPreset {
+        switch  container.panelState.expandedPreset {
         case .home:
             HomeUI()
                 .transition(.collapseExpandTransition)
         case .tray:
             TrayUI()
-                .transition(.collapseExpandTransition)
-        case .greeting:
-            GreetingView()
-                .transition(.collapseExpandTransition)
-        case .valediction:
-            ValedictionView()
                 .transition(.collapseExpandTransition)
         }
     }

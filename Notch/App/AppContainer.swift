@@ -10,16 +10,21 @@ import Observation
 @Observable
 @MainActor
 final class AppContainer {
-    let panelState: PanelState
-    let expandedContentController: ExpandedContentController
-    let collapsedContentController: CollapsedContentController
     
+    let panelState: PanelState
+    
+    let panelController: PanelController
+    let notificationController: NotificationController
+
+    let fastFolderStore: FastFolderStore
     
     init() {
         let panelState = PanelState()
-        
         self.panelState = panelState
-        self.expandedContentController = ExpandedContentController(panelState: panelState)
-        self.collapsedContentController = CollapsedContentController(panelState: panelState)
+
+        self.panelController = PanelController(panelState: panelState)
+        self.notificationController = NotificationController(panelState: panelState)
+        
+        self.fastFolderStore = FastFolderStore()
     }
 }
