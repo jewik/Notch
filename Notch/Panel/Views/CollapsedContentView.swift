@@ -23,7 +23,7 @@ struct CollapsedContentView: View {
     
     
     var body: some View {
-        VStack{
+        VStack(spacing: ui(4)) {
             
             ZStack(alignment: .top) {
                 
@@ -31,7 +31,7 @@ struct CollapsedContentView: View {
                 
                 ZStack {
                     PanelShape(uiScale: scale)
-                        .fill(.indigo)
+                        .fill(.black)
                 }
                 .frame(width: ui(184), height: ui(32), alignment: .top)
                 .onTapGesture {tap in
@@ -40,7 +40,23 @@ struct CollapsedContentView: View {
                 }
             }
             
-            NotificationView()
+            if container.panelState.isNotificationTime {
+                notificationView
+                    .animation(.smooth(duration: 0.5), value: container.panelState.isNotificationTime)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var notificationView: some View {
+        
+        switch container.panelState.notification {
+            case .greeting:
+            GreetingNotificationView().transition(.changePresetTransition)
+
+            case .valediction:
+            ValedictionNotificationView().transition(.changePresetTransition)
+            
         }
     }
 }

@@ -6,20 +6,49 @@ struct ExpandedContentView: View {
     @Environment(AppContainer.self)
     private var container
     
-    @State private var isDragging: Bool = false
+    @Environment(\.uiScale)
+    private var scale
     
-        var body: some View {
-        
-        ZStack (alignment: .top){
-            content
+    @State private var isDragging: Bool = false
+    @State private var navRowWidth: CGFloat = 500
+    
+    private func ui(_ value: CGFloat) -> CGFloat {
+        value * scale
+    }
+    
+    var body: some View {
+        VStack {
+            
+            ZStack {
+                NavigationRowView()
+            }
+            .frame(width: navRowWidth, height: ui(30))
+
+            
+            ZStack (alignment: .top){
+                content
+            }
+            // Ключевой фикс: фиксируем идеальный размер по горизонтали,
+            // чтобы контент не сжимался до нуля во время анимации parent ZStack
+            .fixedSize(horizontal: true, vertical: false)
+            .onGeometryChange(for: CGSize.self) { geo in
+                geo.size
+            } action: { size in
+                // Анимируем изменение ширины плавно
+                withAnimation(.smooth(duration: 0.5)) {
+                    print("expandedpreset size", size)
+                    navRowWidth = size.width
+                }
+            }
         }
         .onContinuousHover{ phase in
             if phase == .ended {
                 print("hoverEnded")
-                
+
                 container.panelController.showCollapsedPreset()
             }
         }
+        .animation(.smooth(duration: 0.5), value: navRowWidth)
         
     }
     

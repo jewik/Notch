@@ -5,7 +5,7 @@
 //  Created by Usanin Ivan on 29.07.2026.
 //
 
-
+import AVKit
 import SwiftUI
 
 // 6 (50) points of width 300 UIs in total
@@ -29,7 +29,7 @@ struct PlayerView: View {
 //            .background(Color.gray.opacity(0.5))
         }
         .padding(.horizontal , ui(10))
-        .frame(width: ui(300), height: ui(150), alignment: .leading)
+        .frame(width: ui(300), height: ui(150), alignment: .center)
         
     }
 }
@@ -116,6 +116,19 @@ struct PlayerButtonRowView : View{
             }
             .buttonStyle(.plain)
         }
+    }
+}
+
+struct AudioRoutePickerButton: NSViewRepresentable {
+    func makeNSView(context: Context) -> AVRoutePickerView {
+        let picker = AVRoutePickerView()
+        picker.isRoutePickerButtonBordered = false
+        // Задаем цвет иконки AirPlay / Аудио
+        return picker
+    }
+    
+    func updateNSView(_ nsView: AVRoutePickerView, context: Context) {
+        // Здесь можно обновлять состояние при необходимости
     }
 }
 

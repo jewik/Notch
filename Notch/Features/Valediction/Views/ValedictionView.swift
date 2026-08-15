@@ -2,7 +2,7 @@
 
 import SwiftUI
 
-struct ValedictionView: View {
+struct ValedictionNotificationView: View {
     
     @Environment(AppContainer.self)
     private var container
@@ -20,79 +20,41 @@ struct ValedictionView: View {
         ZStack (alignment: .center) {
                 
                 
-                VStack (alignment: .center, spacing: ui(10)) {
-                    ValedationButton(
+                HStack (alignment: .center, spacing: ui(10)) {
+                    NotchButton(
+                        systemName: "",
                         title: "Cancel",
                         color: .indigo,
-                        accessibilityLabel: "Cancel",
+                        bgSize: CGSize(width: ui(100), height: ui(30)),
+                        textSize: ui(16),
+                        isActive: true,
                         action: {
                             container.panelController.showExpandedPreset(.home)
-                        }
-                    )
-                    
-                    ValedationButton(
+                        })
+
+                    NotchButton(
+                        systemName: "",
                         title: "Terminate",
                         color: .red,
-                        accessibilityLabel: "Terminate",
+                        bgSize: CGSize(width: ui(100), height: ui(30)),
+                        textSize: ui(16),
+                        isActive: true,
                         action: {
                             Task {
-                                container.notificationController.hideNotification()
+                                container.panelController.hideNotification()
                                 try? await Task.sleep(for: .seconds(1))
                                 NSApplication.shared.terminate(nil)
                             }
-                        }
-                    )
+                        })
                 }
-                .padding(ui(20))
-            
             
         }
-        .frame(width: ui(220), height: ui(150), alignment: .bottom)
+        .frame(width: ui(230), height: ui(40), alignment: .top)
         .onAppear {
             print("valediction called")
         }
     }
 }
-
-struct ValedationButton : View{
-    
-    let title: String
-    let color: Color
-    let accessibilityLabel: String
-    let action: () -> Void
-    
-    
-    @Environment(AppContainer.self)
-    private var container
-    
-    @Environment(\.uiScale)
-    private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-    
-    var body: some View {
-            Button(action: action) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: ui(20))
-                        .fill(color.opacity(0.2))
-                        .frame(width: ui(180), height: ui(40))
-
-                        Text(title)
-                            .font(.system(size: ui(16), weight: .semibold, design: .rounded))
-                            .lineLimit(1)
-                            .foregroundStyle(color)
-                }
-            }
-            .buttonStyle(.plain)
-        
-            .accessibilityLabel(accessibilityLabel)
-            .help(accessibilityLabel)
-        
-    }
-}
-
 
 #Preview {
     ZStack {
@@ -100,11 +62,11 @@ struct ValedationButton : View{
             .fill(.black)
 
         
-        ValedictionView()
+        ValedictionNotificationView()
 //            .background(Color.blue.opacity(0.2))
             .environment(AppContainer())
 
     }
-    .frame(width: 220, height: 150)
+    .frame(width: 230, height: 40)
     .frame(width: 400, height: 300, alignment: .top)
 }

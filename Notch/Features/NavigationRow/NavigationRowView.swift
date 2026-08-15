@@ -23,45 +23,55 @@ struct NavigationRowView: View {
     }
     
     var body: some View {
-        HStack (alignment: .center, spacing: 0) {
+        HStack (alignment: .center, spacing: ui(2)) {
             BackButton(
                 action: {
                     container.panelController.showCollapsedPreset()
-                    container.notificationController.showNotification(notification: .valediction)
+                    container.panelController.showNotification(notification: .valediction, duration: 5)
                 }
             )
-                .padding(.leading, ui(10))
+                .padding(
+                    EdgeInsets(
+                        top: 0,
+                        leading: ui(10),
+                        bottom: 0,
+                        trailing: ui(4)
+                    )
+                )
             
-            ServiceRowButtonUI(
+            NotchButton(
                 systemName: "house.fill",
                 title: "Home",
-                accessibilityLabel: "Home",
+                color: .white,
+                bgSize: CGSize(width: ui(74), height: ui(26)),
+                textSize: ui(14),
                 isActive: container.panelState.expandedPreset == .home,
                 action: {
                     container.panelController.showExpandedPreset(.home)
                 })
-            .padding(.leading, ui(8))
             
 
-            ServiceRowButtonUI(
+            NotchButton(
                 systemName: "tray.fill",
                 title: "Tray",
-                accessibilityLabel: "Tray",
+                color: .indigo,
+                bgSize: CGSize(width: ui(68), height: ui(26)),
+                textSize: ui(14),
                 isActive: container.panelState.expandedPreset == .tray,
                 action: {
                     container.panelController.showExpandedPreset(.tray)
-                })
-            .padding(.leading, ui(4))
-            
+                })            
             Spacer()
             
-            ServiceRowButtonUI(
+            NotchButton(
                 systemName: "gearshape.fill",
-//                title: "",
-                accessibilityLabel: "settings",
+                title: "",
+                color: .white,
+                bgSize: CGSize(width: ui(26), height: ui(26)),
+                textSize: ui(14),
                 isActive: false,
                 action: {})
-            .padding(.trailing, ui(4))
+            .padding(.trailing, ui(10))
         }
         .frame(maxWidth: .infinity)
         .frame(height: ui(32))
@@ -94,55 +104,5 @@ struct BackButton: View {
                 }
         .buttonStyle(.plain)
 
-    }
-}
-
-struct ServiceRowButtonUI: View {
-    let systemName: String
-    var title: String?
-    let accessibilityLabel: String
-    let isActive: Bool
-    let action: () -> Void
-    
-    @Environment(\.uiScale)
-    private var scale
-    
-    @State private var isHovered = false
-
-    private func points(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-
-    private var isHighlighted: Bool {
-        isActive || isHovered
-    }
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: points(2)) {
-                Image(systemName: systemName)
-                    .font(.system(size: points(14), weight: .semibold))
-//                    .background(Color.red.opacity(0.2))
-
-                if let title {
-                    Text(title)
-                        .font(.system(size: points(14), weight: .semibold, design: .rounded))
-                        .lineLimit(1)
-//                        .background(Color.blue.opacity(0.2))
-                }
-            }            .padding(points(4))
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(isActive ? .white : .white.opacity(0.72))
-        .background {
-            if isHighlighted {
-                RoundedRectangle(cornerRadius: points(12), style: .continuous)
-                    .fill(.white.opacity(0.14))
-            }
-        }
-        .onHover { isHovered = $0 }
-        .accessibilityLabel(accessibilityLabel)
-        .help(accessibilityLabel)
     }
 }

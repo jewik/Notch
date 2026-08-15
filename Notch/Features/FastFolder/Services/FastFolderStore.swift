@@ -22,13 +22,8 @@ final class FastFolderStore {
     
     func addFolder(url: URL) {
         do {
-            guard url.startAccessingSecurityScopedResource() else {
-                return
-            }
-            
-            defer {
-                url.stopAccessingSecurityScopedResource()
-            }
+            guard url.startAccessingSecurityScopedResource() else { return }
+            defer { url.stopAccessingSecurityScopedResource() }
             
             let bookmark = try url.bookmarkData(
                 options: [.withSecurityScope],
@@ -36,10 +31,15 @@ final class FastFolderStore {
                 relativeTo: nil
             )
             
+            // 1. Получаем теги Finder из URL
+            let resourceValues = try url.resourceValues(forKeys: [.tagNamesKey])
+            let finderTags = resourceValues.tagNames ?? [] // Массив строк тегов
+            
             let folder = FastFolder(
                 id: UUID(),
                 name: url.lastPathComponent,
-                bookmark: bookmark
+                bookmark: bookmark,
+                tags: finderTags // 2. Сохраняем теги
             )
             
             folders.append(folder)

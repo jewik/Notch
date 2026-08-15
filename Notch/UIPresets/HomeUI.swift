@@ -16,9 +16,6 @@ struct HomeUI: View {
     }
     
     var body: some View {
-        VStack(alignment: .center, spacing: 0) {
-            
-            NavigationRowView()
             HStack(alignment: .center, spacing: 0) {
                 
                 PlayerView()
@@ -28,9 +25,8 @@ struct HomeUI: View {
                 
                 FastFolderView()
 //                    .background(.blue.opacity(0.1))
-            }
         }
-        .frame(width: ui(600), height: ui(150 + 32), alignment: .top)
+        .frame(width: ui(600), height: ui(150), alignment: .top)
     }
     
 }
@@ -48,6 +44,6 @@ struct HomeUI: View {
                 .environment(AppContainer())
 //                .background(Color.cyan.opacity(0.1))
         }
-    .frame(width: 600, height: 150 + 32, alignment: .top)
+    .frame(width: 600, height: 150, alignment: .top)
 
 }

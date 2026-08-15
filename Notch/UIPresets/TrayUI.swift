@@ -18,17 +18,12 @@ struct TrayUI: View {
 
     
     var body: some View {
-        VStack(alignment: .center, spacing: ui(2)){
-            
-            NavigationRowView()
-
-            HStack(alignment: .center, spacing: 0) {
+        HStack(alignment: .center, spacing: 0) {
                 
-                AirDropView()
+            AirDropView()
                 
-            }
         }
-        .frame(width: ui(500), height: ui(150 + 32))
+        .frame(width: ui(500), height: ui(150))
 
     }
 }
@@ -44,7 +39,7 @@ struct TrayUI: View {
             .background(Color.cyan.opacity(0.1))
             .environment(AppContainer())
     }
-.frame(width: 500, height: 150 + 32, alignment: .top)
+.frame(width: 500, height: 150, alignment: .top)
 
 
 }
