@@ -54,7 +54,7 @@ struct NavigationRowView: View {
             NotchButton(
                 systemName: "tray.fill",
                 title: "Tray",
-                color: .indigo,
+                color: .white,
                 bgSize: CGSize(width: ui(68), height: ui(26)),
                 textSize: ui(14),
                 isActive: container.panelState.expandedPreset == .tray,

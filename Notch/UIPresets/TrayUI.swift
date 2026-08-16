@@ -23,7 +23,7 @@ struct TrayUI: View {
             AirDropView()
                 
         }
-        .frame(width: ui(500), height: ui(150))
+        .frame(height: ui(150))
 
     }
 }

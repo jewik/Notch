@@ -94,11 +94,7 @@ struct FastFolderView: View {
                             .offset(x: ui(-8), y: ui(8))
                         }
                     }
-                                        
                     
-                    
-                    
-//                    .background(.red)
                 }
                 if container.fastFolderStore.folders.count < 3 {
                     Button (action: selectFolder) {
@@ -109,21 +105,20 @@ struct FastFolderView: View {
                                 .fill(.white.opacity(0.1))
                                 .padding(ui(10))
                                 .frame(width: ui(100), height: ui(80))
-
+                            
                         }
                     }
                     .padding(.top ,ui(4))
                     .buttonStyle(.plain)
                 }
-                
-                
             }
-            
-            
             
         }
         .padding(.top, ui(10))
         .frame(width: ui(300), height: ui(150), alignment: .top)
+        .onAppear {
+            container.fastFolderStore.refreshFolders()
+        }
         .onDisappear {
             isEditMode = false
         }
@@ -171,21 +166,19 @@ struct FastFolderButtonView: View {
         case "blue", "синий": return .blue
         case "purple", "фиолетовый": return .purple
         case "gray", "серый": return .gray
-        default: return .clear // Неизвестные теги игнорируем
-        }
+        default: return .clear        }
     }
     
     var body: some View {
 
         Button(action: action){
             VStack(alignment: .center, spacing: 0) {
-                ZStack(alignment: .topLeading) { // Точки будут внизу справа
+                ZStack(alignment: .topLeading) {
                     Image(nsImage: folderIcon)
                         .resizable()
                         .scaledToFit()
                         .frame(width: ui(70), height: ui(70))
                     
-                    // 2. Ряд цветных точек (теги)
                     if !tags.isEmpty {
                         VStack(spacing: ui(2)) {
 

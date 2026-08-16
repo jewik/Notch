@@ -45,13 +45,25 @@ struct NotchButton: View {
                     }
                 }
                 RoundedRectangle(cornerRadius: ui(bgSize.width / 2), style: .continuous)
-                .fill(isHighlighted ? color.opacity(0.14) : .clear)
+                    .fill(isHighlighted ? color.opacity(0.14) : .clear)
                     .frame(width: ui(bgSize.width), height: ui(bgSize.height))
+//                BlickShape()
+//                    .fill(isHighlighted ? color.opacity(0.14) : .clear)
+//                    .shadow(color: color, radius: bgSize.height / 2)
+//                    .padding(.leading , ui(bgSize.height / 3 * 2))
+//                    .frame(width: ui(bgSize.width), height: ui(bgSize.height))
+//                    .transition(.collapseExpandTransition)
+                
+                
             }
         }
         .buttonStyle(.plain)
         .foregroundStyle(isActive ? color : color.opacity(0.72))
-        .onHover { isHovered = $0 }
+        .onHover { hovering in
+            withAnimation (.smooth(duration: 0.2)) {
+                isHovered = hovering
+            }
+        }
     }
 }
 

@@ -7,7 +7,7 @@
 
 
 import SwiftUI
-
+import AppKit
 
 @MainActor
 final class PanelController {
@@ -67,4 +67,11 @@ final class PanelController {
         panelState.isNotificationTime = false
     }
     
+    func triggerMacHaptic() {
+
+        let performer = NSHapticFeedbackManager.defaultPerformer
+
+        performer.perform(.levelChange, performanceTime: .now)
+//        performer.perform(.levelChange, performanceTime: .now)
+    }
 }

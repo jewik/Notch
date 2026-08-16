@@ -16,17 +16,19 @@ struct HomeUI: View {
     }
     
     var body: some View {
-            HStack(alignment: .center, spacing: 0) {
-                
-                PlayerView()
-//                    .background(.red.opacity(0.1))
-                Divider()
-                    .padding(.vertical, ui(10))
-                
-                FastFolderView()
-//                    .background(.blue.opacity(0.1))
+        HStack(alignment: .center, spacing: 0) {
+            
+            PlayerView()
+            //                    .background(.red.opacity(0.1))
+            Divider()
+                .padding(.vertical, ui(10))
+
+            
+            FastFolderView()
+            //                    .background(.blue.opacity(0.1))
         }
-        .frame(width: ui(600), height: ui(150), alignment: .top)
+        .frame(height: ui(150))
+//        .background(.red)
     }
     
 }

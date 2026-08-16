@@ -33,7 +33,7 @@ struct AirDropView: View {
             }
         }
         .padding(ui(10))
-        .frame(width: ui(500), height: ui(150), alignment: .leading)
+        .frame(width: ui(500), height: ui(150), alignment: .center)
         
         .onDrop(
             of: [UTType.fileURL.identifier],

@@ -22,9 +22,9 @@ struct PanelView: View {
     private var panelShadowRadius: CGFloat {
         isPanelHovered || container.panelState.isNotificationTime ? ui(20) : 0
     }
-//    private var panelStrokeColor: Color {
-//        container.panelState.isExpanded ? .white.opacity(0.1) : .clear
-//    }
+    private var panelStrokeColor: Color {
+        container.panelState.panelMode == .expanded || container.panelState.isNotificationTime ? .white.opacity(0.05) : .clear
+    }
 
     private func ui(_ value: CGFloat) -> CGFloat {
         value * scale
@@ -51,7 +51,7 @@ struct PanelView: View {
                         uiScale: 1
                     )
                     .fill(.black)
-//                    .stroke(panelStrokeColor, lineWidth: ui(1))
+                    .stroke(panelStrokeColor, lineWidth: ui(1))
                     .shadow(color: .black, radius: panelShadowRadius)
                     .animation(resizeAnimation, value: panelShadowRadius)
 //                    .animation(.smooth, value: panelStrokeColor)
@@ -78,14 +78,7 @@ struct PanelView: View {
                     
                 
             }
-                .padding(
-                    EdgeInsets(
-                        top: 0,
-                        leading: ui(extraContentPadding),
-                        bottom: ui(extraContentPadding),
-                        trailing: ui(extraContentPadding)
-                    )
-                )
+            .padding([.leading, .trailing, .bottom], ui(extraContentPadding))
 
                 .onGeometryChange(for: CGSize.self) { geo in
                     geo.size
@@ -94,7 +87,12 @@ struct PanelView: View {
                     selectAnimation(to: size)
                     contentSize = size
                 }
-                .onHover { isPanelHovered = $0}
+                .onHover {
+                    isPanelHovered = $0
+                    if isPanelHovered {
+                        container.panelController.triggerMacHaptic()
+                    }
+                }
             
             // hande airdrop
                 .onDrop(

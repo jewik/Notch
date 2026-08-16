@@ -17,7 +17,7 @@ struct ExpandedContentView: View {
     }
     
     var body: some View {
-        VStack {
+        VStack (spacing: 0) {
             
             ZStack {
                 NavigationRowView()
