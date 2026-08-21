@@ -17,6 +17,8 @@ struct CollapsedContentView: View {
     @Environment(\.uiScale)
     private var scale: CGFloat
     
+    @State private var contentSize: CGSize = .zero
+    
     private func ui(_ value: CGFloat) -> CGFloat {
         value * scale
     }
@@ -42,7 +44,6 @@ struct CollapsedContentView: View {
             
             if container.panelState.isNotificationTime {
                 notificationView
-                    .animation(.smooth(duration: 0.5), value: container.panelState.isNotificationTime)
             }
         }
     }
@@ -52,10 +53,13 @@ struct CollapsedContentView: View {
         
         switch container.panelState.notification {
             case .greeting:
-            GreetingNotificationView().transition(.changePresetTransition)
+            GreetingNotificationView().transition(.collapseExpandTransition)
 
             case .valediction:
-            ValedictionNotificationView().transition(.changePresetTransition)
+            ValedictionNotificationView().transition(.collapseExpandTransition)
+            
+        case .airdrop:
+            AirDropNotificationView().transition(.collapseExpandTransition)
             
         }
     }

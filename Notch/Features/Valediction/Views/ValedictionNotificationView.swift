@@ -21,8 +21,7 @@ struct ValedictionNotificationView: View {
                 
                 
                 HStack (alignment: .center, spacing: ui(10)) {
-                    NotchButton(
-                        systemName: "",
+                    ValedictionButton(
                         title: "Cancel",
                         color: .indigo,
                         bgSize: CGSize(width: ui(100), height: ui(30)),
@@ -32,8 +31,7 @@ struct ValedictionNotificationView: View {
                             container.panelController.showExpandedPreset(.home)
                         })
 
-                    NotchButton(
-                        systemName: "",
+                    ValedictionButton(
                         title: "Terminate",
                         color: .red,
                         bgSize: CGSize(width: ui(100), height: ui(30)),
@@ -55,6 +53,56 @@ struct ValedictionNotificationView: View {
         }
     }
 }
+
+
+struct ValedictionButton: View {
+    var title: String
+    let color: Color
+    let bgSize: CGSize
+    let textSize: CGFloat
+    let isActive: Bool
+    var disabled: Bool?
+    let action: () -> Void
+
+    
+    @State private var isHovered = false
+
+    private var isHighlighted: Bool {
+        isActive || isHovered
+    }
+
+    var body: some View {
+        Button(action: action) {
+            ZStack(alignment: .center) {
+                    
+
+                        Text(title)
+                            .font(.system(size: textSize, weight: .semibold, design: .rounded))
+                            .lineLimit(1)
+                            .foregroundStyle(color)
+
+                
+                RoundedRectangle(cornerRadius: bgSize.width / 2, style: .continuous)
+                    .fill(isHighlighted ? color.opacity(0.14) : .clear)
+                    .frame(width: bgSize.width, height: bgSize.height)
+            }
+            .frame(width: bgSize.width, height: bgSize.height, alignment: .leading)
+            .clipShape(
+                RoundedRectangle(cornerRadius: bgSize.width / 2, style: .continuous)
+            )
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(isActive ? color : color.opacity(0.72))
+
+        .onHover { hovering in
+            withAnimation (.smooth(duration: 0.2)) {
+                isHovered = hovering
+            }
+        }
+        .disabled(disabled ?? false)
+    }
+}
+
 
 #Preview {
     ZStack {

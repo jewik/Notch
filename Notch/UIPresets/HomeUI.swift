@@ -18,8 +18,8 @@ struct HomeUI: View {
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
             
-            PlayerView()
-            //                    .background(.red.opacity(0.1))
+            AudioSwitcherView()
+//                                .background(.red.opacity(0.1))
             Divider()
                 .padding(.vertical, ui(10))
 
@@ -42,10 +42,21 @@ struct HomeUI: View {
         ZStack {
             PanelShape(uiScale: 1)
                 .fill(.black)
-            HomeUI()
-                .environment(AppContainer())
-//                .background(Color.cyan.opacity(0.1))
+            HStack(alignment: .center, spacing: 0) {
+                
+                AudioSwitcherView()
+                                    .background(.red.opacity(0.1))
+                Divider()
+                    .padding(.vertical, 10)
+
+                
+                FastFolderView()
+                                    .background(.blue.opacity(0.1))
+            }
+            .frame(height: 150)
+
         }
-    .frame(width: 600, height: 150, alignment: .top)
+//    .frame(width: 600, height: 150, alignment: .top)
+    .environment(AppContainer())
 
 }

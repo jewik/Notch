@@ -4,7 +4,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 // 6 points of width 300 UIs in total
-struct AirDropView: View {
+struct AirDropNotificationView: View {
 
     @Environment(\.uiScale)
     private var scale
@@ -41,12 +41,13 @@ struct AirDropView: View {
         ) {
             providers in
             print("AirDrop share called")
+            
             return AirDropService.share(providers)
         }
     }
 }
 
 #Preview {
-    AirDropView()
+    AirDropNotificationView()
         .background(Color.pink.opacity(0.1))
 }

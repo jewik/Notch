@@ -51,7 +51,7 @@ struct FastFolderView: View {
                     systemName: isEditMode ? "checkmark" : "square.and.pencil",
                     title: isEditMode ? "Done" : "Edit",
                     color: isEditMode ? .green : .indigo,
-                    bgSize: CGSize(width: ui(60), height: ui(26)),
+                    bgSize: CGSize(width: isEditMode ? ui(66): ui(60), height: ui(26)),
                     textSize: ui(14),
                     isActive: false,
                     action: {

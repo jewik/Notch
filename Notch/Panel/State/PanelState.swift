@@ -16,6 +16,7 @@ enum PanelMode {
 enum NotificationPreset {
     case greeting
     case valediction
+    case airdrop
 }
 
 

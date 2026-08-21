@@ -17,6 +17,12 @@ final class AppContainer {
 
     let fastFolderStore: FastFolderStore
     
+    let audioService: AudioDeviceServiceProtocol
+    let audioViewModel: AudioDeviceViewModel
+    
+    let bluetoothService: BluetoothDeviceServiceProtocol
+
+    
     init() {
         let panelState = PanelState()
         self.panelState = panelState
@@ -24,6 +30,18 @@ final class AppContainer {
         self.panelController = PanelController(panelState: panelState)
         
         self.fastFolderStore = FastFolderStore()
+        
+        
+        let audio = AudioDeviceService()
+        let bluetooth = BluetoothDeviceService()
+
+        self.audioService = audio
+        self.bluetoothService = bluetooth
+        
+        self.audioViewModel = AudioDeviceViewModel(
+            audioService: audio,
+            bluetoothService: bluetooth
+        )
         
         print("container init")
     }

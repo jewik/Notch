@@ -43,24 +43,13 @@ struct NavigationRowView: View {
                 systemName: "house.fill",
                 title: "Home",
                 color: .white,
-                bgSize: CGSize(width: ui(74), height: ui(26)),
+                bgSize: CGSize(width: ui(70), height: ui(26)),
                 textSize: ui(14),
                 isActive: container.panelState.expandedPreset == .home,
                 action: {
                     container.panelController.showExpandedPreset(.home)
                 })
             
-
-            NotchButton(
-                systemName: "tray.fill",
-                title: "Tray",
-                color: .white,
-                bgSize: CGSize(width: ui(68), height: ui(26)),
-                textSize: ui(14),
-                isActive: container.panelState.expandedPreset == .tray,
-                action: {
-                    container.panelController.showExpandedPreset(.tray)
-                })            
             Spacer()
             
             NotchButton(

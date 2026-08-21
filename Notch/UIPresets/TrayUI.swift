@@ -20,7 +20,7 @@ struct TrayUI: View {
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
                 
-            AirDropView()
+//            AirDropView()
                 
         }
         .frame(height: ui(150))

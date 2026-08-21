@@ -105,7 +105,7 @@ struct PanelView: View {
                 }
                 .onChange(of: isDragging) {oldValue, newValue in
                     if newValue {
-                        container.panelController.showExpandedPreset(.tray)
+                        container.panelController.showNotification(notification: .airdrop)
                     }
                 }
                 

@@ -43,19 +43,20 @@ final class PanelController {
     }
     
     func showNotification(notification: NotificationPreset, duration: TimeInterval = 3) {
-        hideTask?.cancel()
-        
-        panelState.notification = notification
-        panelState.isNotificationTime = true
-        
-        hideTask = Task {
-            try? await Task.sleep(for: .seconds(duration))
+        withAnimation (.smooth(duration: 0.5)){
+            hideTask?.cancel()
+            panelState.notification = notification
+            panelState.isNotificationTime = true
             
-            guard !Task.isCancelled else {
-                return
+            hideTask = Task {
+                try? await Task.sleep(for: .seconds(duration))
+                
+                guard !Task.isCancelled else {
+                    return
+                }
+                
+                panelState.isNotificationTime = false
             }
-            
-            panelState.isNotificationTime = false
         }
         
     }
