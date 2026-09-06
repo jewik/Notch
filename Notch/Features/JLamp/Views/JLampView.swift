@@ -11,19 +11,13 @@ import SwiftUI
 
 struct JLampView: View {
     
-    @Environment(\.uiScale) private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-    
     var body: some View {
         
         ZStack {
             
             HStack(spacing: 0) {
 
-                VStack(spacing: ui(20)) {
+                VStack(spacing: 20) {
                     
                     JLampSettingView()
                     JLampSettingView()
@@ -34,7 +28,7 @@ struct JLampView: View {
                 JLampImageView()
             }
         }
-        .frame(width: ui(300), height: ui(150))
+        .frame(width: 300, height: 150)
     }
 }
 
@@ -45,42 +39,30 @@ struct JLampView: View {
 }
 
 struct JLampImageView : View{
-    
-    @Environment(\.uiScale) private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
+
     
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: ui(30))
+            RoundedRectangle(cornerRadius: 30)
                 .fill(Color.clear.opacity(0.3))
-                .frame(width: ui(130), height: ui(130))
+                .frame(width: 130, height: 130)
 //                .background(Color.blue.opacity(0.5))
             Image(systemName: "homepod.fill")
-                .font(.system(size: ui(120), weight: .semibold))
+                .font(.system(size: 120, weight: .semibold))
         }
     }
 }
 
 struct JLampSettingView : View {
-    
-    @Environment(\.uiScale) private var scale
-    
-    var jLampModel = JLampModel()
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-    
-    
+
+var jLampModel = JLampModel()
+
     var body: some View {
         
         HStack {
             
             Image(systemName: "sun.max.fill")
-                .font(.system(size: ui(14), weight: .semibold))
+                .font(.system(size: 14, weight: .semibold))
             
 //            GlassSlider(
 //                value: $jLampModel.jBrightness
@@ -88,7 +70,7 @@ struct JLampSettingView : View {
 //                print("Brightness:", newValue)
 //            }
         }
-        .padding(.horizontal ,ui(10))
+        .padding(.horizontal ,10)
 
     }
 }

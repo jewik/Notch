@@ -15,15 +15,9 @@ struct NavigationRowView: View {
     @Environment(AppContainer.self)
     private var container
     
-    @Environment(\.uiScale)
-    private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
     
     var body: some View {
-        HStack (alignment: .center, spacing: ui(2)) {
+        HStack (alignment: .center, spacing: 2) {
             BackButton(
                 action: {
                     container.panelController.showCollapsedPreset()
@@ -33,9 +27,9 @@ struct NavigationRowView: View {
                 .padding(
                     EdgeInsets(
                         top: 0,
-                        leading: ui(10),
+                        leading: 10,
                         bottom: 0,
-                        trailing: ui(4)
+                        trailing: 4
                     )
                 )
             
@@ -43,8 +37,8 @@ struct NavigationRowView: View {
                 systemName: "house.fill",
                 title: "Home",
                 color: .white,
-                bgSize: CGSize(width: ui(70), height: ui(26)),
-                textSize: ui(14),
+                bgSize: CGSize(width: 70, height: 26),
+                textSize: 14,
                 isActive: container.panelState.expandedPreset == .home,
                 action: {
                     container.panelController.showExpandedPreset(.home)
@@ -56,14 +50,14 @@ struct NavigationRowView: View {
                 systemName: "gearshape.fill",
                 title: "",
                 color: .white,
-                bgSize: CGSize(width: ui(26), height: ui(26)),
-                textSize: ui(14),
+                bgSize: CGSize(width: 26, height: 26),
+                textSize: 14,
                 isActive: false,
                 action: {})
-            .padding(.trailing, ui(10))
+            .padding(.trailing, 10)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: ui(32))
+        .frame(height: 32)
     }
 }
 
@@ -72,13 +66,7 @@ struct BackButton: View {
     
     let action: () -> Void
     
-    @Environment(\.uiScale)
-    private var scale
     
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-
     var body: some View {
         Button(action: action) {
                     ZStack {
@@ -87,9 +75,9 @@ struct BackButton: View {
 
                         Circle()
                             .fill(.black.opacity(0.5))
-                            .frame(width: ui(5), height: ui(5))
+                            .frame(width: 5, height: 5)
                     }
-                    .frame(width: ui(14), height: ui(14))
+                    .frame(width: 14, height: 14)
                 }
         .buttonStyle(.plain)
 

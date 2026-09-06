@@ -5,12 +5,6 @@ struct AudioSwitcherView: View {
     @Environment(AppContainer.self)
     private var appContainer
     
-    @Environment(\.uiScale)
-    private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
     
     private var viewModel: AudioDeviceViewModel {
         appContainer.audioViewModel
@@ -19,14 +13,14 @@ struct AudioSwitcherView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 24) {
             
-            // ЛЕВАЯ КОЛОНКА: АКТИВНЫЕ ВЫХОДЫ
+            
             VStack(alignment: .leading, spacing: 12) {
                 Text("Output")
-                                    .font(.system(size: ui(20), weight: .semibold, design: .rounded))
-                                    .lineLimit(1)
+                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .lineLimit(1)
                 
                 ScrollView(.vertical, showsIndicators: true) {
-                    VStack(spacing: ui(2)) {
+                    VStack(spacing: 2) {
                         ForEach(viewModel.activeDevices) { device in
                             let isActive = device.id == viewModel.activeDeviceID
                             
@@ -35,13 +29,13 @@ struct AudioSwitcherView: View {
                                 systemName: device.type.iconName,
                                 title: device.name,
                                 color: .white,
-                                bgSize: CGSize(width: ui(120), height: ui(26)),
-                                textSize: ui(14),
+                                bgSize: CGSize(width: 120, height: 26),
+                                textSize: 14,
                                 isActive: isActive,
                                 action: {viewModel.selectActiveDevice(device)}
                             )
                             
-
+                            
                         }
                     }
                     .padding(.trailing, 4)
@@ -49,11 +43,10 @@ struct AudioSwitcherView: View {
             }
             .frame(maxWidth: .infinity)
             
-            // ПРАВАЯ КОЛОНКА: ОТКЛЮЧЕННЫЕ ЗАПОМНЕННЫЕ BLUETOOTH ДЕВАЙСЫ
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Bluetooth")
-                        .font(.system(size: ui(20), weight: .semibold, design: .rounded))
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
                         .lineLimit(1)
                     
                     if viewModel.isConnectingBluetooth {
@@ -63,7 +56,7 @@ struct AudioSwitcherView: View {
                 }
                 
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: ui(2)) {
+                    VStack(spacing: 2) {
                         if viewModel.rememberedBluetoothDevices.isEmpty {
                             Text("Нет доступных устройств")
                                 .font(.callout)
@@ -76,34 +69,12 @@ struct AudioSwitcherView: View {
                                     systemName: "beats.headphones",
                                     title: btDevice.name,
                                     color: .white,
-                                    bgSize: CGSize(width: ui(120), height: ui(26)),
-                                    textSize: ui(14),
+                                    bgSize: CGSize(width: 120, height: 26),
+                                    textSize: 14,
                                     isActive: false,
                                     disabled: viewModel.isConnectingBluetooth,
                                     action: {viewModel.connectBluetoothDevice(btDevice)}
                                 )
-                                
-//                                Button(action: {
-//                                    viewModel.connectBluetoothDevice(btDevice)
-//                                }) {
-//                                    HStack {
-//                                        Image(systemName: "beats.headphones")
-//                                            .frame(width: 20)
-//                                            .opacity(0.6)
-//                                        Text(btDevice.name)
-//                                            .lineLimit(1)
-//                                        Spacer()
-//                                        Image(systemName: "cable.connector.slash")
-//                                            .font(.caption)
-//                                            .foregroundColor(.gray)
-//                                    }
-//                                    .padding(.horizontal, 12)
-//                                    .padding(.vertical, 10)
-//                                    .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
-//                                    .cornerRadius(8)
-//                                }
-//                                .buttonStyle(.plain)
-//                                .disabled(viewModel.isConnectingBluetooth)
                             }
                         }
                     }
@@ -112,7 +83,7 @@ struct AudioSwitcherView: View {
             }
             .frame(maxWidth: .infinity)
         }
-        .padding(ui(14))
+        .padding(14)
         .frame(width: 300, height: 150)
     }
 }
@@ -124,16 +95,16 @@ struct AudioSwitcherView: View {
 
 
 #Preview {
-
+    
     ZStack {
-        PanelShape(uiScale: 1)
+        PanelShape()
             .fill(.black)
         
         AudioSwitcherView()
             .environment(AppContainer())
             .background(Color.blue.opacity(0.2))
-
-
+        
+        
     }
     .frame(width: 300, height: 150)
     .frame(width: 400, height: 300, alignment: .top)

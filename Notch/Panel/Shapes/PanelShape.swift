@@ -10,14 +10,9 @@ import SwiftUI
 
 struct UnionPanelShape: Shape {
     
-    let uiScale: CGFloat
     
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * uiScale
-    }
-    
-    private var botMaxRadius: CGFloat { ui(60) }
-    private var topMaxRadius: CGFloat { ui(30) }
+    private var botMaxRadius: CGFloat { 60 }
+    private var topMaxRadius: CGFloat { 30 }
     
     func path(in rect: CGRect) -> Path {
         var path: Path = Path()
@@ -29,10 +24,10 @@ struct UnionPanelShape: Shape {
         let botRadius: CGFloat = min(height / 2, botMaxRadius)
         
         path.move(to: CGPoint(x: 0, y: 0))
-        path.addLine(to: CGPoint(x: 0, y: ui(1)))
+        path.addLine(to: CGPoint(x: 0, y: 1))
         ContinuousCornerPath.add(
             addTo: &path,
-            startPoint: CGPoint(x: -topRadius, y: topRadius + ui(1)),
+            startPoint: CGPoint(x: -topRadius, y: topRadius + 1),
             radius: topRadius,
             angleType: .bottomLeft,
             inversion: true
@@ -40,21 +35,21 @@ struct UnionPanelShape: Shape {
         
         ContinuousCornerPath.add(
             addTo: &path,
-            startPoint: CGPoint(x: topRadius, y: height - botRadius + ui(1)),
+            startPoint: CGPoint(x: topRadius, y: height - botRadius + 1),
             radius: botRadius,
             angleType: .bottomLeft
         )
         
         ContinuousCornerPath.add(
             addTo: &path,
-            startPoint: CGPoint(x: width - botRadius - topRadius, y: height + ui(1)),
+            startPoint: CGPoint(x: width - botRadius - topRadius, y: height + 1),
             radius: botRadius,
             angleType: .bottomRight
         )
         
         ContinuousCornerPath.add(
             addTo: &path,
-            startPoint: CGPoint(x: width, y: ui(1)),
+            startPoint: CGPoint(x: width, y: 1),
             radius: topRadius,
             angleType: .topLeft,
             inversion: true
@@ -69,13 +64,7 @@ struct UnionPanelShape: Shape {
 
 struct PanelShape: Shape {
     
-    let uiScale: CGFloat
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * uiScale
-    }
-    
-    private var botMaxRadius: CGFloat { ui(60) }
+    private var botMaxRadius: CGFloat { 60 }
     
     func path(in rect: CGRect) -> Path {
         var path: Path = Path()
@@ -111,7 +100,7 @@ struct PanelShape: Shape {
 #Preview {
     ZStack () {
         ZStack (alignment: .top) {
-            UnionPanelShape(uiScale: 1)
+            UnionPanelShape()
                 .fill(Color.teal)
                 .shadow(color: Color.teal.opacity(0.8), radius: 20)
         }

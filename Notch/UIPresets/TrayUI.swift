@@ -33,7 +33,7 @@ struct TrayUI: View {
 #Preview {
     
     ZStack {
-        PanelShape(uiScale: 1)
+        PanelShape()
             .fill(.black)
         TrayUI()
             .background(Color.cyan.opacity(0.1))

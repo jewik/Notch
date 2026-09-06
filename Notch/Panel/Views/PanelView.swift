@@ -9,8 +9,6 @@ struct PanelView: View {
     @Environment(AppContainer.self)
     private var container
     
-    @Environment(\.uiScale)
-    private var scale
     
     @State private var contentSize: CGSize = .zero
     @State private var resizeAnimation: Animation = .smoothCollapceAnimation
@@ -20,14 +18,10 @@ struct PanelView: View {
     let extraContentPadding: CGFloat = 0
     
     private var panelShadowRadius: CGFloat {
-        isPanelHovered || container.panelState.isNotificationTime ? ui(20) : 0
+        isPanelHovered || container.panelState.isNotificationTime ? 20 : 0
     }
     private var panelStrokeColor: Color {
         container.panelState.panelMode == .expanded || container.panelState.isNotificationTime ? .white.opacity(0.05) : .clear
-    }
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
     }
     
     private func selectAnimation(to newSize: CGSize){
@@ -39,7 +33,7 @@ struct PanelView: View {
     }
     
     init() {
-        contentSize = CGSize(width: ui(184), height: ui(32))
+        contentSize = CGSize(width: 184, height: 32)
     }
     
     var body: some View {
@@ -47,18 +41,16 @@ struct PanelView: View {
         ZStack (alignment: .top){
             ZStack (alignment: .top) {
                 
-                UnionPanelShape(
-                    uiScale: 1
-                )
+                UnionPanelShape()
                 .fill(.black)
-                .stroke(panelStrokeColor, lineWidth: ui(1))
+                .stroke(panelStrokeColor, lineWidth: 1)
                 .shadow(color: .black, radius: panelShadowRadius)
                 .animation(resizeAnimation, value: panelShadowRadius)
                 //                    .animation(.smooth, value: panelStrokeColor)
                 
             }
             .frame(
-                width: contentSize.width + min(ui(30), contentSize.height / 4) * 2,
+                width: contentSize.width + min(30, contentSize.height / 4) * 2,
                 height: contentSize.height, alignment: .top
             )
             .animation(resizeAnimation, value: contentSize)
@@ -78,7 +70,7 @@ struct PanelView: View {
                 
                 
             }
-            .padding([.leading, .trailing, .bottom], ui(extraContentPadding))
+            .padding([.leading, .trailing, .bottom], extraContentPadding)
             
             .onGeometryChange(for: CGSize.self) { geo in
                 geo.size
@@ -111,7 +103,7 @@ struct PanelView: View {
             
             
         }
-        .frame(width: ui(1200), height: ui(300), alignment: .top)
+        .frame(width: 1200, height: 300, alignment: .top)
         //        .background(.red)
         
     }

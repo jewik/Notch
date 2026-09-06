@@ -11,13 +11,7 @@ import SwiftUI
 
 struct CollapsedPlayerView: View {
     
-    @Environment(\.uiScale) private var scale
-    
     @State private var isCoverHovered: Bool = false
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
     
     var body: some View {
         
@@ -27,37 +21,37 @@ struct CollapsedPlayerView: View {
             HStack (alignment: .center, spacing: 0) {
                 
                 ZStack {
-                    RoundedRectangle (cornerRadius: ui(8))
+                    RoundedRectangle (cornerRadius: 8)
                         .fill(Color.white.opacity(0.2))
-                        .frame(width: ui(26), height: ui(26))
+                        .frame(width: 26, height: 26)
                 }
                 .onHover { isCoverHovered = $0 }
                 
                 
                 ZStack {
                 }
-                .frame(width: ui(184), height: ui(32))
-                .padding(.horizontal, ui(4))
+                .frame(width: 184, height: 32)
+                .padding(.horizontal, 4)
                 //            .background(.red.opacity(0.2))
                 
                 
                 ZStack {
-                    RoundedRectangle (cornerRadius: ui(8))
+                    RoundedRectangle (cornerRadius: 8)
                         .fill(Color.white.opacity(0.2))
-                        .frame(width: ui(26), height: ui(26))
+                        .frame(width: 26, height: 26)
                 }
                 
                 
             }
-            .padding(.horizontal, ui(4))
+            .padding(.horizontal, 4)
             
             if isCoverHovered {
                 ZStack (alignment: .center) {
                     Text("Here is track name")
-                        .font(.system(size: ui(14), weight: .semibold, design: .rounded))
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .lineLimit(1)
                 }
-                .frame(width: ui(184), height: ui(32))
+                .frame(width: 184, height: 32)
                 .transition(.collapseExpandTransition)
             }
         }
@@ -68,7 +62,7 @@ struct CollapsedPlayerView: View {
 
 #Preview {
     ZStack {
-        PanelShape(uiScale: 1)
+        PanelShape()
             .fill(.black)
 
         

@@ -11,44 +11,30 @@ import SwiftUI
 // 6 (50) points of width 300 UIs in total
 struct PlayerView: View {
     
-    @Environment(\.uiScale)
-    private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-    
     var body: some View {
         
-        HStack(spacing: ui(10)) {
+        HStack(spacing: 10) {
             PlayerCoverView()
-            VStack(alignment: .leading, spacing: ui(22)){
+            VStack(alignment: .leading, spacing: 22){
                 PlayerInfoView()
                 PlayerButtonRowView()
             }
 //            .background(Color.gray.opacity(0.5))
         }
-        .padding(.horizontal , ui(10))
-        .frame(width: ui(300), height: ui(150), alignment: .center)
+        .padding(.horizontal , 10)
+        .frame(width: 300, height: 150, alignment: .center)
         
     }
 }
 
 struct PlayerCoverView: View {
     
-    @Environment(\.uiScale)
-    private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-    
     var body: some View {
         
         ZStack {
-            RoundedRectangle(cornerRadius: ui(30))
+            RoundedRectangle(cornerRadius: 30)
                 .fill(Color.gray.opacity(0.3))
-                .frame(width: ui(130), height: ui(130))
+                .frame(width: 130, height: 130)
 //                .background(Color.blue.opacity(0.5))
         }
     }
@@ -56,22 +42,15 @@ struct PlayerCoverView: View {
 
 struct PlayerInfoView: View {
     
-    @Environment(\.uiScale)
-    private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-    
     var body: some View {
         
         VStack(alignment: .leading, spacing: 0) {
             Text("The Silence")
-                .font(.system(size: ui(16), weight: .bold, design: .rounded))
+                .font(.system(size: 16, weight: .bold, design: .rounded))
             Text("The Universe")
-                .font(.system(size: ui(14), weight: .regular, design: .rounded)).opacity(0.8)
+                .font(.system(size: 14, weight: .regular, design: .rounded)).opacity(0.8)
             Text("The Void")
-                .font(.system(size: ui(14), weight: .regular, design: .rounded)).opacity(0.5)
+                .font(.system(size: 14, weight: .regular, design: .rounded)).opacity(0.5)
         }
 //        .background(Color.gray.opacity(0.5))
         
@@ -81,16 +60,9 @@ struct PlayerInfoView: View {
 
 struct PlayerButtonRowView : View{
 
-    @Environment(\.uiScale)
-    private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-    
     var body: some View {
         
-        HStack(spacing: ui(16)) {
+        HStack(spacing: 16) {
             Button(action: {}) {
                 Image(systemName: "star")
             }

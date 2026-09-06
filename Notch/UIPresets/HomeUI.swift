@@ -40,7 +40,7 @@ struct HomeUI: View {
 #Preview {
 
         ZStack {
-            PanelShape(uiScale: 1)
+            PanelShape()
                 .fill(.black)
             HStack(alignment: .center, spacing: 0) {
                 

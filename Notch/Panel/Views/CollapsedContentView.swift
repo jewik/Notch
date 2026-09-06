@@ -14,29 +14,22 @@ struct CollapsedContentView: View {
     @Environment(AppContainer.self)
     private var container
     
-    @Environment(\.uiScale)
-    private var scale: CGFloat
     
     @State private var contentSize: CGSize = .zero
-
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
     
     
     var body: some View {
-        VStack(spacing: ui(4)) {
+        VStack(spacing: 4) {
             
             ZStack(alignment: .top) {
                 
-//                            CollapsedPlayerView()
+                //                            CollapsedPlayerView()
                 
                 ZStack {
-                    PanelShape(uiScale: scale)
+                    PanelShape()
                         .fill(.black)
                 }
-                .frame(width: ui(184), height: ui(32), alignment: .top)
+                .frame(width: 184, height: 32, alignment: .top)
                 .onTapGesture {tap in
                     print("tapped")
                     container.panelController.showExpandedPreset(.home)
@@ -53,10 +46,10 @@ struct CollapsedContentView: View {
     private var notificationView: some View {
         
         switch container.panelState.notification {
-            case .greeting:
+        case .greeting:
             GreetingNotificationView().transition(.collapseExpandTransition)
-
-            case .valediction:
+            
+        case .valediction:
             ValedictionNotificationView().transition(.collapseExpandTransition)
             
         case .airdrop:

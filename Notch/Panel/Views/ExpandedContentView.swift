@@ -6,15 +6,9 @@ struct ExpandedContentView: View {
     @Environment(AppContainer.self)
     private var container
     
-    @Environment(\.uiScale)
-    private var scale
     
     @State private var isDragging: Bool = false
     @State private var navRowWidth: CGFloat = 500
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
     
     var body: some View {
         VStack (spacing: 0) {
@@ -22,8 +16,8 @@ struct ExpandedContentView: View {
             ZStack {
                 NavigationRowView()
             }
-            .frame(width: navRowWidth, height: ui(30))
-
+            .frame(width: navRowWidth, height: 30)
+            
             
             ZStack (alignment: .top){
                 content
@@ -44,7 +38,7 @@ struct ExpandedContentView: View {
         .onContinuousHover{ phase in
             if phase == .ended {
                 print("hoverEnded")
-
+                
                 container.panelController.showCollapsedPreset()
             }
         }
@@ -63,11 +57,11 @@ struct ExpandedContentView: View {
                 .transition(.collapseExpandTransition)
         }
     }
-
+    
 }
 
 struct TogglePresetButton: View {
-
+    
     let action: () -> Void
     
     @Environment(\.uiScale)
@@ -81,12 +75,12 @@ struct TogglePresetButton: View {
         Button(action: action) {
             
             ZStack(alignment: .center) {
-                RoundedRectangle(cornerRadius: ui(10))
+                RoundedRectangle(cornerRadius: 10)
                     .fill(Color.black.opacity(0.01))
-                    .frame(width: ui(184), height: ui(33))
+                    .frame(width: 184, height: 33)
                 
                 Text("Mr. Notch")
-                    .font(.system(size: ui(14), weight: .semibold, design: .rounded))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .lineLimit(1)
             }
         }

@@ -12,13 +12,6 @@ struct GreetingNotificationView: View {
     @Environment(AppContainer.self)
     private var container
     
-    @Environment(\.uiScale)
-    private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-    
     var body: some View {
         
         ZStack (alignment: .center) {
@@ -29,7 +22,7 @@ struct GreetingNotificationView: View {
                         container.panelController.showExpandedPreset(.home)
                 }
         }
-        .frame(width: ui(220), height: ui(140))
+        .frame(width: 220, height: 140)
 
     }
     
@@ -38,7 +31,7 @@ struct GreetingNotificationView: View {
 
 #Preview {
     ZStack {
-        PanelShape(uiScale: 1)
+        PanelShape()
             .fill(.black)
 
         

@@ -4,28 +4,20 @@ import SwiftUI
 
 struct ValedictionNotificationView: View {
     
-    @Environment(AppContainer.self)
+@Environment(AppContainer.self)
     private var container
-    
-    @Environment(\.uiScale)
-    private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-
     
     var body: some View {
         
         ZStack (alignment: .center) {
                 
                 
-                HStack (alignment: .center, spacing: ui(10)) {
+                HStack (alignment: .center, spacing: 10) {
                     ValedictionButton(
                         title: "Cancel",
                         color: .indigo,
-                        bgSize: CGSize(width: ui(100), height: ui(30)),
-                        textSize: ui(16),
+                        bgSize: CGSize(width: 100, height: 30),
+                        textSize: 16,
                         isActive: true,
                         action: {
                             container.panelController.showExpandedPreset(.home)
@@ -34,8 +26,8 @@ struct ValedictionNotificationView: View {
                     ValedictionButton(
                         title: "Terminate",
                         color: .red,
-                        bgSize: CGSize(width: ui(100), height: ui(30)),
-                        textSize: ui(16),
+                        bgSize: CGSize(width: 100, height: 30),
+                        textSize: 16,
                         isActive: true,
                         action: {
                             Task {
@@ -47,7 +39,7 @@ struct ValedictionNotificationView: View {
                 }
             
         }
-        .frame(width: ui(230), height: ui(40), alignment: .top)
+        .frame(width: 230, height: 40, alignment: .top)
         .onAppear {
             print("valediction called")
         }
@@ -106,7 +98,7 @@ struct ValedictionButton: View {
 
 #Preview {
     ZStack {
-        PanelShape(uiScale: 1)
+        PanelShape()
             .fill(.black)
 
         
