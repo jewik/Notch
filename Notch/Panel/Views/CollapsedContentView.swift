@@ -18,6 +18,7 @@ struct CollapsedContentView: View {
     private var scale: CGFloat
     
     @State private var contentSize: CGSize = .zero
+
     
     private func ui(_ value: CGFloat) -> CGFloat {
         value * scale

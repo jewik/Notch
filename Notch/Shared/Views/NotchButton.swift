@@ -13,16 +13,11 @@ struct NotchButton: View {
     let color: Color
     let bgSize: CGSize
     let textSize: CGFloat
-    let isActive: Bool
+    var isActive: Bool
     var disabled: Bool?
     let action: () -> Void
-
     
     @State private var isHovered = false
-
-    private var isHighlighted: Bool {
-        isActive || isHovered
-    }
 
     var body: some View {
         Button(action: action) {
@@ -32,22 +27,23 @@ struct NotchButton: View {
                         ZStack (alignment: .center) {
                             Image(systemName: systemName)
                                 .font(.system(size: textSize, weight: .semibold))
+                                .shadow(color: color, radius: isHovered ? textSize / 3 : 0)
                                 .foregroundStyle(color)
                         }
                         .frame(width: bgSize.height, height: bgSize.height)
                     }
                     
-                    
                     if let title, !title.isEmpty {
                         Text(title)
                             .font(.system(size: textSize, weight: .semibold, design: .rounded))
                             .lineLimit(1)
+                            .shadow(color: color, radius: isHovered ? textSize / 3 : 0)
                             .foregroundStyle(color)
                     }
                 }
                 
                 RoundedRectangle(cornerRadius: bgSize.width / 2, style: .continuous)
-                    .fill(isHighlighted ? color.opacity(0.14) : .clear)
+                    .fill(isActive ? color.opacity(0.15) : .clear)
                     .frame(width: bgSize.width, height: bgSize.height)
             }
             .frame(width: bgSize.width, height: bgSize.height, alignment: .leading)
@@ -56,8 +52,6 @@ struct NotchButton: View {
             )
         }
         .buttonStyle(.plain)
-        .foregroundStyle(isActive ? color : color.opacity(0.72))
-
         .onHover { hovering in
             withAnimation (.smooth(duration: 0.2)) {
                 isHovered = hovering

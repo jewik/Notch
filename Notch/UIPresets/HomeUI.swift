@@ -16,7 +16,7 @@ struct HomeUI: View {
     }
     
     var body: some View {
-        HStack(alignment: .center, spacing: 0) {
+        HStack(alignment: .top, spacing: 0) {
             
             AudioSwitcherView()
 //                                .background(.red.opacity(0.1))

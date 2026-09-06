@@ -25,7 +25,7 @@ struct PanelView: View {
     private var panelStrokeColor: Color {
         container.panelState.panelMode == .expanded || container.panelState.isNotificationTime ? .white.opacity(0.05) : .clear
     }
-
+    
     private func ui(_ value: CGFloat) -> CGFloat {
         value * scale
     }
@@ -41,30 +41,30 @@ struct PanelView: View {
     init() {
         contentSize = CGSize(width: ui(184), height: ui(32))
     }
-
+    
     var body: some View {
         
         ZStack (alignment: .top){
-                ZStack (alignment: .top) {
-                    
-                    UnionPanelShape(
-                        uiScale: 1
-                    )
-                    .fill(.black)
-                    .stroke(panelStrokeColor, lineWidth: ui(1))
-                    .shadow(color: .black, radius: panelShadowRadius)
-                    .animation(resizeAnimation, value: panelShadowRadius)
-//                    .animation(.smooth, value: panelStrokeColor)
-                    
-                }
-                .frame(
-                    width: contentSize.width + min(ui(30), contentSize.height / 4) * 2,
-                    height: contentSize.height, alignment: .top
+            ZStack (alignment: .top) {
+                
+                UnionPanelShape(
+                    uiScale: 1
                 )
-                .animation(resizeAnimation, value: contentSize)
-
-
-
+                .fill(.black)
+                .stroke(panelStrokeColor, lineWidth: ui(1))
+                .shadow(color: .black, radius: panelShadowRadius)
+                .animation(resizeAnimation, value: panelShadowRadius)
+                //                    .animation(.smooth, value: panelStrokeColor)
+                
+            }
+            .frame(
+                width: contentSize.width + min(ui(30), contentSize.height / 4) * 2,
+                height: contentSize.height, alignment: .top
+            )
+            .animation(resizeAnimation, value: contentSize)
+            
+            
+            
             
             ZStack(alignment: .top) {
                 
@@ -75,45 +75,45 @@ struct PanelView: View {
                 } else {
                     Text("pashalka")
                 }
-                    
+                
                 
             }
             .padding([.leading, .trailing, .bottom], ui(extraContentPadding))
-
-                .onGeometryChange(for: CGSize.self) { geo in
-                    geo.size
-                } action: { size in
-                    print(size)
-                    selectAnimation(to: size)
-                    contentSize = size
+            
+            .onGeometryChange(for: CGSize.self) { geo in
+                geo.size
+            } action: { size in
+                print(size)
+                selectAnimation(to: size)
+                contentSize = size
+            }
+            .onHover {
+                isPanelHovered = $0
+                if isPanelHovered {
+                    container.panelController.triggerMacHaptic()
                 }
-                .onHover {
-                    isPanelHovered = $0
-                    if isPanelHovered {
-                        container.panelController.triggerMacHaptic()
-                    }
-                }
+            }
             
             // hande airdrop
-                .onDrop(
-                    of: [UTType.fileURL],
-                    isTargeted: $isDragging
-                ) {
-                    providers in
-                    print("onDrop")
-                    return true
+            .onDrop(
+                of: [UTType.fileURL],
+                isTargeted: $isDragging
+            ) {
+                providers in
+                print("onDrop")
+                return true
+            }
+            .onChange(of: isDragging) {oldValue, newValue in
+                if newValue {
+                    container.panelController.showNotification(notification: .airdrop)
                 }
-                .onChange(of: isDragging) {oldValue, newValue in
-                    if newValue {
-                        container.panelController.showNotification(notification: .airdrop)
-                    }
-                }
-                
-
+            }
+            
+            
         }
         .frame(width: ui(1200), height: ui(300), alignment: .top)
-//        .background(.red)
-            
+        //        .background(.red)
+        
     }
 }
 

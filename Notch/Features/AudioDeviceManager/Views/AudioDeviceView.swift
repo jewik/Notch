@@ -41,27 +41,7 @@ struct AudioSwitcherView: View {
                                 action: {viewModel.selectActiveDevice(device)}
                             )
                             
-//                            Button(action: {
-//                                viewModel.selectActiveDevice(device)
-//                            }) {
-//                                HStack {
-//                                    Image(systemName: device.type.iconName)
-//                                        .frame(width: 20)
-//                                    Text(device.name)
-//                                        .lineLimit(1)
-//                                    Spacer()
-//                                    if isActive {
-//                                        Image(systemName: "checkmark.circle.fill")
-//                                            .foregroundColor(.white)
-//                                    }
-//                                }
-//                                .padding(.horizontal, 12)
-//                                .padding(.vertical, 10)
-//                                .background(isActive ? Color.accentColor : Color(NSColor.controlBackgroundColor))
-//                                .foregroundColor(isActive ? .white : .primary)
-//                                .cornerRadius(8)
-//                            }
-//                            .buttonStyle(.plain)
+
                         }
                     }
                     .padding(.trailing, 4)
@@ -82,7 +62,7 @@ struct AudioSwitcherView: View {
                     }
                 }
                 
-                ScrollView(.vertical, showsIndicators: true) {
+                ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: ui(2)) {
                         if viewModel.rememberedBluetoothDevices.isEmpty {
                             Text("Нет доступных устройств")
