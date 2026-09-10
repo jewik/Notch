@@ -29,7 +29,7 @@ struct CollapsedContentView: View {
                     PanelShape()
                         .fill(.black)
                 }
-                .frame(width: 184, height: 32, alignment: .top)
+                .frame(width: 184, height: 30, alignment: .top)
                 .onTapGesture {tap in
                     print("tapped")
                     container.panelController.showExpandedPreset(.home)

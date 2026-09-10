@@ -7,8 +7,8 @@ import AppKit
 
 enum OverlayPanelFactory {
 
-    static func makePanel(frame: NSRect) -> FloatingNotificationPanel {
-        let panel = FloatingNotificationPanel(
+    static func makePanel(frame: NSRect) -> FloatingPanel {
+        let panel = FloatingPanel(
             contentRect: frame,
             styleMask: [
                 .borderless,
@@ -23,7 +23,7 @@ enum OverlayPanelFactory {
         return panel
     }
 
-    private static func configure(_ panel: FloatingNotificationPanel) {
+    private static func configure(_ panel: FloatingPanel) {
         panel.isReleasedWhenClosed = false
 
         panel.isFloatingPanel = true

@@ -11,7 +11,7 @@ import SwiftUI
 struct UnionPanelShape: Shape {
     
     
-    private var botMaxRadius: CGFloat { 60 }
+    private var botMaxRadius: CGFloat { 50 }
     private var topMaxRadius: CGFloat { 30 }
     
     func path(in rect: CGRect) -> Path {
@@ -64,7 +64,7 @@ struct UnionPanelShape: Shape {
 
 struct PanelShape: Shape {
     
-    private var botMaxRadius: CGFloat { 60 }
+    private var botMaxRadius: CGFloat { 50 }
     
     func path(in rect: CGRect) -> Path {
         var path: Path = Path()

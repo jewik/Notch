@@ -3,13 +3,14 @@
 
 import AppKit
 import SwiftUI
+import ApplicationServices
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     
     let container = AppContainer()
     
-    private var overlayPanel: FloatingNotificationPanel?
+    private var overlayPanel: FloatingPanel?
     
     private var screenConfigurationObserver: NSObjectProtocol?
     
@@ -27,6 +28,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         
         startScreenObservers()
+        
+//        if requestAccessibilityPermission() {
+//            startSystemKeyMonitor()
+//        }
         
         showOverlayPanel()
     }
@@ -128,4 +133,44 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         return hostingView
     }
+    
+//    private func startSystemKeyMonitor() {
+//
+//        container.systemKeyMonitor.onAction = { [weak self] action in
+//            guard let self else {
+//                return
+//            }
+//
+//            switch action {
+//
+//            case .brightnessDown:
+//                print("Brightness down")
+//
+//                // например:
+//                // container.panelController.showBrightness(-1)
+//
+//            case .brightnessUp:
+//                print("Brightness up")
+//
+//            case .volumeDown:
+//                print("Volume down")
+//
+//            case .volumeUp:
+//                print("Volume up")
+//
+//            case .mute:
+//                print("Mute")
+//            }
+//        }
+//
+//        container.systemKeyMonitor.start()
+//    }
+//    
+//    func requestAccessibilityPermission() -> Bool {
+//        let options = [
+//            kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true
+//        ] as CFDictionary
+//
+//        return AXIsProcessTrustedWithOptions(options)
+//    }
 }

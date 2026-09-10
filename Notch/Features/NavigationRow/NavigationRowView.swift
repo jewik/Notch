@@ -57,7 +57,7 @@ struct NavigationRowView: View {
             .padding(.trailing, 10)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 32)
+        .frame(height: 30)
     }
 }
 

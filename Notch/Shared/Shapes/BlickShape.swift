@@ -8,6 +8,7 @@ import SwiftUI
 
 struct BlickShape: Shape {
     
+    
     func path(in rect: CGRect) -> Path {
         var path: Path = Path()
         

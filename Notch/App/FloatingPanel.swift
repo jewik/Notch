@@ -5,7 +5,7 @@
 
 import AppKit
 
-final class FloatingNotificationPanel: NSPanel {
+final class FloatingPanel: NSPanel {
 
     override var canBecomeKey: Bool {
         false

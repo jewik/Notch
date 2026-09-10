@@ -21,27 +21,27 @@ final class AppContainer {
     let audioViewModel: AudioDeviceViewModel
     
     let bluetoothService: BluetoothDeviceServiceProtocol
+    
+//    let systemKeyMonitor: SystemKeyMonitorService
 
     
     init() {
-        let panelState = PanelState()
-        self.panelState = panelState
+        
+        self.panelState = PanelState()
 
-        self.panelController = PanelController(panelState: panelState)
+        self.panelController = PanelController(panelState: self.panelState)
         
         self.fastFolderStore = FastFolderStore()
-        
-        
-        let audio = AudioDeviceService()
-        let bluetooth = BluetoothDeviceService()
 
-        self.audioService = audio
-        self.bluetoothService = bluetooth
+        self.audioService = AudioDeviceService()
+        self.bluetoothService = BluetoothDeviceService()
         
         self.audioViewModel = AudioDeviceViewModel(
-            audioService: audio,
-            bluetoothService: bluetooth
+            audioService: self.audioService,
+            bluetoothService: self.bluetoothService
         )
+        
+//        self.systemKeyMonitor = SystemKeyMonitorService()
         
         print("container init")
     }

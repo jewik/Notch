@@ -33,7 +33,7 @@ struct PanelView: View {
     }
     
     init() {
-        contentSize = CGSize(width: 184, height: 32)
+        contentSize = CGSize(width: 184, height: 30)
     }
     
     var body: some View {

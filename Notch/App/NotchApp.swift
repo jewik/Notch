@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct UITestsApp: App {
+struct NotchApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self)
     private var appDelegate
     
