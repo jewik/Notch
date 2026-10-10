@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     
     let container = AppContainer()
     
+    private let overlaySpace = PanelOverlaySpace()
     private var overlayPanel: FloatingPanel?
     
     private var screenConfigurationObserver: NSObjectProtocol?
@@ -61,10 +62,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         panel.contentView = makeHostingView()
         
+        overlaySpace?.add(panel)
         overlayPanel = panel
         
         panel.orderFrontRegardless()
     }
+    
+    func applicationWillTerminate(_ notification: Notification) {
+        overlayPanel?.orderOut(nil)
+        overlaySpace?.close()
+    }
+
     
     private func updateOverlayPanelFrame() {
         guard let panel = overlayPanel else {
@@ -83,6 +91,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             animate: false
         )
     }
+    
 
     
     private func targetScreen() -> NSScreen? {

@@ -1,221 +1,84 @@
-import AppKit
-import CoreGraphics
-import Carbon.HIToolbox
+
+
+import Cocoa
+import ApplicationServices
 
 final class SystemKeyMonitorService {
-
-    enum Action {
-        case brightnessDown
-        case brightnessUp
-        case volumeDown
-        case volumeUp
-        case mute
-    }
-
-    var onAction: ((Action) -> Void)?
-
-    private var eventTap: CFMachPort?
-    private var runLoopSource: CFRunLoopSource?
-
-    // NX_SYSDEFINED is not represented by a CGEventType case.
-    // It is the system-defined event type used for media keys.
-    private static let systemDefinedEventType = UInt32(NX_SYSDEFINED)
-
-    // MARK: - Start
-
-    func start() {
-        guard eventTap == nil else {
-            return
-        }
-
-        let eventMask: CGEventMask =
-            CGEventMask(1) << CGEventMask(Self.systemDefinedEventType)
-
-        let refcon = Unmanaged.passUnretained(self).toOpaque()
-
-        guard let tap = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
+    
+    
+    func setupEventTap() {
+        // 14 — это числовое значение (Raw Value) для событий NX_SYSDEFINED (медиа-клавиши)
+        let sysDefinedRawValue = 14
+        let eventMask = (1 << sysDefinedRawValue)
+        
+        guard let eventTap = CGEvent.tapCreate(
+            tap: .cghidEventTap,
             place: .headInsertEventTap,
             options: .defaultTap,
-            eventsOfInterest: eventMask,
-            callback: { proxy, type, event, refcon in
-
-                guard let refcon else {
-                    return Unmanaged.passUnretained(event)
+            eventsOfInterest: CGEventMask(eventMask), // передаем маску с флагом 14
+            callback: myEventTapCallback,
+            userInfo: nil
+        ) else {
+            print("Ошибка: Требуются права Accessibility (Специальные возможности)!")
+            return
+        }
+        
+        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
+        CGEvent.tapEnable(tap: eventTap, enable: true)
+    }
+    // Колбэк, который проверяет нажатые клавиши
+    let myEventTapCallback: CGEventTapCallBack = { (proxy, type, event, refcon) -> Unmanaged<CGEvent>? in
+        // Проверяем тип события по его числовому идентификатору (14 = System Defined)
+        if type.rawValue == 14 { // 14 = NX_SYSDEFINED (Системные медиа-клавиши)
+            let nsEvent = NSEvent(cgEvent: event)
+            
+            if nsEvent?.subtype.rawValue == 8 { // Subtype 8 = Auxiliary keys
+                let data = nsEvent?.data1 ?? 0
+                let keyCode = (data & 0xFFFF0000) >> 16
+                let keyState = ((data & 0xFF00) >> 8)
+                let isKeyDown = keyState == 0x0A // 0x0A - Нажатие кнопки
+                
+                if isKeyDown {
+                    switch keyCode {
+                    case 0: // NX_KEYTYPE_SOUND_UP
+                        print("Нажата кнопка: Громкость ВВЕРХ")
+                        //                            adjustVolume(by: 0.0625)
+                        SystemControlService.shared.adjustVolume(by: 0.0625)
+                        return nil // Блокируем системный HUD громкости
+                        
+                    case 1: // NX_KEYTYPE_SOUND_DOWN
+                        print("Нажата кнопка: Громкость ВНИЗ")
+                        //                            adjustVolume(by: -0.0625)
+                        SystemControlService.shared.adjustVolume(by: -0.0625)
+                        return nil // Блокируем системный HUD громкости
+                        
+                    case 2: // NX_KEYTYPE_BRIGHTNESS_UP
+                        print("Нажата кнопка: Яркость ВВЕРХ")
+                        //                            adjustBrightness(by: 0.0625)
+                        return nil // Блокируем системный HUD яркости
+                        //
+                        //                        case 3: // NX_KEYTYPE_BRIGHTNESS_DOWN
+                        //                            print("Нажата кнопка: Яркость ВНИЗ")
+                        ////                            adjustBrightness(by: -0.0625)
+                        //                            return nil // Блокируем системный HUD яркости
+                        //
+                        //                        case 7: // NX_KEYTYPE_MUTE
+                        //                            print("Нажата кнопка: MUTE")
+                        ////                            toggleMute()
+                        //                            return nil // Блокируем системный HUD мьюта
+                        
+                    default:
+                        break
+                    }
                 }
-
-                let service = Unmanaged<SystemKeyMonitorService>
-                    .fromOpaque(refcon)
-                    .takeUnretainedValue()
-
-                return service.handle(
-                    proxy: proxy,
-                    type: type,
-                    event: event
-                )
-            },
-            userInfo: refcon
-        ) else {
-            print("❌ Failed to create CGEvent tap")
-            print("   Check Accessibility permission.")
-            return
+            }
         }
-
-        eventTap = tap
-
-        guard let source = CFMachPortCreateRunLoopSource(
-            kCFAllocatorDefault,
-            tap,
-            0
-        ) else {
-            print("❌ Failed to create run loop source")
-
-            CGEvent.tapEnable(
-                tap: tap,
-                enable: false
-            )
-
-            eventTap = nil
-
-            return
-        }
-
-        runLoopSource = source
-
-        CFRunLoopAddSource(
-            CFRunLoopGetMain(),
-            source,
-            .commonModes
-        )
-
-        CGEvent.tapEnable(
-            tap: tap,
-            enable: true
-        )
-
-        print("✅ SystemKeyMonitor started")
-    }
-
-    // MARK: - Stop
-
-    func stop() {
-        if let eventTap {
-            CGEvent.tapEnable(
-                tap: eventTap,
-                enable: false
-            )
-        }
-
-        if let runLoopSource {
-            CFRunLoopRemoveSource(
-                CFRunLoopGetMain(),
-                runLoopSource,
-                .commonModes
-            )
-        }
-
-        eventTap = nil
-        runLoopSource = nil
-
-        print("🛑 SystemKeyMonitor stopped")
-    }
-
-    // MARK: - Event handling
-
-    private func handle(
-        proxy: CGEventTapProxy,
-        type: CGEventType,
-        event: CGEvent
-    ) -> Unmanaged<CGEvent>? {
-
-        // CGEventType does NOT have .systemDefined.
-        //
-        // Compare the raw value with NX_SYSDEFINED instead.
-        guard type.rawValue == Self.systemDefinedEventType else {
-            return Unmanaged.passUnretained(event)
-        }
-
-        guard let action = action(from: event) else {
-            return Unmanaged.passUnretained(event)
-        }
-
-        Task { @MainActor [weak self] in
-            self?.onAction?(action)
-        }
-
-        // IMPORTANT:
-        //
-        // Returning nil removes the event from the event stream.
-        //
-        // Therefore macOS does not receive the volume/brightness
-        // key event and its standard HUD/action is not triggered.
-        return nil
-    }
-
-    // MARK: - Decode media key
-
-    private func action(
-        from event: CGEvent
-    ) -> Action? {
-
-        guard let nsEvent = NSEvent(cgEvent: event) else {
-            return nil
-        }
-
-        guard nsEvent.type == .systemDefined else {
-            return nil
-        }
-
-        // Media keys are represented as system-defined events.
-        guard nsEvent.subtype == .screenChanged else {
-            return nil
-        }
-
-        let data1 = nsEvent.data1
-
-        // The high 16 bits contain the NX key type.
-        let keyCode = Int32(
-            (data1 >> 16) & 0xFFFF
-        )
-
-        // Bits 8...15 contain key state.
-        let keyState = Int32(
-            (data1 >> 8) & 0xFF
-        )
-
-        // 0xA = key down
-        // 0xB = key up
-        //
-        // We only want to react once when the key is pressed.
-        guard keyState == 0xA else {
-            return nil
-        }
-
-        switch keyCode {
-
-        case NX_KEYTYPE_BRIGHTNESS_DOWN:
-            return .brightnessDown
-
-        case NX_KEYTYPE_BRIGHTNESS_UP:
-            return .brightnessUp
-
-        case NX_KEYTYPE_SOUND_DOWN:
-            return .volumeDown
-
-        case NX_KEYTYPE_SOUND_UP:
-            return .volumeUp
-
-        case NX_KEYTYPE_MUTE:
-            return .mute
-
-        default:
-            return nil
-        }
-    }
-
-    deinit {
-        // `SystemKeyMonitorService` is deliberately NOT @MainActor,
-        // so deinit can safely perform this cleanup.
-        stop()
+            
+            let key = Unmanaged.passRetained(event)
+            print("key pressed", key)
+            return key
+        
+        
     }
 }

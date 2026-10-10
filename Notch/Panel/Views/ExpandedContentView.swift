@@ -15,6 +15,7 @@ struct ExpandedContentView: View {
             
             ZStack {
                 NavigationRowView()
+                    .padding(.horizontal, 10)
             }
             .frame(width: navRowWidth, height: 30)
             

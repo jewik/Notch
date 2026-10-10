@@ -17,21 +17,28 @@ struct NavigationRowView: View {
     
     
     var body: some View {
-        HStack (alignment: .center, spacing: 2) {
-            BackButton(
+        HStack (alignment: .center, spacing: 8) {
+            DotButton(
+                color: .red,
                 action: {
                     container.panelController.showCollapsedPreset()
                     container.panelController.showNotification(notification: .valediction, duration: 5)
                 }
-            )
-                .padding(
-                    EdgeInsets(
-                        top: 0,
-                        leading: 10,
-                        bottom: 0,
-                        trailing: 4
-                    )
-                )
+            ) {
+                Circle()
+                    .fill(.black.opacity(0.6))
+                    .frame(width: 5, height: 5)
+            }
+            
+//            DotButton(
+//                color: .indigo,
+//                action: {}
+//            ) {
+//                Image(systemName: "gearshape.fill")
+//                    .font(.system(size: 10, weight: .semibold))
+//                    .foregroundStyle(.black.opacity(0.6))
+//            }
+
             
             NotchButton(
                 systemName: "house.fill",
@@ -44,42 +51,37 @@ struct NavigationRowView: View {
                     container.panelController.showExpandedPreset(.home)
                 })
             
-            Spacer()
+//            Spacer()
             
-            NotchButton(
-                systemName: "gearshape.fill",
-                title: "",
-                color: .white,
-                bgSize: CGSize(width: 26, height: 26),
-                textSize: 14,
-                isActive: false,
-                action: {})
-            .padding(.trailing, 10)
-        }
-        .frame(maxWidth: .infinity)
+                    }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 30)
     }
 }
 
 
-struct BackButton: View {
+struct DotButton<InnerContent: View>: View {
     
+    let color: Color?
     let action: () -> Void
+    
+    @ViewBuilder
+    let innerContent: () -> InnerContent
+        
+    @State private var isHovered = false
     
     
     var body: some View {
         Button(action: action) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.red)
-
-                        Circle()
-                            .fill(.black.opacity(0.5))
-                            .frame(width: 5, height: 5)
-                    }
-                    .frame(width: 14, height: 14)
-                }
+            ZStack {
+                Circle()
+                    .fill(color ?? .white)
+                innerContent()
+            }
+            .frame(width: 14, height: 14)
+        }
         .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
 
     }
 }

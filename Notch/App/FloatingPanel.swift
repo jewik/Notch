@@ -14,4 +14,6 @@ final class FloatingPanel: NSPanel {
     override var canBecomeMain: Bool {
         false
     }
+    
+    @objc func _hasActiveAppearanceIgnoringKeyFocus() -> Bool { true }
 }

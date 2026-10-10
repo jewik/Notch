@@ -17,11 +17,11 @@ struct PanelView: View {
     
     let extraContentPadding: CGFloat = 0
     
-    private var panelShadowRadius: CGFloat {
-        isPanelHovered || container.panelState.isNotificationTime ? 20 : 0
+    private var panelShadowColor: Color {
+        isPanelHovered || container.panelState.isNotificationTime ? .black.opacity(0.8) : .clear
     }
     private var panelStrokeColor: Color {
-        container.panelState.panelMode == .expanded || container.panelState.isNotificationTime ? .white.opacity(0.05) : .clear
+        container.panelState.panelMode == .expanded || container.panelState.isNotificationTime ? .white.opacity(0.08) : .clear
     }
     
     private func selectAnimation(to newSize: CGSize){
@@ -41,12 +41,32 @@ struct PanelView: View {
         ZStack (alignment: .top){
             ZStack (alignment: .top) {
                 
-                UnionPanelShape()
-                .fill(.black)
-                .stroke(panelStrokeColor, lineWidth: 1)
-                .shadow(color: .black, radius: panelShadowRadius)
-                .animation(resizeAnimation, value: panelShadowRadius)
-                //                    .animation(.smooth, value: panelStrokeColor)
+                Color.clear
+                    .glassEffect(.clear, in: UnionPanelShape())
+                    .environment(\.appearsActive, true)
+                    .materialActiveAppearance(.active)
+                    .animation(resizeAnimation, value: panelShadowColor)
+                
+                GeometryReader { geometry in
+                    let totalHeight = geometry.size.height
+
+                    let blackStop = totalHeight > 0 ? (30.0 / totalHeight) : 0.0
+                    
+                    UnionPanelShape()
+                        .fill(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .black, location: 0.0),
+                                    .init(color: .black, location: blackStop),
+                                    .init(color: .black.opacity(0.1), location: 1.0)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .shadow(color: panelShadowColor, radius: 20)
+                        .animation(resizeAnimation, value: panelShadowColor)
+                }
                 
             }
             .frame(

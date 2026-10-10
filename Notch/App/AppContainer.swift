@@ -22,7 +22,7 @@ final class AppContainer {
     
     let bluetoothService: BluetoothDeviceServiceProtocol
     
-//    let systemKeyMonitor: SystemKeyMonitorService
+    let systemKeyMonitor: SystemKeyMonitorService
 
     
     init() {
@@ -41,8 +41,14 @@ final class AppContainer {
             bluetoothService: self.bluetoothService
         )
         
-//        self.systemKeyMonitor = SystemKeyMonitorService()
+        self.systemKeyMonitor = SystemKeyMonitorService()
         
         print("container init")
+        startServices()
+    }
+    
+    
+    func startServices(){
+        systemKeyMonitor.setupEventTap()
     }
 }
