@@ -11,9 +11,9 @@ import AppKit
 
 @MainActor
 final class PanelController {
+
     
     private let panelState: PanelState
-
     
     private var hideTask: Task<Void, Never>?
     

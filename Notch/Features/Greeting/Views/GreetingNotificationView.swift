@@ -19,7 +19,7 @@ struct GreetingNotificationView: View {
                 Text("Hola!")
                     .font(.system(size: 40, weight: .bold, design: .rounded))
                     .onTapGesture {tap in
-                        container.panelController.showExpandedPreset(.home)
+                        container.controller.showExpandedPreset(.home)
                 }
         }
         .frame(width: 220, height: 140)

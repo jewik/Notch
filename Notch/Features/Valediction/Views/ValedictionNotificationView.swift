@@ -4,8 +4,6 @@ import SwiftUI
 
 struct ValedictionNotificationView: View {
     
-@Environment(AppContainer.self)
-    private var container
     
     var body: some View {
         
@@ -20,7 +18,7 @@ struct ValedictionNotificationView: View {
                         textSize: 16,
                         isActive: true,
                         action: {
-                            container.panelController.showExpandedPreset(.home)
+                            AppContainer.shared.controller.showExpandedPreset(.home)
                         })
 
                     ValedictionButton(
@@ -31,7 +29,7 @@ struct ValedictionNotificationView: View {
                         isActive: true,
                         action: {
                             Task {
-                                container.panelController.hideNotification()
+                                AppContainer.shared.controller.hideNotification()
                                 try? await Task.sleep(for: .seconds(1))
                                 NSApplication.shared.terminate(nil)
                             }

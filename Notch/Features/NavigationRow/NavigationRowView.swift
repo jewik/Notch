@@ -12,17 +12,14 @@ import SwiftUI
 
 struct NavigationRowView: View {
     
-    @Environment(AppContainer.self)
-    private var container
-    
-    
+
     var body: some View {
         HStack (alignment: .center, spacing: 8) {
             DotButton(
                 color: .red,
                 action: {
-                    container.panelController.showCollapsedPreset()
-                    container.panelController.showNotification(notification: .valediction, duration: 5)
+                    AppContainer.shared.controller.showCollapsedPreset()
+                    AppContainer.shared.controller.showNotification(notification: .valediction, duration: 5)
                 }
             ) {
                 Circle()
@@ -46,9 +43,9 @@ struct NavigationRowView: View {
                 color: .white,
                 bgSize: CGSize(width: 70, height: 26),
                 textSize: 14,
-                isActive: container.panelState.expandedPreset == .home,
+                isActive: AppContainer.shared.panelState.expandedPreset == .home,
                 action: {
-                    container.panelController.showExpandedPreset(.home)
+                    AppContainer.shared.controller.showExpandedPreset(.home)
                 })
             
 //            Spacer()

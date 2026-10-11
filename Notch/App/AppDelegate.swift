@@ -8,8 +8,6 @@ import ApplicationServices
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     
-    let container = AppContainer()
-    
     private let overlaySpace = PanelOverlaySpace()
     private var overlayPanel: FloatingPanel?
     
@@ -24,17 +22,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(
         _ notification: Notification
     ) {
-        // The app has no Dock icon and does not behave
-        // like a regular foreground application.
+
         NSApp.setActivationPolicy(.accessory)
         
+        MediaKeysGatekeeperService.shared.start()
+        
         startScreenObservers()
-        
-//        if requestAccessibilityPermission() {
-//            startSystemKeyMonitor()
-//        }
-        
         showOverlayPanel()
+    }
+    
+    func applicationWillTerminate(_ notification: Notification) {
+        
+        MediaKeysGatekeeperService.shared.stop()
+        
+        overlayPanel?.orderOut(nil)
+        overlaySpace?.close()
     }
     
     deinit {
@@ -68,10 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.orderFrontRegardless()
     }
     
-    func applicationWillTerminate(_ notification: Notification) {
-        overlayPanel?.orderOut(nil)
-        overlaySpace?.close()
-    }
+
 
     
     private func updateOverlayPanelFrame() {
@@ -125,7 +124,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func makeHostingView() -> NSView {
         let rootView = PanelView()
-            .environment(container)
+            .environment(AppContainer.shared)
         
         let hostingView = NSHostingView(
             rootView: rootView

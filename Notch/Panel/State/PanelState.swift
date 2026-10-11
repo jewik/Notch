@@ -17,6 +17,7 @@ enum NotificationPreset {
     case greeting
     case valediction
     case airdrop
+    case HUD
 }
 
 

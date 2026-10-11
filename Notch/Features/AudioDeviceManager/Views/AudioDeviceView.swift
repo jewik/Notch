@@ -2,12 +2,8 @@ import SwiftUI
 
 struct AudioSwitcherView: View {
     
-    @Environment(AppContainer.self)
-    private var appContainer
-    
-    
     private var viewModel: AudioDeviceViewModel {
-        appContainer.audioViewModel
+        AppContainer.shared.audioViewModel
     }
     
     var body: some View {

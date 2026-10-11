@@ -25,7 +25,7 @@ struct AirDropNotificationView: View {
             }
         }
         .padding(10)
-        .frame(width: 500, height: 150, alignment: .center)
+        .frame(width: 300, height: 100, alignment: .center)
         
         .onDrop(
             of: [UTType.fileURL.identifier],

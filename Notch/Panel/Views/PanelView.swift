@@ -18,10 +18,10 @@ struct PanelView: View {
     let extraContentPadding: CGFloat = 0
     
     private var panelShadowColor: Color {
-        isPanelHovered || container.panelState.isNotificationTime ? .black.opacity(0.8) : .clear
+        isPanelHovered || AppContainer.shared.panelState.isNotificationTime ? .black.opacity(0.8) : .clear
     }
     private var panelStrokeColor: Color {
-        container.panelState.panelMode == .expanded || container.panelState.isNotificationTime ? .white.opacity(0.08) : .clear
+        AppContainer.shared.panelState.panelMode == .expanded || AppContainer.shared.panelState.isNotificationTime ? .white.opacity(0.08) : .clear
     }
     
     private func selectAnimation(to newSize: CGSize){
@@ -50,15 +50,14 @@ struct PanelView: View {
                 GeometryReader { geometry in
                     let totalHeight = geometry.size.height
 
-                    let blackStop = totalHeight > 0 ? (30.0 / totalHeight) : 0.0
-                    
+                    let blackStop = totalHeight <= 30 ? 1.0 : 30.0 / totalHeight
                     UnionPanelShape()
                         .fill(
                             LinearGradient(
                                 stops: [
                                     .init(color: .black, location: 0.0),
                                     .init(color: .black, location: blackStop),
-                                    .init(color: .black.opacity(0.1), location: 1.0)
+                                    .init(color: .black.opacity(0.2), location: 1.0)
                                 ],
                                 startPoint: .top,
                                 endPoint: .bottom
@@ -80,9 +79,9 @@ struct PanelView: View {
             
             ZStack(alignment: .top) {
                 
-                if container.panelState.panelMode == .collapsed {
+                if AppContainer.shared.panelState.panelMode == .collapsed {
                     CollapsedContentView().transition(.collapseExpandTransition)
-                } else if container.panelState.panelMode == .expanded {
+                } else if AppContainer.shared.panelState.panelMode == .expanded {
                     ExpandedContentView().transition(.collapseExpandTransition)
                 } else {
                     Text("pashalka")
@@ -102,7 +101,7 @@ struct PanelView: View {
             .onHover {
                 isPanelHovered = $0
                 if isPanelHovered {
-                    container.panelController.triggerMacHaptic()
+                    AppContainer.shared.controller.triggerMacHaptic()
                 }
             }
             
@@ -117,7 +116,7 @@ struct PanelView: View {
             }
             .onChange(of: isDragging) {oldValue, newValue in
                 if newValue {
-                    container.panelController.showNotification(notification: .airdrop)
+                    AppContainer.shared.controller.showNotification(notification: .airdrop)
                 }
             }
             

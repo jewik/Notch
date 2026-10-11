@@ -11,10 +11,6 @@ import SwiftUI
 
 struct CollapsedContentView: View {
     
-    @Environment(AppContainer.self)
-    private var container
-    
-    
     @State private var contentSize: CGSize = .zero
     
     
@@ -32,11 +28,12 @@ struct CollapsedContentView: View {
                 .frame(width: 184, height: 30, alignment: .top)
                 .onTapGesture {tap in
                     print("tapped")
-                    container.panelController.showExpandedPreset(.home)
+                    AppContainer.shared.controller.showExpandedPreset(.home)
+//                    container.panelController.showExpandedPreset(.home)
                 }
             }
             
-            if container.panelState.isNotificationTime {
+            if AppContainer.shared.panelState.isNotificationTime {
                 notificationView
             }
         }
@@ -45,7 +42,7 @@ struct CollapsedContentView: View {
     @ViewBuilder
     private var notificationView: some View {
         
-        switch container.panelState.notification {
+        switch AppContainer.shared.panelState.notification {
         case .greeting:
             GreetingNotificationView().transition(.collapseExpandTransition)
             
@@ -55,6 +52,11 @@ struct CollapsedContentView: View {
         case .airdrop:
             AirDropNotificationView().transition(.collapseExpandTransition)
             
+        case .HUD:
+            HUDNotificationView(
+                systemName: AppContainer.shared.HUDViewmodel.kind.symbolName,
+                progress: AppContainer.shared.HUDViewmodel.value
+            ).transition(.collapseExpandTransition)
         }
     }
 }

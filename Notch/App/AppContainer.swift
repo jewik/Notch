@@ -11,9 +11,11 @@ import Observation
 @MainActor
 final class AppContainer {
     
+    static let shared = AppContainer()
+    
     let panelState: PanelState
     
-    let panelController: PanelController
+    let controller: PanelController
 
     let fastFolderStore: FastFolderStore
     
@@ -22,14 +24,14 @@ final class AppContainer {
     
     let bluetoothService: BluetoothDeviceServiceProtocol
     
-    let systemKeyMonitor: SystemKeyMonitorService
+    let HUDViewmodel: HUDViewModel
 
     
     init() {
         
         self.panelState = PanelState()
 
-        self.panelController = PanelController(panelState: self.panelState)
+        self.controller = PanelController(panelState: self.panelState)
         
         self.fastFolderStore = FastFolderStore()
 
@@ -41,14 +43,10 @@ final class AppContainer {
             bluetoothService: self.bluetoothService
         )
         
-        self.systemKeyMonitor = SystemKeyMonitorService()
+        self.HUDViewmodel = HUDViewModel()
         
         print("container init")
-        startServices()
+
     }
     
-    
-    func startServices(){
-        systemKeyMonitor.setupEventTap()
-    }
 }

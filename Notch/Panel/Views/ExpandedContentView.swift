@@ -2,10 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ExpandedContentView: View {
-    
-    @Environment(AppContainer.self)
-    private var container
-    
+
     
     @State private var isDragging: Bool = false
     @State private var navRowWidth: CGFloat = 500
@@ -40,7 +37,7 @@ struct ExpandedContentView: View {
             if phase == .ended {
                 print("hoverEnded")
                 
-                container.panelController.showCollapsedPreset()
+                AppContainer.shared.controller.showCollapsedPreset()
             }
         }
         .animation(.smooth(duration: 0.5), value: navRowWidth)
@@ -49,7 +46,7 @@ struct ExpandedContentView: View {
     
     @ViewBuilder
     private var content: some View {
-        switch  container.panelState.expandedPreset {
+        switch  AppContainer.shared.panelState.expandedPreset {
         case .home:
             HomeUI()
                 .transition(.collapseExpandTransition)
