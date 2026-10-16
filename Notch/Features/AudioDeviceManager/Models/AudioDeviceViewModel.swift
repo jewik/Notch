@@ -5,12 +5,13 @@ import Observation
 final class AudioDeviceViewModel {
     // Списки для UI
     private(set) var activeDevices: [AudioDevice] = []
-    private(set) var rememberedBluetoothDevices: [RememberedBluetoothDevice] = []
+    private(set) var rememberedBluetoothDevices: [BluetoothDevice] = []
     private(set) var activeDeviceID: UInt32 = 0
     private(set) var isConnectingBluetooth: Bool = false
     
     private let audioService: AudioDeviceServiceProtocol
     private let bluetoothService: BluetoothDeviceServiceProtocol
+    private var bluetoothDevicesObserver: NSObjectProtocol?
     
     init(audioService: AudioDeviceServiceProtocol, bluetoothService: BluetoothDeviceServiceProtocol) {
         self.audioService = audioService
@@ -24,7 +25,7 @@ final class AudioDeviceViewModel {
         audioService.setAsDefaultOutputDevice(device.id)
     }
     
-    func connectBluetoothDevice(_ device: RememberedBluetoothDevice) {
+    func connectBluetoothDevice(_ device: BluetoothDevice) {
         isConnectingBluetooth = true
         bluetoothService.connectDevice(device) { [weak self] success in
             self?.isConnectingBluetooth = false
@@ -56,11 +57,23 @@ final class AudioDeviceViewModel {
             self?.activeDeviceID = newActiveID
         }
         
-        // Слушатель изменений статуса Bluetooth на системном уровне
-        bluetoothService.onBluetoothDevicesChanged = { [weak self] _ in
+        // NotificationCenter позволяет нескольким feature/view model независимо
+        // слушать общий Bluetooth-сервис, не перезаписывая callback друг друга.
+        bluetoothDevicesObserver = NotificationCenter.default.addObserver(
+            forName: .bluetoothDevicesDidChange,
+            object: bluetoothService,
+            queue: .main
+        ) { [weak self] _ in
             self?.refreshAll()
         }
         
         audioService.startListening()
+    }
+
+    deinit {
+        if let bluetoothDevicesObserver {
+            NotificationCenter.default.removeObserver(bluetoothDevicesObserver)
+        }
+        audioService.stopListening()
     }
 }

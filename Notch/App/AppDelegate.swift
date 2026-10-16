@@ -26,14 +26,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         
         MediaKeysGatekeeperService.shared.start()
+        BluetoothDeviceService.shared.start()
         
         startScreenObservers()
         showOverlayPanel()
+        AppContainer.shared.controller.startBluetoothNotifications(
+            from: BluetoothDeviceService.shared
+        )
     }
     
     func applicationWillTerminate(_ notification: Notification) {
         
         MediaKeysGatekeeperService.shared.stop()
+        AppContainer.shared.controller.stopBluetoothNotifications()
+        BluetoothDeviceService.shared.stop()
         
         overlayPanel?.orderOut(nil)
         overlaySpace?.close()

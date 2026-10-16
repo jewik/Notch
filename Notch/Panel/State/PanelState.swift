@@ -18,6 +18,7 @@ enum NotificationPreset {
     case valediction
     case airdrop
     case HUD
+    case bluetooth
 }
 
 

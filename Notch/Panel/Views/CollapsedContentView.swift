@@ -57,6 +57,13 @@ struct CollapsedContentView: View {
                 systemName: AppContainer.shared.HUDViewmodel.kind.symbolName,
                 progress: AppContainer.shared.HUDViewmodel.value
             ).transition(.collapseExpandTransition)
+
+        case .bluetooth:
+            BluetoothNotificationView(
+                systemName: AppContainer.shared.bluetoothNotificationViewModel.symbolName,
+                deviceName: AppContainer.shared.bluetoothNotificationViewModel.deviceName,
+                message: AppContainer.shared.bluetoothNotificationViewModel.message
+            ).transition(.collapseExpandTransition)
         }
     }
 }
