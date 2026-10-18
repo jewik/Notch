@@ -22,7 +22,6 @@ struct CollapsedContentView: View {
             
             ZStack(alignment: .top) {
                 
-                
                 ZStack {
                     PanelShape()
                         .fill(.black)
@@ -39,34 +38,6 @@ struct CollapsedContentView: View {
             }
         }
     }
-    
-//    @ViewBuilder
-//    private var notificationView: some View {
-//        
-//        switch AppContainer.shared.panelState.notification {
-//        case .greeting:
-//            GreetingNotificationView().transition(.collapseExpandTransition)
-//            
-//        case .valediction:
-//            ValedictionNotificationView().transition(.collapseExpandTransition)
-//            
-//        case .airdrop:
-//            AirDropNotificationView().transition(.collapseExpandTransition)
-//            
-//        case .HUD:
-//            HUDNotificationView(
-//                systemName: AppContainer.shared.HUDViewmodel.kind.symbolName,
-//                progress: AppContainer.shared.HUDViewmodel.value
-//            ).transition(.collapseExpandTransition)
-//
-//        case .bluetooth:
-//            BluetoothNotificationView(
-//                systemName: AppContainer.shared.bluetoothNotificationViewModel.symbolName,
-//                deviceName: AppContainer.shared.bluetoothNotificationViewModel.deviceName,
-//                message: AppContainer.shared.bluetoothNotificationViewModel.message
-//            ).transition(.collapseExpandTransition)
-//        }
-//    }
 }
 
 

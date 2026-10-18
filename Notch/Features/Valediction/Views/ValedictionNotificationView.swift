@@ -1,6 +1,7 @@
 
 
 import SwiftUI
+import os
 
 struct ValedictionNotificationView: PanelNotification {
     
@@ -27,6 +28,7 @@ struct ValedictionNotificationContentView: View {
                     isActive: true,
                     action: {
                         AppContainer.shared.controller.showExpandedPreset(.home)
+                        PanelNotificationsService.shared.hideCurrent()
                     })
                 
                 ValedictionButton(
@@ -40,9 +42,6 @@ struct ValedictionNotificationContentView: View {
             
         }
         .frame(width: 230, height: 40, alignment: .top)
-        .onAppear {
-            print("valediction called")
-        }
     }
 }
 

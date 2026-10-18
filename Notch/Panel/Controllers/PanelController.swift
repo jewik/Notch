@@ -33,13 +33,13 @@ final class PanelController {
     }
     
     func showCollapsedPreset() {
-        withAnimation (.smooth(duration: 0.5)) {
+        withAnimation (.smooth) {
             setPanelMode(.collapsed)
         }
     }
     
     func showExpandedPreset(_ preset: ExpandedPreset) {
-        withAnimation (.smooth(duration: 0.5)) {
+        withAnimation (.smooth) {
             setPanelMode(.expanded)
             panelState.expandedPreset = preset
         }

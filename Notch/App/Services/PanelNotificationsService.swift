@@ -44,6 +44,16 @@ final class PanelNotificationsService {
         }
     }
     
+    
+    func hideCurrent() {
+        dismissTask?.cancel()
+        dismissTask = nil
+        
+        withAnimation(.smooth) {
+            currentNotification = nil
+        }
+    }
+    
     private func show(_ notification: PanelNotification) {
         
         dismissTask?.cancel()
@@ -53,15 +63,12 @@ final class PanelNotificationsService {
         }
         
         dismissTask = Task {
-            
             let nanoseconds = UInt64(notification.duration * 1_000_000_000)
             try? await Task.sleep(nanoseconds: nanoseconds)
             
-            
             if !Task.isCancelled {
-                withAnimation(.smooth) {
-                    currentNotification = nil
-                }
+                // Используем новый метод для консистентного скрытия
+                hideCurrent()
             }
         }
     }

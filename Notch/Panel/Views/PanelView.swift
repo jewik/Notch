@@ -6,12 +6,8 @@ import os
 
 struct PanelView: View {
     
-    @Environment(AppContainer.self)
-    private var container
-    
-    
     @State private var contentSize: CGSize = .zero
-    @State private var resizeAnimation: Animation = .smoothCollapceAnimation
+    @State private var resizeAnimation: Animation = .smooth
     @State private var isPanelHovered: Bool = false
     @State private var isDragging: Bool = false
     
@@ -26,9 +22,9 @@ struct PanelView: View {
     
     private func selectAnimation(to newSize: CGSize){
         if newSize.width >= self.contentSize.width && newSize.height >= self.contentSize.height {
-            resizeAnimation = .bouncy(duration: 0.5)
+            resizeAnimation = .bouncy
         } else {
-            resizeAnimation = .smooth(duration: 0.5)
+            resizeAnimation = .smooth
         }
     }
     
@@ -39,65 +35,20 @@ struct PanelView: View {
     var body: some View {
         
         ZStack (alignment: .top){
-            ZStack (alignment: .top) {
-                
-                Color.clear
-                    .glassEffect(.clear, in: UnionPanelShape())
-                    .environment(\.appearsActive, true)
-                    .materialActiveAppearance(.active)
-                    .animation(resizeAnimation, value: panelShadowColor)
-                
-                GeometryReader { geometry in
-                    let totalHeight = geometry.size.height
 
-                    let blackStop = totalHeight <= 30 ? 1.0 : 30.0 / totalHeight
-                    UnionPanelShape()
-                        .fill(
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .black, location: 0.0),
-                                    .init(color: .black, location: blackStop),
-                                    .init(color: .black.opacity(0.2), location: 1.0)
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .shadow(color: panelShadowColor, radius: 20)
-                        .shadow(color: panelShadowColor, radius: 20)
-                        .animation(resizeAnimation, value: panelShadowColor)
-                }
-                
-            }
-            .frame(
-                width: contentSize.width + min(30, contentSize.height / 4) * 2,
-                height: contentSize.height, alignment: .top
-            )
-            .animation(resizeAnimation, value: contentSize)
-            
-            
-            
-            
-            ZStack(alignment: .top) {
-                
-                if AppContainer.shared.panelState.panelMode == .collapsed {
-                    CollapsedContentView().transition(.collapseExpandTransition)
-                } else if AppContainer.shared.panelState.panelMode == .expanded {
-                    ExpandedContentView().transition(.collapseExpandTransition)
-                } else {
-                    Text("pashalka")
-                }
-                
-                
-            }
+            surface
+
+            content
             .padding([.leading, .trailing, .bottom], extraContentPadding)
             
             .onGeometryChange(for: CGSize.self) { geo in
                 geo.size
             } action: { size in
-                Log.general.info("PanelView resize to: \(String(describing: size))")
+                Log.ui.info("PanelView resize to: \(String(describing: size))")
                 selectAnimation(to: size)
-                contentSize = size
+                withAnimation(resizeAnimation) {
+                    contentSize = size
+                }
             }
             .onHover {
                 isPanelHovered = $0
@@ -112,7 +63,7 @@ struct PanelView: View {
                 isTargeted: $isDragging
             ) {
                 providers in
-                print("onDrop")
+                Log.ui.info("File dragged to panel")
                 return true
             }
             .onChange(of: isDragging) {oldValue, newValue in
@@ -127,7 +78,72 @@ struct PanelView: View {
         //        .background(.red)
         
     }
+    
+    @ViewBuilder
+    private var surface : some View {
+        ZStack (alignment: .top) {
+            
+            Color.clear
+                .glassEffect(.clear, in: UnionPanelShape())
+                .environment(\.appearsActive, true)
+                .materialActiveAppearance(.active)
+                .shadow(color: panelShadowColor, radius: 20)
+                .animation(.smooth, value: panelShadowColor)
+
+
+            AnimatedPanelBackground(height: contentSize.height)
+                            
+        }
+        .frame(
+            width: contentSize.width + min(30, contentSize.height / 4) * 2,
+            height: contentSize.height, alignment: .top
+        )
+    }
+    
+    @ViewBuilder
+    private var content : some View {
+        ZStack(alignment: .top) {
+            
+            if AppContainer.shared.panelState.panelMode == .collapsed {
+                CollapsedContentView().transition(.collapseExpandTransition)
+            } else if AppContainer.shared.panelState.panelMode == .expanded {
+                ExpandedContentView().transition(.collapseExpandTransition)
+            } else {
+                Text("pashalka")
+            }
+        }
+    }
 }
+
+
+struct AnimatedPanelBackground: View, Animatable {
+    
+    var height: CGFloat
+
+    var animatableData: CGFloat {
+        get { height }
+        set { height = newValue }
+    }
+    
+    var body: some View {
+        let blackStop = min(1, 30 / max(height, 1))
+        
+        UnionPanelShape()
+            .fill(
+                LinearGradient(
+                    stops: [
+                        .init(color: .black, location: 0),
+                        .init(color: .black, location: blackStop),
+                        .init(color: .black.opacity(0.2), location: 1)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+
+    }
+}
+
 
 #Preview {
     PanelView()
