@@ -117,7 +117,7 @@ struct PanelView: View {
             }
             .onChange(of: isDragging) {oldValue, newValue in
                 if newValue {
-                    AppContainer.shared.controller.showNotification(notification: .airdrop)
+                    PanelNotificationsService.shared.post(AirDropNotificationView())
                 }
             }
             

@@ -4,15 +4,27 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 // 6 points of width 300 UIs in total
-struct AirDropNotificationView: View {
+struct AirDropNotificationView: PanelNotification {
+    
+    let id = UUID()
+    let priority = 6 // Высокий приоритет
+    let duration: TimeInterval = 5.0
+    
+        
+    func makeView() -> AnyView {
+        AnyView(AirDropNotificationContentView())
+    }
+}
+
+struct AirDropNotificationContentView : View {
+    
     @State var isDragging: Bool = false
     
     private var bgOpacity: Double {
         isDragging ? 0.3 : 0.2
     }
-    
+
     var body: some View {
-        
         ZStack(alignment: .center) {
             RoundedRectangle(cornerRadius: 30)
                 .fill(Color.indigo.opacity(bgOpacity))
@@ -24,22 +36,22 @@ struct AirDropNotificationView: View {
                     .font(.system(size: 20))
             }
         }
-        .padding(10)
-        .frame(width: 300, height: 100, alignment: .center)
+            .padding(10)
+            .frame(width: 300, height: 100, alignment: .center)
         
-        .onDrop(
-            of: [UTType.fileURL.identifier],
-            isTargeted: $isDragging
-        ) {
-            providers in
-            print("AirDrop share called")
-            
-            return AirDropService.share(providers)
-        }
+            .onDrop(
+                of: [UTType.fileURL.identifier],
+                isTargeted: $isDragging
+            ) {
+                providers in
+                print("AirDrop share called")
+                
+                return AirDropService.share(providers)
+            }
     }
 }
 
 #Preview {
-    AirDropNotificationView()
+    AirDropNotificationContentView()
         .background(Color.pink.opacity(0.1))
 }

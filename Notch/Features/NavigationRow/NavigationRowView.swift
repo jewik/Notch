@@ -19,7 +19,7 @@ struct NavigationRowView: View {
                 color: .red,
                 action: {
                     AppContainer.shared.controller.showCollapsedPreset()
-                    AppContainer.shared.controller.showNotification(notification: .valediction, duration: 5)
+                    PanelNotificationsService.shared.post(ValedictionNotificationView())
                 }
             ) {
                 Circle()

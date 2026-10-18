@@ -7,7 +7,26 @@
 
 import SwiftUI
 
-struct HUDNotificationView: View {
+struct HUDNotificationView: PanelNotification {
+    
+    let id = UUID()
+    let priority = 1 // Высокий приоритет
+    let duration: TimeInterval = 1.5
+    
+    var systemName: String
+    var progress: Float
+
+    
+    func makeView() -> AnyView {
+        AnyView(HUDNotificationContentView(
+            systemName: systemName,
+            progress: progress
+        ))
+    }
+}
+
+
+struct HUDNotificationContentView: View {
     
     var systemName: String
     var progress: Float
@@ -39,8 +58,8 @@ struct HUDNotificationView: View {
                 .frame(width: 40)
             
         }
-        .frame(width: 240, height: 40)
-        .animation(.smooth(duration: 0.2), value: progress)
-        .animation(.smooth(duration: 0.2), value: systemName)
+            .frame(width: 240, height: 40)
+            .animation(.smooth(duration: 0.2), value: progress)
+            .animation(.smooth(duration: 0.2), value: systemName)
     }
 }

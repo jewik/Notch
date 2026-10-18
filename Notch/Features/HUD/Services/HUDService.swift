@@ -40,8 +40,12 @@ final class HUDService {
         
         AppContainer.shared.HUDViewmodel.value = step
         
-        AppContainer.shared.controller.showNotification(notification: .HUD, duration: 1.5)
-
+        //        AppContainer.shared.controller.showNotification(notification: .HUD, duration: 1.5)
+        PanelNotificationsService.shared.post(HUDNotificationView(
+            systemName: AppContainer.shared.HUDViewmodel.kind.symbolName,
+            progress: AppContainer.shared.HUDViewmodel.value
+        ))
+        
     }
     
     

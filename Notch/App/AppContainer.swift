@@ -25,8 +25,8 @@ final class AppContainer {
     let audioViewModel: AudioDeviceViewModel
     
     let bluetoothService: BluetoothDeviceServiceProtocol
+    let bluetoothNotificationsService: BluetoothNotificationService
 
-    let bluetoothNotificationViewModel: BluetoothNotificationViewModel
     
     let HUDViewmodel: HUDViewModel
 
@@ -34,20 +34,18 @@ final class AppContainer {
     init() {
         
         let panelState = PanelState()
-        let bluetoothNotificationViewModel = BluetoothNotificationViewModel()
 
         self.panelState = panelState
-        self.bluetoothNotificationViewModel = bluetoothNotificationViewModel
 
         self.controller = PanelController(
-            panelState: panelState,
-            bluetoothNotificationViewModel: bluetoothNotificationViewModel
+            panelState: panelState
         )
         
         self.fastFolderStore = FastFolderStore()
 
         self.audioService = AudioDeviceService()
         self.bluetoothService = BluetoothDeviceService.shared
+        self.bluetoothNotificationsService = BluetoothNotificationService()
         
         self.audioViewModel = AudioDeviceViewModel(
             audioService: self.audioService,
