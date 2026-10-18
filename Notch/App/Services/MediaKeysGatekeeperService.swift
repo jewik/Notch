@@ -43,7 +43,7 @@ public final class MediaKeysGatekeeperService {
         guard eventTap == nil else { return }
         guard AXIsProcessTrusted() else {
             requestAccessibilityIfNeeded()
-//            schedulePermissionRetry()
+            schedulePermissionRetry()
             return
         }
         
@@ -76,16 +76,19 @@ public final class MediaKeysGatekeeperService {
         requestedAccessibility = true
         let prompt = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
         AXIsProcessTrustedWithOptions([prompt: true] as CFDictionary)
+        
+        Log.service.info("MediaKeysGatekeeperService accessibility request called")
     }
     
     private func schedulePermissionRetry() {
         guard permissionRetry == nil else { return }
-        permissionRetry = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+        permissionRetry = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] timer in
             guard AXIsProcessTrusted() else { return }
             timer.invalidate()
             self?.permissionRetry = nil
             self?.start()
         }
+        Log.service.info("MediaKeysGatekeeperService accessibility request retry called")
     }
     
     private func installEventTap() {
@@ -133,6 +136,7 @@ public final class MediaKeysGatekeeperService {
         let data = UInt32(truncatingIfNeeded: nativeEvent.data1)
         let rawKey = Int((data >> 16) & 0xffff)
         let state = Int((data >> 8) & 0xff)
+
         guard let key = InterceptedMediaKey(rawValue: rawKey), state == 0x0a || state == 0x0b else {
             return Unmanaged.passUnretained(event)
         }
@@ -153,7 +157,7 @@ public final class MediaKeysGatekeeperService {
                         self?.asyncExecuteAndNotify(for: key, step: ownedStep)
                     }
                 }
-                print("Keys gatekeeper overload")
+                Log.service.info("MediaKeysGatekeeperService overload")
                 return nil
             }
             if nativeKeys.contains(rawKey) { return Unmanaged.passUnretained(event) }
@@ -183,16 +187,19 @@ public final class MediaKeysGatekeeperService {
             hardwareQueue.async { [weak self] in
                 self?.asyncExecuteAndNotify(for: key, step: step)
             }
+            
+
         } else {
             // Если мы зависли, мы все равно "поглощаем" этот шаг локально, чтобы не дергать macOS,
             // но вычисления не запускаем.
-            print("Keys gatekeeper overload")
+            Log.service.info("MediaKeysGatekeeperService overload")
             consumedKeys[rawKey] = step
         }
         return nil
     }
     
     private func asyncExecuteAndNotify(for key: InterceptedMediaKey, step: Float) {
+        Log.service.info("MediaKeysGatekeeperService key: \(key.rawValue) executing")
         // Устанавливаем флаг занятости перед началом тяжелой работы
         processingLock.withLock { $0 = true }
         
@@ -201,12 +208,9 @@ public final class MediaKeysGatekeeperService {
             processingLock.withLock { $0 = false }
         }
         
-        print("key pressed", key)
-        
         switch key {
         case .brightnessUp, .brightnessDown, .volumeUp, .volumeDown, .volumeMute:
             HUDService.shared.update(hudKey: key)
-            
         }
     }
 }

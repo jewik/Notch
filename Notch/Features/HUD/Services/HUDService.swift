@@ -42,7 +42,6 @@ final class HUDService {
         
         AppContainer.shared.controller.showNotification(notification: .HUD, duration: 1.5)
 
-        print("ui adjust", hudKey, " step", step)
     }
     
     

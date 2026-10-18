@@ -5,7 +5,9 @@
 //  Created by Usanin Ivan on 04.08.2026.
 //
 
+import os
 import Observation
+
 
 @Observable
 @MainActor
@@ -54,7 +56,7 @@ final class AppContainer {
         
         self.HUDViewmodel = HUDViewModel()
         
-        print("container init")
+        Log.general.info("AppContainer init.")
 
     }
     

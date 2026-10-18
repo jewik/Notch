@@ -1,6 +1,7 @@
 //
 //  AppDelegate.swift
 
+import os
 import AppKit
 import SwiftUI
 import ApplicationServices
@@ -22,17 +23,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(
         _ notification: Notification
     ) {
-
+        
         NSApp.setActivationPolicy(.accessory)
         
         MediaKeysGatekeeperService.shared.start()
         BluetoothDeviceService.shared.start()
-        
-        startScreenObservers()
-        showOverlayPanel()
         AppContainer.shared.controller.startBluetoothNotifications(
             from: BluetoothDeviceService.shared
         )
+        
+        startScreenObservers()
+        showOverlayPanel()
+        
+        Log.general.info("Application did finished launching.")
     }
     
     func applicationWillTerminate(_ notification: Notification) {
@@ -43,6 +46,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         overlayPanel?.orderOut(nil)
         overlaySpace?.close()
+        
+        Log.general.info("Application will terminate.")
     }
     
     deinit {
@@ -76,8 +81,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.orderFrontRegardless()
     }
     
-
-
+    
+    
     
     private func updateOverlayPanelFrame() {
         guard let panel = overlayPanel else {
@@ -97,7 +102,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
     }
     
-
+    
     
     private func targetScreen() -> NSScreen? {
         NSScreen.main ?? NSScreen.screens.first
@@ -147,44 +152,4 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         return hostingView
     }
-    
-//    private func startSystemKeyMonitor() {
-//
-//        container.systemKeyMonitor.onAction = { [weak self] action in
-//            guard let self else {
-//                return
-//            }
-//
-//            switch action {
-//
-//            case .brightnessDown:
-//                print("Brightness down")
-//
-//                // например:
-//                // container.panelController.showBrightness(-1)
-//
-//            case .brightnessUp:
-//                print("Brightness up")
-//
-//            case .volumeDown:
-//                print("Volume down")
-//
-//            case .volumeUp:
-//                print("Volume up")
-//
-//            case .mute:
-//                print("Mute")
-//            }
-//        }
-//
-//        container.systemKeyMonitor.start()
-//    }
-//    
-//    func requestAccessibilityPermission() -> Bool {
-//        let options = [
-//            kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true
-//        ] as CFDictionary
-//
-//        return AXIsProcessTrustedWithOptions(options)
-//    }
 }

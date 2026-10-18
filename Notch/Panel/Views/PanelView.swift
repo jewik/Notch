@@ -2,7 +2,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
-
+import os
 
 struct PanelView: View {
     
@@ -64,6 +64,7 @@ struct PanelView: View {
                             )
                         )
                         .shadow(color: panelShadowColor, radius: 20)
+                        .shadow(color: panelShadowColor, radius: 20)
                         .animation(resizeAnimation, value: panelShadowColor)
                 }
                 
@@ -94,7 +95,7 @@ struct PanelView: View {
             .onGeometryChange(for: CGSize.self) { geo in
                 geo.size
             } action: { size in
-                print(size)
+                Log.general.info("PanelView resize to: \(String(describing: size))")
                 selectAnimation(to: size)
                 contentSize = size
             }
