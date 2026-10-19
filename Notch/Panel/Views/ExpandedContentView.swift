@@ -62,13 +62,6 @@ struct TogglePresetButton: View {
     
     let action: () -> Void
     
-    @Environment(\.uiScale)
-    private var scale: CGFloat
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
-    
     var body: some View {
         Button(action: action) {
             

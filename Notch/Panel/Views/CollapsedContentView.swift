@@ -45,5 +45,5 @@ struct CollapsedContentView: View {
     CollapsedContentView()
         .background(Color.red.opacity(0.1))
         .frame(width: 300, height: 140, alignment: .top)
-        .environment(AppContainer())
+//        .environment(AppContainer())
 }

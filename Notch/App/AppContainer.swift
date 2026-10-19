@@ -8,8 +8,6 @@
 import os
 import Observation
 
-
-@Observable
 @MainActor
 final class AppContainer {
     
@@ -18,31 +16,31 @@ final class AppContainer {
     let panelState: PanelState
     
     let controller: PanelController
-
+    
     let fastFolderStore: FastFolderStore
     
     let audioService: AudioDeviceServiceProtocol
+    
     let audioViewModel: AudioDeviceViewModel
     
     let bluetoothService: BluetoothDeviceServiceProtocol
     let bluetoothNotificationsService: BluetoothNotificationService
-
     
     let HUDViewmodel: HUDViewModel
-
+    
     
     init() {
         
         let panelState = PanelState()
-
+        
         self.panelState = panelState
-
+        
         self.controller = PanelController(
             panelState: panelState
         )
         
         self.fastFolderStore = FastFolderStore()
-
+        
         self.audioService = AudioDeviceService()
         self.bluetoothService = BluetoothDeviceService.shared
         self.bluetoothNotificationsService = BluetoothNotificationService()
@@ -55,7 +53,7 @@ final class AppContainer {
         self.HUDViewmodel = HUDViewModel()
         
         Log.general.info("AppContainer init.")
-
+        
     }
     
 }

@@ -9,12 +9,8 @@ import SwiftUI
 
 struct FastFolderView: View {
     
-    @Environment(AppContainer.self)
-    private var container: AppContainer
-    
-    @Environment(\.uiScale)
-    private var scale: CGFloat
-    
+    private var container = AppContainer.shared
+
     @State private var isEditMode: Bool = false
     
     var body: some View {
@@ -145,8 +141,6 @@ struct FastFolderButtonView: View {
     
     private let folderIcon = NSWorkspace.shared.icon(forFile: NSHomeDirectory())
     
-    @Environment(\.uiScale)
-    private var scale: CGFloat
     
     func colorForTagName(_ name: String) -> Color {
         switch name.lowercased() {
@@ -207,7 +201,7 @@ struct FastFolderButtonView: View {
         
         FastFolderView()
             .background(Color.blue.opacity(0.2))
-            .environment(AppContainer())
+//            .environment(AppContainer())
         
     }
     .frame(width: 300, height: 150)

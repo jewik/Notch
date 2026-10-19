@@ -97,7 +97,7 @@ struct AudioSwitcherView: View {
             .fill(.black)
         
         AudioSwitcherView()
-            .environment(AppContainer())
+//            .environment(AppContainer())
             .background(Color.blue.opacity(0.2))
         
         

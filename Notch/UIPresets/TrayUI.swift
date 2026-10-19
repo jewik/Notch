@@ -8,13 +8,6 @@ import SwiftUI
 
 
 struct TrayUI: View {
-    
-    @Environment(\.uiScale)
-    private var scale
-    
-    private func ui(_ value: CGFloat) -> CGFloat {
-        value * scale
-    }
 
     
     var body: some View {
@@ -23,7 +16,7 @@ struct TrayUI: View {
 //            AirDropView()
                 
         }
-        .frame(height: ui(150))
+        .frame(height: 150)
 
     }
 }
@@ -37,7 +30,7 @@ struct TrayUI: View {
             .fill(.black)
         TrayUI()
             .background(Color.cyan.opacity(0.1))
-            .environment(AppContainer())
+//            .environment(AppContainer())
     }
 .frame(width: 500, height: 150, alignment: .top)
 

@@ -9,9 +9,6 @@ import SwiftUI
 
 struct GreetingNotificationView: View {
     
-    @Environment(AppContainer.self)
-    private var container
-    
     var body: some View {
         
         ZStack (alignment: .center) {
@@ -19,7 +16,7 @@ struct GreetingNotificationView: View {
                 Text("Hola!")
                     .font(.system(size: 40, weight: .bold, design: .rounded))
                     .onTapGesture {tap in
-                        container.controller.showExpandedPreset(.home)
+//                        container.controller.showExpandedPreset(.home)
                 }
         }
         .frame(width: 220, height: 140)
@@ -37,7 +34,7 @@ struct GreetingNotificationView: View {
         
         GreetingNotificationView()
             .background(Color.blue.opacity(0.2))
-            .environment(AppContainer())
+//            .environment(AppContainer())
 
     }
     .frame(width: 220, height: 140)

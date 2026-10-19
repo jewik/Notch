@@ -137,7 +137,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func makeHostingView() -> NSView {
         let rootView = PanelView()
-            .environment(AppContainer.shared)
         
         let hostingView = NSHostingView(
             rootView: rootView

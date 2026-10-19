@@ -6,7 +6,9 @@ import os
 
 struct PanelView: View {
     
-    @State private var contentSize: CGSize = .zero
+    private let container = AppContainer.shared
+    
+    @State private var contentSize: CGSize = .init(width: 184, height: 30)
     @State private var resizeAnimation: Animation = .smooth
     @State private var isPanelHovered: Bool = false
     @State private var isDragging: Bool = false
@@ -14,10 +16,11 @@ struct PanelView: View {
     let extraContentPadding: CGFloat = 0
     
     private var panelShadowColor: Color {
-        isPanelHovered || AppContainer.shared.panelState.isNotificationTime ? .black.opacity(0.8) : .clear
+        isPanelHovered ? .black.opacity(0.8) : .clear
     }
+
     private var panelStrokeColor: Color {
-        AppContainer.shared.panelState.panelMode == .expanded || AppContainer.shared.panelState.isNotificationTime ? .white.opacity(0.08) : .clear
+        container.panelState.panelMode == .expanded || container.panelState.isNotificationTime ? .white.opacity(0.08) : .clear
     }
     
     private func selectAnimation(to newSize: CGSize){
@@ -28,9 +31,7 @@ struct PanelView: View {
         }
     }
     
-    init() {
-        contentSize = CGSize(width: 184, height: 30)
-    }
+    init() {}
     
     var body: some View {
         
@@ -53,7 +54,7 @@ struct PanelView: View {
             .onHover {
                 isPanelHovered = $0
                 if isPanelHovered {
-                    AppContainer.shared.controller.triggerMacHaptic()
+                    container.controller.triggerMacHaptic()
                 }
             }
             
@@ -104,9 +105,9 @@ struct PanelView: View {
     private var content : some View {
         ZStack(alignment: .top) {
             
-            if AppContainer.shared.panelState.panelMode == .collapsed {
+            if container.panelState.panelMode == .collapsed {
                 CollapsedContentView().transition(.collapseExpandTransition)
-            } else if AppContainer.shared.panelState.panelMode == .expanded {
+            } else if container.panelState.panelMode == .expanded {
                 ExpandedContentView().transition(.collapseExpandTransition)
             } else {
                 Text("pashalka")
@@ -148,6 +149,5 @@ struct AnimatedPanelBackground: View, Animatable {
 #Preview {
     PanelView()
         .background(.gray.opacity(0.1))
-        .environment(AppContainer())
 }
 

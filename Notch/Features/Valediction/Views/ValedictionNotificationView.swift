@@ -94,18 +94,3 @@ struct ValedictionButton: View {
     }
 }
 
-
-#Preview {
-    ZStack {
-        PanelShape()
-            .fill(.black)
-        
-        
-        //        ValedictionNotificationView()
-        //            .background(Color.blue.opacity(0.2))
-        //            .environment(AppContainer())
-        
-    }
-    .frame(width: 230, height: 40)
-    .frame(width: 400, height: 300, alignment: .top)
-}
