@@ -43,7 +43,7 @@ public final class MediaKeysGatekeeperService {
         guard eventTap == nil else { return }
         guard AXIsProcessTrusted() else {
             requestAccessibilityIfNeeded()
-            schedulePermissionRetry()
+//            schedulePermissionRetry()
             return
         }
         

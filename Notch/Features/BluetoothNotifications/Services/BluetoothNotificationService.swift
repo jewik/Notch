@@ -5,9 +5,12 @@
 //  Created by Usanin Ivan on 18.10.2026.
 //
 
+import Observation
 import AppKit
 import os
 
+
+@Observable
 final class BluetoothNotificationService {
     
     

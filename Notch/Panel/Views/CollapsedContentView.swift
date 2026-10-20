@@ -18,19 +18,19 @@ struct CollapsedContentView: View {
     
     
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(alignment: .center) {
             
-            ZStack(alignment: .top) {
-                
-                ZStack {
-                    PanelShape()
-                        .fill(.black)
-                }
+            //            ZStack(alignment: .top) {
+            
+            //                ZStack {
+            PanelShape()
+                .fill(.black)
+            //                }
                 .frame(width: 184, height: 30, alignment: .top)
                 .onTapGesture {tap in
                     AppContainer.shared.controller.showExpandedPreset(.home)
                 }
-            }
+            //            }
             
             if let current = notificationService.currentNotification {
                 current.makeView()
@@ -45,5 +45,5 @@ struct CollapsedContentView: View {
     CollapsedContentView()
         .background(Color.red.opacity(0.1))
         .frame(width: 300, height: 140, alignment: .top)
-//        .environment(AppContainer())
+    //        .environment(AppContainer())
 }

@@ -12,7 +12,7 @@ import SwiftUI
 
 struct NavigationRowView: View {
     
-
+    
     var body: some View {
         HStack (alignment: .center, spacing: 8) {
             DotButton(
@@ -27,15 +27,15 @@ struct NavigationRowView: View {
                     .frame(width: 5, height: 5)
             }
             
-//            DotButton(
-//                color: .indigo,
-//                action: {}
-//            ) {
-//                Image(systemName: "gearshape.fill")
-//                    .font(.system(size: 10, weight: .semibold))
-//                    .foregroundStyle(.black.opacity(0.6))
-//            }
-
+            //            DotButton(
+            //                color: .indigo,
+            //                action: {}
+            //            ) {
+            //                Image(systemName: "gearshape.fill")
+            //                    .font(.system(size: 10, weight: .semibold))
+            //                    .foregroundStyle(.black.opacity(0.6))
+            //            }
+            
             
             NotchButton(
                 systemName: "house.fill",
@@ -47,10 +47,23 @@ struct NavigationRowView: View {
                 action: {
                     AppContainer.shared.controller.showExpandedPreset(.home)
                 })
+            NotchButton(
+                systemName: "",
+                title: "Greeeting",
+                color: .white,
+                bgSize: CGSize(width: 120, height: 26),
+                textSize: 14,
+                isActive: AppContainer.shared.panelState.expandedPreset == .home,
+                action: {
+                    AppContainer.shared.controller.showCollapsedPreset()
+                    PanelNotificationsService.shared.post(AppleHelloNotificationView())
+                    
+                })
             
-//            Spacer()
+            Spacer()
+            CustomTimeView()
             
-                    }
+        }
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 30)
     }
@@ -64,7 +77,7 @@ struct DotButton<InnerContent: View>: View {
     
     @ViewBuilder
     let innerContent: () -> InnerContent
-        
+    
     @State private var isHovered = false
     
     
@@ -79,6 +92,6 @@ struct DotButton<InnerContent: View>: View {
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
-
+        
     }
 }

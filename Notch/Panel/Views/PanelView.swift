@@ -127,7 +127,8 @@ struct AnimatedPanelBackground: View, Animatable {
     }
     
     var body: some View {
-        let blackStop = min(1, 30 / max(height, 1))
+        let blackStop = min(1, 30 / height)
+
         
         UnionPanelShape()
             .fill(

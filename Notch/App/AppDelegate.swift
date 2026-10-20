@@ -28,6 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         MediaKeysGatekeeperService.shared.start()
         BluetoothDeviceService.shared.start()
+        ScreenUnlockObserveService.shared.setupWorkspaceObservers()
         
         AppContainer.shared.bluetoothNotificationsService.startBluetoothNotifications(
             from: BluetoothDeviceService.shared
@@ -37,6 +38,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         showOverlayPanel()
         
         Log.general.info("Application did finished launching.")
+        
+//        PanelNotificationsService.shared.post(AppleHelloNotificationView())
     }
     
     func applicationWillTerminate(_ notification: Notification) {
