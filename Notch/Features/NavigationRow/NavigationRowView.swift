@@ -14,84 +14,61 @@ struct NavigationRowView: View {
     
     
     var body: some View {
-        HStack (alignment: .center, spacing: 8) {
+        HStack (alignment: .center, spacing: 4) {
             DotButton(
                 color: .red,
+                showUnsavedDot: true,
                 action: {
                     AppContainer.shared.controller.showCollapsedPreset()
                     PanelNotificationsService.shared.post(ValedictionNotificationView())
+                },
+                innerContent: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.red)
                 }
-            ) {
-                Circle()
-                    .fill(.black.opacity(0.6))
-                    .frame(width: 5, height: 5)
-            }
-            
-            //            DotButton(
-            //                color: .indigo,
-            //                action: {}
-            //            ) {
-            //                Image(systemName: "gearshape.fill")
-            //                    .font(.system(size: 10, weight: .semibold))
-            //                    .foregroundStyle(.black.opacity(0.6))
-            //            }
-            
-            
-            NotchButton(
-                systemName: "house.fill",
-                title: "Home",
-                color: .white,
-                bgSize: CGSize(width: 70, height: 26),
-                textSize: 14,
-                isActive: AppContainer.shared.panelState.expandedPreset == .home,
+            )
+
+            DotButton(
+                color: .yellow,
                 action: {
                     AppContainer.shared.controller.showExpandedPreset(.home)
-                })
-            NotchButton(
-                systemName: "",
-                title: "Greeeting",
-                color: .white,
-                bgSize: CGSize(width: 120, height: 26),
-                textSize: 14,
-                isActive: AppContainer.shared.panelState.expandedPreset == .home,
+                },
+                innerContent: {
+                    Image(systemName: "house.fill")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.yellow)
+                }
+            )
+            
+            DotButton(
+                color: .green,
                 action: {
-                    AppContainer.shared.controller.showCollapsedPreset()
-                    PanelNotificationsService.shared.post(AppleHelloNotificationView())
-                    
-                })
+                    AppContainer.shared.panelState.useGlassPanelSurface.toggle()
+                },
+                innerContent: {
+                    Image(systemName: "square.on.square.intersection.dashed")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.green)
+                }
+            )
+            
+            DotButton(
+                color: .cyan,
+                action: {},
+                innerContent: {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.cyan)
+                }
+            )
             
             Spacer()
             CustomTimeView()
             
         }
+        .padding(.horizontal, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 30)
-    }
-}
-
-
-struct DotButton<InnerContent: View>: View {
-    
-    let color: Color?
-    let action: () -> Void
-    
-    @ViewBuilder
-    let innerContent: () -> InnerContent
-    
-    @State private var isHovered = false
-    
-    
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                Circle()
-                    .fill(color ?? .white)
-                innerContent()
-            }
-            .frame(width: 14, height: 14)
-        }
-        .buttonStyle(.plain)
-        .onHover { isHovered = $0 }
-        
     }
 }

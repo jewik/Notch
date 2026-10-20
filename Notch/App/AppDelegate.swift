@@ -139,7 +139,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func makeHostingView() -> NSView {
-        let rootView = PanelView()
+        let rootView = PanelView().moveToSky()
+//        let rootView = PanelView()
         
         let hostingView = NSHostingView(
             rootView: rootView

@@ -42,23 +42,23 @@ struct AppleHelloView: View {
                     Color.white,
                     style: StrokeStyle(lineWidth: 6, lineCap: .round, lineJoin: .round)
                 )
-                .frame(width: 240, height: 120)
+                .frame(width: 200, height: 80)
         }
         .task {
             do {
                 // 1. Задержка ПЕРЕД началом всей анимации (например, 1.5 секунды)
-                try await Task.sleep(for: .seconds(0.5))
+//                try await Task.sleep(for: .seconds(0.5)) 
                 
                 // 2. Фаза рисования: линия плавно появляется от 0 до 1
-                withAnimation(.easeInOut(duration: 2)) {
+                withAnimation(.easeInOut(duration: 1.5)) {
                     lineEnd = 1.0
                 }
                 
                 // 3. Пауза, пока слово полностью отображается (например, 1 секунда)
-                try await Task.sleep(for: .seconds(2)) // длительность анимации + пауза
+                try await Task.sleep(for: .seconds(1)) // длительность анимации + пауза
                 
                 // 4. Фаза стирания: начало линии догоняет конец (от 0 до 1)
-                withAnimation(.easeInOut(duration: 1.5)) {
+                withAnimation(.easeInOut(duration: 1)) {
                     lineStart = 1.0
                 }
                 

@@ -10,11 +10,11 @@ struct ValedictionNotificationView: PanelNotification {
     let duration: TimeInterval = 5.0
     
     func makeView() -> AnyView {
-        AnyView(ValedictionNotificationContentView())
+        AnyView(ValedictionView())
     }
 }
 
-struct ValedictionNotificationContentView: View {
+struct ValedictionView: View {
     var body: some View {
         ZStack (alignment: .center) {
             

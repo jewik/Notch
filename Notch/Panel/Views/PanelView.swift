@@ -18,10 +18,7 @@ struct PanelView: View {
     private var panelShadowColor: Color {
         isPanelHovered ? .black.opacity(0.8) : .clear
     }
-
-    private var panelStrokeColor: Color {
-        container.panelState.panelMode == .expanded || container.panelState.isNotificationTime ? .white.opacity(0.08) : .clear
-    }
+    
     
     private func selectAnimation(to newSize: CGSize){
         if newSize.width >= self.contentSize.width && newSize.height >= self.contentSize.height {
@@ -36,42 +33,42 @@ struct PanelView: View {
     var body: some View {
         
         ZStack (alignment: .top){
-
-            surface
-
-            content
-            .padding([.leading, .trailing, .bottom], extraContentPadding)
             
-            .onGeometryChange(for: CGSize.self) { geo in
-                geo.size
-            } action: { size in
-                Log.ui.info("PanelView resize to: \(String(describing: size))")
-                selectAnimation(to: size)
-                withAnimation(resizeAnimation) {
-                    contentSize = size
+            surface
+            
+            content
+                .padding([.leading, .trailing, .bottom], extraContentPadding)
+            
+                .onGeometryChange(for: CGSize.self) { geo in
+                    geo.size
+                } action: { size in
+                    Log.ui.info("PanelView resize to: \(String(describing: size))")
+                    selectAnimation(to: size)
+                    withAnimation(resizeAnimation) {
+                        contentSize = size
+                    }
                 }
-            }
-            .onHover {
-                isPanelHovered = $0
-                if isPanelHovered {
-                    container.controller.triggerMacHaptic()
+                .onHover {
+                    isPanelHovered = $0
+                    if isPanelHovered {
+                        container.controller.triggerMacHaptic()
+                    }
                 }
-            }
             
             // hande airdrop
-            .onDrop(
-                of: [UTType.fileURL],
-                isTargeted: $isDragging
-            ) {
-                providers in
-                Log.ui.info("File dragged to panel")
-                return true
-            }
-            .onChange(of: isDragging) {oldValue, newValue in
-                if newValue {
-                    PanelNotificationsService.shared.post(AirDropNotificationView())
+                .onDrop(
+                    of: [UTType.fileURL],
+                    isTargeted: $isDragging
+                ) {
+                    providers in
+                    Log.ui.info("File dragged to panel")
+                    return true
                 }
-            }
+                .onChange(of: isDragging) {oldValue, newValue in
+                    if newValue {
+                        PanelNotificationsService.shared.post(AirDropNotificationView())
+                    }
+                }
             
             
         }
@@ -84,16 +81,24 @@ struct PanelView: View {
     private var surface : some View {
         ZStack (alignment: .top) {
             
-            Color.clear
-                .glassEffect(.clear, in: UnionPanelShape())
-                .environment(\.appearsActive, true)
-                .materialActiveAppearance(.active)
-                .shadow(color: panelShadowColor, radius: 20)
-                .animation(.smooth, value: panelShadowColor)
-
-
-            AnimatedPanelBackground(height: contentSize.height)
-                            
+            if container.panelState.useGlassPanelSurface {
+                
+                Color.clear
+                    .glassEffect(.clear, in: UnionPanelShape())
+                    .environment(\.appearsActive, true)
+                    .materialActiveAppearance(.active)
+                    .shadow(color: panelShadowColor, radius: 20)
+                    .animation(.smooth, value: panelShadowColor)
+                
+                
+                AnimatedPanelBackground(height: contentSize.height)
+            } else {
+                UnionPanelShape()
+                    .fill(.black)
+                    .shadow(color: panelShadowColor, radius: 20)
+                    .animation(.smooth, value: panelShadowColor)
+                
+            }
         }
         .frame(
             width: contentSize.width + min(30, contentSize.height / 4) * 2,
@@ -105,12 +110,12 @@ struct PanelView: View {
     private var content : some View {
         ZStack(alignment: .top) {
             
-            if container.panelState.panelMode == .collapsed {
+            switch container.panelState.panelMode {
+            case .collapsed:
                 CollapsedContentView().transition(.collapseExpandTransition)
-            } else if container.panelState.panelMode == .expanded {
+            case .expanded:
                 ExpandedContentView().transition(.collapseExpandTransition)
-            } else {
-                Text("pashalka")
+                
             }
         }
     }
@@ -120,15 +125,15 @@ struct PanelView: View {
 struct AnimatedPanelBackground: View, Animatable {
     
     var height: CGFloat
-
+    
     var animatableData: CGFloat {
         get { height }
         set { height = newValue }
     }
     
     var body: some View {
-        let blackStop = min(1, 30 / height)
-
+        let blackStop = min(1, 35 / height)
+        
         
         UnionPanelShape()
             .fill(
@@ -136,13 +141,13 @@ struct AnimatedPanelBackground: View, Animatable {
                     stops: [
                         .init(color: .black, location: 0),
                         .init(color: .black, location: blackStop),
-                        .init(color: .black.opacity(0.2), location: 1)
+                        .init(color: .black.opacity(0.3), location: 1)
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
             )
-
+        
     }
 }
 

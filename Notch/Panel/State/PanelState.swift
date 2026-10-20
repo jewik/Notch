@@ -13,22 +13,14 @@ enum PanelMode {
     case expanded
 }
 
-enum NotificationPreset {
-    case greeting
-    case valediction
-    case airdrop
-    case HUD
-    case bluetooth
-}
 
 
 @Observable
 final class PanelState {
     
+    var useGlassPanelSurface: Bool = false
+    
     var panelMode: PanelMode = .collapsed
     var expandedPreset: ExpandedPreset = .home
-    var notification: NotificationPreset = .greeting
-    
-    var isNotificationTime: Bool = false
 
 }

@@ -24,7 +24,7 @@ final class PanelController {
         self.panelState = panelState
         
     }
-    func setPanelMode(_ mode: PanelMode) {
+    private func setPanelMode(_ mode: PanelMode) {
         panelState.panelMode = mode
     }
     

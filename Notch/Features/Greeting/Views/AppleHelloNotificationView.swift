@@ -10,7 +10,7 @@ import SwiftUI
 struct AppleHelloNotificationView: PanelNotification {
     let id = UUID()
     let priority = 10
-    let duration: TimeInterval = 4.0
+    let duration: TimeInterval = 2
     
     func makeView() -> AnyView {
         AnyView(AppleHelloView())
