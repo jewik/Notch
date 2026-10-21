@@ -1,10 +1,3 @@
-//
-//  SwiftUI+MoveToSky.swift
-//  SkyLightWindow
-//
-//  Created by 秋星桥 on 5/23/25.
-//
-
 import AppKit
 #if OpenSwiftUI
 import OpenSwiftUI
@@ -13,12 +6,10 @@ import SwiftUI
 #endif
 
 public extension View {
-    /// Places the containing window on the lock-screen Space.
     func moveToSky() -> some View {
         modifier(SkyLightWindowModifier(destination: .lockScreen))
     }
 
-    /// Adds the containing window to a stationary overlay Space.
     func addToPinnedSpace() -> some View {
         modifier(SkyLightWindowModifier(destination: .pinned))
     }

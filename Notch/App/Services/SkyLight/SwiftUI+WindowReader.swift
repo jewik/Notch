@@ -1,10 +1,3 @@
-//
-//  SwiftUI+WindowReader.swift
-//  SkyLightWindow
-//
-//  Created by 秋星桥 on 5/23/25.
-//
-
 import AppKit
 #if OpenSwiftUI
 import OpenSwiftUI

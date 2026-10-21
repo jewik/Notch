@@ -7,6 +7,7 @@ import os
 struct PanelView: View {
     
     private let container = AppContainer.shared
+    private var uiMetrics: UIMetrics
     
     @State private var contentSize: CGSize = .init(width: 184, height: 30)
     @State private var resizeAnimation: Animation = .smooth
@@ -28,7 +29,9 @@ struct PanelView: View {
         }
     }
     
-    init() {}
+    init(uiMetrics: UIMetrics = UIMetrics()) {
+        self.uiMetrics = uiMetrics
+    }
     
     var body: some View {
         
@@ -112,7 +115,8 @@ struct PanelView: View {
             
             switch container.panelState.panelMode {
             case .collapsed:
-                CollapsedContentView().transition(.collapseExpandTransition)
+                CollapsedContentView(uiScale: uiMetrics.pointMultiplier)
+                    .transition(.collapseExpandTransition)
             case .expanded:
                 ExpandedContentView().transition(.collapseExpandTransition)
                 

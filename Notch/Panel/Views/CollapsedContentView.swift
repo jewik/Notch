@@ -13,8 +13,14 @@ import os
 struct CollapsedContentView: View {
     
     @State private var contentSize: CGSize = .zero
+
+    let uiScale: CGFloat
     
     private var notificationService = PanelNotificationsService.shared
+
+    init(uiScale: CGFloat = 1) {
+        self.uiScale = uiScale
+    }
     
     
     var body: some View {
@@ -25,8 +31,13 @@ struct CollapsedContentView: View {
             //                ZStack {
             PanelShape()
                 .fill(.black)
+//                .stroke(Color.blue, lineWidth: 6)
             //                }
-                .frame(width: 184, height: 30, alignment: .top)
+                .frame(
+                    width: 180 * uiScale * 1.017,
+                    height: 30 * uiScale * 1.1,
+                    alignment: .top
+                )
                 .onTapGesture {tap in
                     AppContainer.shared.controller.showExpandedPreset(.home)
                 }

@@ -10,6 +10,7 @@ import ApplicationServices
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var overlayPanel: FloatingPanel?
+    private let uiMetrics = UIMetrics()
     
     private var screenConfigurationObserver: NSObjectProtocol?
     
@@ -72,6 +73,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let screen = targetScreen() else {
             return
         }
+
+        uiMetrics.update(for: screen)
         
         let panel = FloatingPanel(frame: frame(for: screen))
         
@@ -93,6 +96,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let screen = targetScreen() else {
             return
         }
+
+        uiMetrics.update(for: screen)
         
         let newFrame = frame(for: screen)
         
@@ -135,7 +140,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func makeHostingView() -> NSView {
-        let rootView = PanelView()
+        let rootView = PanelView(uiMetrics: uiMetrics)
             .addToPinnedSpace()
             .moveToSky()
 //        let rootView = PanelView()

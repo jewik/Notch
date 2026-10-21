@@ -4,11 +4,6 @@ enum OverlayWindowLevel {
     static let interactiveNotch = NSWindow.Level.mainMenu + 3
 }
 
-/// The app's single root window type.
-///
-/// `NSPanel` already inherits from `NSWindow`, so this replaces the separate
-/// `TopmostWindow` implementation while retaining the lock-screen behavior it
-/// needs.
 final class FloatingPanel: NSPanel {
     convenience init(frame: NSRect) {
         self.init(

@@ -1,16 +1,12 @@
 import AppKit
 import os
 
-/// Owns the private SkyLight Spaces used by the app's overlay windows.
 @MainActor
 final class SkyLightSpace {
     static let shared = SkyLightSpace()
 
     enum Destination: Hashable {
-        /// A separate overlay Space independent from the user's desktop Spaces.
         case pinned
-
-        /// A Space rendered on the lock-screen layer.
         case lockScreen
     }
 
@@ -124,8 +120,6 @@ final class SkyLightSpace {
 
     private init() {}
 
-    /// Adds a window to the requested private Space, creating that Space lazily.
-    /// Call before the window is ordered in for the first time.
     func add(_ window: NSWindow, to destination: Destination) {
         guard let api = Self.api,
               window.windowNumber > 0,
@@ -163,7 +157,6 @@ final class SkyLightSpace {
         spaces[destination] = managedSpace
     }
 
-    /// Removes registered windows before destroying all private Spaces.
     func stop() {
         guard let api = Self.api else {
             return
@@ -198,7 +191,6 @@ final class SkyLightSpace {
             return nil
         }
 
-        // Flag 1 creates an overlay Space without Finder desktop content.
         let spaceID = api.createSpace(api.connection, 1, nil)
         guard spaceID != 0 else {
             Log.service.error("SkyLight failed to create an overlay Space.")

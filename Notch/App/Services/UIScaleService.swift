@@ -8,6 +8,7 @@
 import AppKit
 import Combine
 import CoreGraphics
+import Observation
 
 enum UIScaleService {
     /// Private design density for scale-invariant UI. Raise this to make every
@@ -19,6 +20,13 @@ enum UIScaleService {
         guard displayPointsPerMillimeter > 0 else { return 1 }
 
         return displayPointsPerMillimeter / designPointsPerMillimeter
+    }
+
+    static func collapsedPointMultiplier(for screen: NSScreen) -> CGFloat {
+        // External displays already size the collapsed panel from the menu bar.
+        // Only a built-in display needs resolution-independent physical sizing.
+        guard isBuiltIn(screen) else { return 1 }
+        return pointMultiplier(for: screen)
     }
 
     static func points(_ designPoints: CGFloat, for screen: NSScreen) -> CGFloat {
@@ -37,6 +45,11 @@ enum UIScaleService {
         return CGDisplayScreenSize(displayID)
     }
 
+    private static func isBuiltIn(_ screen: NSScreen) -> Bool {
+        guard let displayID = displayID(for: screen) else { return false }
+        return CGDisplayIsBuiltin(displayID) != 0
+    }
+
     private static func displayID(for screen: NSScreen) -> CGDirectDisplayID? {
         let key = NSDeviceDescriptionKey("NSScreenNumber")
         guard let number = screen.deviceDescription[key] as? NSNumber else { return nil }
@@ -44,11 +57,13 @@ enum UIScaleService {
     }
 }
 
-final class UIMetrics: ObservableObject {
-    @Published private(set) var pointMultiplier: CGFloat = 1
+
+@Observable
+final class UIMetrics {
+    private(set) var pointMultiplier: CGFloat = 1
 
     func update(for screen: NSScreen) {
-        pointMultiplier = UIScaleService.pointMultiplier(for: screen)
+        pointMultiplier = UIScaleService.collapsedPointMultiplier(for: screen)
     }
 
     func points(_ designPoints: CGFloat) -> CGFloat {
