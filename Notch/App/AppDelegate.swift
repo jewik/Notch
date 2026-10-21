@@ -8,8 +8,7 @@ import ApplicationServices
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    
-    private let overlaySpace = PanelOverlaySpace()
+
     private var overlayPanel: FloatingPanel?
     
     private var screenConfigurationObserver: NSObjectProtocol?
@@ -50,7 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         BluetoothDeviceService.shared.stop()
         
         overlayPanel?.orderOut(nil)
-        overlaySpace?.close()
+        SkyLightSpace.shared.stop()
         
         Log.general.info("Application will terminate.")
     }
@@ -74,13 +73,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         
-        let panel = OverlayPanelFactory.makePanel(
-            frame: frame(for: screen)
-        )
+        let panel = FloatingPanel(frame: frame(for: screen))
         
         panel.contentView = makeHostingView()
         
-        overlaySpace?.add(panel)
         overlayPanel = panel
         
         panel.orderFrontRegardless()
@@ -139,7 +135,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func makeHostingView() -> NSView {
-        let rootView = PanelView().moveToSky()
+        let rootView = PanelView()
+            .addToPinnedSpace()
+            .moveToSky()
 //        let rootView = PanelView()
         
         let hostingView = NSHostingView(

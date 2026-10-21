@@ -13,22 +13,38 @@ import SwiftUI
 #endif
 
 public extension View {
+    /// Places the containing window on the lock-screen Space.
     func moveToSky() -> some View {
-        modifier(MoveToSkyModifier())
+        modifier(SkyLightWindowModifier(destination: .lockScreen))
+    }
+
+    /// Adds the containing window to a stationary overlay Space.
+    func addToPinnedSpace() -> some View {
+        modifier(SkyLightWindowModifier(destination: .pinned))
     }
 }
 
-struct MoveToSkyModifier: ViewModifier {
-    @State var window: NSWindow? = nil
-    @State var hasMoved = false
+private struct SkyLightWindowModifier: ViewModifier {
+    let destination: SkyLightSpace.Destination
+
+    @State private var window: NSWindow?
+    @State private var movedWindowNumber: Int?
 
     func body(content: Content) -> some View {
         content
             .background(WindowReadingView($window))
-            .onChange(of: window) { _ in
-                guard !hasMoved, let window else { return }
-                hasMoved = true
-                SkyLightOperator.shared.delegateWindow(window)
+            .onChange(of: window) {
+                moveWindowIfNeeded()
             }
+    }
+
+    private func moveWindowIfNeeded() {
+        guard let window,
+              movedWindowNumber != window.windowNumber else {
+            return
+        }
+
+        SkyLightSpace.shared.add(window, to: destination)
+        movedWindowNumber = window.windowNumber
     }
 }

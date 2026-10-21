@@ -12,8 +12,8 @@ class ScreenUnlockObserveService: NSObject {
     
     static let shared = ScreenUnlockObserveService()
     
-    private var isLocked = false
-    private var isSleeping = false
+    var isLocked = false
+    var isSleeping = false
         
         // This initializer runs immediately when ScreenUnlockObserveService.shared is called
         override private init() {
@@ -102,6 +102,7 @@ class ScreenUnlockObserveService: NSObject {
     func onLock() {
         Log.service.info("Screen lock event received")
         isLocked = true
+        AppContainer.shared.controller.showCollapsedPreset()
         PanelNotificationsService.shared.post(LockedNotificationView())
     }
     

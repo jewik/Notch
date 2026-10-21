@@ -39,6 +39,8 @@ final class PanelController {
     }
     
     func showExpandedPreset(_ preset: ExpandedPreset) {
+        if ScreenUnlockObserveService.shared.isLocked { return }
+        
         withAnimation (.smooth) {
             setPanelMode(.expanded)
             panelState.expandedPreset = preset

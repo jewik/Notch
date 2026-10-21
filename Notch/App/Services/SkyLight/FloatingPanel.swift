@@ -1,0 +1,59 @@
+import AppKit
+
+enum OverlayWindowLevel {
+    static let interactiveNotch = NSWindow.Level.mainMenu + 3
+}
+
+/// The app's single root window type.
+///
+/// `NSPanel` already inherits from `NSWindow`, so this replaces the separate
+/// `TopmostWindow` implementation while retaining the lock-screen behavior it
+/// needs.
+final class FloatingPanel: NSPanel {
+    convenience init(frame: NSRect) {
+        self.init(
+            contentRect: frame,
+            styleMask: [
+                .borderless,
+                .nonactivatingPanel,
+            ],
+            backing: .buffered,
+            defer: false
+        )
+
+        isReleasedWhenClosed = false
+        isFloatingPanel = true
+
+        isOpaque = false
+        backgroundColor = .clear
+        hasShadow = false
+
+        hidesOnDeactivate = false
+        isMovable = false
+        isMovableByWindowBackground = false
+
+        animationBehavior = .none
+        level = OverlayWindowLevel.interactiveNotch
+        collectionBehavior = [
+            .canJoinAllSpaces,
+            .fullScreenAuxiliary,
+            .stationary,
+            .ignoresCycle,
+        ]
+
+        acceptsMouseMovedEvents = true
+        canBecomeVisibleWithoutLogin = true
+    }
+
+    override var canBecomeKey: Bool {
+        false
+    }
+
+    override var canBecomeMain: Bool {
+        false
+    }
+
+    @objc func _hasActiveAppearanceIgnoringKeyFocus() -> Bool {
+        true
+    }
+}
